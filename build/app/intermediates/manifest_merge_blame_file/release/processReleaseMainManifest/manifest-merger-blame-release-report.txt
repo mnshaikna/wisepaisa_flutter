@@ -1,0 +1,275 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.appswella.wisepaise"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="36" />
+10
+11    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+11-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:2:5-76
+11-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:2:22-74
+12    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+12-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:3:5-78
+12-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:3:22-76
+13    <uses-permission android:name="android.permission.INTERNET" />
+13-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:4:5-66
+13-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:4:22-64
+14    <!--
+15         Required to query activities that can process text, see:
+16         https://developer.android.com/training/package-visibility and
+17         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+18
+19         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin.
+20    -->
+21    <queries>
+21-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:43:5-48:15
+22        <intent>
+22-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:44:9-47:18
+23            <action android:name="android.intent.action.PROCESS_TEXT" />
+23-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:45:13-72
+23-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:45:21-70
+24
+25            <data android:mimeType="text/plain" />
+25-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:46:13-50
+25-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:46:19-48
+26        </intent>
+27    </queries>
+28
+29    <uses-permission android:name="android.permission.VIBRATE" />
+29-->[:flutter_local_notifications] /Users/mohamedshaikna/StudioProjects/wisepaise/build/flutter_local_notifications/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:7:5-66
+29-->[:flutter_local_notifications] /Users/mohamedshaikna/StudioProjects/wisepaise/build/flutter_local_notifications/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:7:22-63
+30
+31    <permission
+31-->[androidx.core:core:1.13.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+32        android:name="com.appswella.wisepaise.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+32-->[androidx.core:core:1.13.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+33        android:protectionLevel="signature" />
+33-->[androidx.core:core:1.13.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+34
+35    <uses-permission android:name="com.appswella.wisepaise.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+35-->[androidx.core:core:1.13.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+35-->[androidx.core:core:1.13.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+36
+37    <application
+38        android:name="android.app.Application"
+38-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:7:9-42
+39        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+39-->[androidx.core:core:1.13.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+40        android:extractNativeLibs="true"
+41        android:icon="@mipmap/ic_launcher"
+41-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:9:9-43
+42        android:label="Wise Paisa" >
+42-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:6:9-35
+43        <activity
+43-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:10:9-31:20
+44            android:name="com.appswella.wisepaise.MainActivity"
+44-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:11:13-41
+45            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+45-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:16:13-163
+46            android:exported="true"
+46-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:12:13-36
+47            android:hardwareAccelerated="true"
+47-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:17:13-47
+48            android:launchMode="singleTop"
+48-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:13:13-43
+49            android:taskAffinity=""
+49-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:14:13-36
+50            android:theme="@style/LaunchTheme"
+50-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:15:13-47
+51            android:windowSoftInputMode="adjustResize" >
+51-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:18:13-55
+52
+53            <!--
+54                 Specifies an Android theme to apply to this Activity as soon as
+55                 the Android process has started. This theme is visible to the user
+56                 while the Flutter UI initializes. After that, this theme continues
+57                 to determine the Window background behind the Flutter UI.
+58            -->
+59            <meta-data
+59-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:23:13-26:17
+60                android:name="io.flutter.embedding.android.NormalTheme"
+60-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:24:15-70
+61                android:resource="@style/NormalTheme" />
+61-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:25:15-52
+62
+63            <intent-filter>
+63-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:27:13-30:29
+64                <action android:name="android.intent.action.MAIN" />
+64-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:28:17-68
+64-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:28:25-66
+65
+66                <category android:name="android.intent.category.LAUNCHER" />
+66-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:29:17-76
+66-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:29:27-74
+67            </intent-filter>
+68        </activity>
+69        <!--
+70             Don't delete the meta-data below.
+71             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+72        -->
+73        <meta-data
+73-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:34:9-36:33
+74            android:name="flutterEmbedding"
+74-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:35:13-44
+75            android:value="2" />
+75-->/Users/mohamedshaikna/StudioProjects/wisepaise/android/app/src/main/AndroidManifest.xml:36:13-30
+76
+77        <provider
+77-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:9:9-17:20
+78            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
+78-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:10:13-82
+79            android:authorities="com.appswella.wisepaise.flutter.image_provider"
+79-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:11:13-74
+80            android:exported="false"
+80-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:12:13-37
+81            android:grantUriPermissions="true" >
+81-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:13:13-47
+82            <meta-data
+82-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:14:13-16:75
+83                android:name="android.support.FILE_PROVIDER_PATHS"
+83-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:15:17-67
+84                android:resource="@xml/flutter_image_picker_file_paths" />
+84-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:16:17-72
+85        </provider> <!-- Trigger Google Play services to install the backported photo picker module. -->
+86        <service
+86-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:19:9-31:19
+87            android:name="com.google.android.gms.metadata.ModuleDependencies"
+87-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:20:13-78
+88            android:enabled="false"
+88-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:21:13-36
+89            android:exported="false" >
+89-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:22:13-37
+90            <intent-filter>
+90-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:24:13-26:29
+91                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+91-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:25:17-94
+91-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:25:25-91
+92            </intent-filter>
+93
+94            <meta-data
+94-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:28:13-30:36
+95                android:name="photopicker_activity:0:required"
+95-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:29:17-63
+96                android:value="" />
+96-->[:image_picker_android] /Users/mohamedshaikna/StudioProjects/wisepaise/build/image_picker_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml:30:17-33
+97        </service>
+98
+99        <uses-library
+99-->[androidx.window:window:1.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:23:9-25:40
+100            android:name="androidx.window.extensions"
+100-->[androidx.window:window:1.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:24:13-54
+101            android:required="false" />
+101-->[androidx.window:window:1.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:25:13-37
+102        <uses-library
+102-->[androidx.window:window:1.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:26:9-28:40
+103            android:name="androidx.window.sidecar"
+103-->[androidx.window:window:1.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:27:13-51
+104            android:required="false" />
+104-->[androidx.window:window:1.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:28:13-37
+105
+106        <activity
+106-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:23:9-27:75
+107            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+107-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:24:13-93
+108            android:excludeFromRecents="true"
+108-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:25:13-46
+109            android:exported="false"
+109-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:26:13-37
+110            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+110-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:27:13-72
+111        <!--
+112            Service handling Google Sign-In user revocation. For apps that do not integrate with
+113            Google Sign-In, this service will never be started.
+114        -->
+115        <service
+115-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:33:9-37:51
+116            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+116-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:34:13-89
+117            android:exported="true"
+117-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:35:13-36
+118            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"
+118-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:36:13-107
+119            android:visibleToInstantApps="true" />
+119-->[com.google.android.gms:play-services-auth:21.0.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:37:13-48
+120
+121        <activity
+121-->[com.google.android.gms:play-services-base:18.0.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:9-22:45
+122            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+122-->[com.google.android.gms:play-services-base:18.0.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:19-85
+123            android:exported="false"
+123-->[com.google.android.gms:play-services-base:18.0.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:22:19-43
+124            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+124-->[com.google.android.gms:play-services-base:18.0.1] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:21:19-78
+125
+126        <meta-data
+126-->[com.google.android.gms:play-services-basement:18.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0519204103b13c59942046b5de387717/transformed/jetified-play-services-basement-18.2.0/AndroidManifest.xml:21:9-23:69
+127            android:name="com.google.android.gms.version"
+127-->[com.google.android.gms:play-services-basement:18.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0519204103b13c59942046b5de387717/transformed/jetified-play-services-basement-18.2.0/AndroidManifest.xml:22:13-58
+128            android:value="@integer/google_play_services_version" />
+128-->[com.google.android.gms:play-services-basement:18.2.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/0519204103b13c59942046b5de387717/transformed/jetified-play-services-basement-18.2.0/AndroidManifest.xml:23:13-66
+129
+130        <provider
+130-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20
+131            android:name="androidx.startup.InitializationProvider"
+131-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:25:13-67
+132            android:authorities="com.appswella.wisepaise.androidx-startup"
+132-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:26:13-68
+133            android:exported="false" >
+133-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:27:13-37
+134            <meta-data
+134-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+135                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+135-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+136                android:value="androidx.startup" />
+136-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+137            <meta-data
+137-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+138                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+138-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+139                android:value="androidx.startup" />
+139-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+140        </provider>
+141
+142        <receiver
+142-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+143            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+143-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+144            android:directBootAware="false"
+144-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+145            android:enabled="true"
+145-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+146            android:exported="true"
+146-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+147            android:permission="android.permission.DUMP" >
+147-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+148            <intent-filter>
+148-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+149                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+149-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+149-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+150            </intent-filter>
+151            <intent-filter>
+151-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+152                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+152-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+152-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+153            </intent-filter>
+154            <intent-filter>
+154-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+155                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+155-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+155-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+156            </intent-filter>
+157            <intent-filter>
+157-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+158                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+158-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+158-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/53e65cb99d6b4f80573625ff2ea53dae/transformed/jetified-profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+159            </intent-filter>
+160        </receiver>
+161    </application>
+162
+163</manifest>

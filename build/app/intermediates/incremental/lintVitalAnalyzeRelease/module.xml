@@ -1,0 +1,18 @@
+<lint-module
+    format="1"
+    dir="/Users/mohamedshaikna/StudioProjects/wisepaise/android/app"
+    name=":app"
+    type="APP"
+    maven="android:app:unspecified"
+    agpVersion="8.7.0"
+    buildFolder="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app"
+    bootClassPath="/Users/mohamedshaikna/Android/Sdk/platforms/android-36/android.jar:/Users/mohamedshaikna/Android/Sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="11"
+    compileTarget="android-36">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

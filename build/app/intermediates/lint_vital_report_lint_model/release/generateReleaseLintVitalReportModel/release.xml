@@ -1,0 +1,38 @@
+<variant
+    name="release"
+    package="com.appswella.wisepaise"
+    minSdkVersion="21"
+    targetSdkVersion="36"
+    shrinking="true"
+    mergedManifest="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml"
+    manifestMergeReport="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/outputs/logs/manifest-merger-release-report.txt"
+    proguardFiles="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.7.0:/Users/mohamedshaikna/Android/flutter/packages/flutter_tools/gradle/flutter_proguard_rules.pro:proguard-rules.pro"
+    partialResultsDir="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out">
+  <buildFeatures
+      coreLibraryDesugaring="true"
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/release/java:src/main/kotlin:src/release/kotlin"
+        resDirectories="src/main/res:src/release/res"
+        assetsDirectories="src/main/assets:src/release/assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <manifestPlaceholders>
+    <placeholder
+        name="applicationName"
+        value="android.app.Application" />
+  </manifestPlaceholders>
+  <artifact
+      classOutputs="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/tmp/kotlin-classes/release:/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/kotlinToolingMetadata:/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/intermediates/compile_and_runtime_not_namespaced_r_class_jar/release/processReleaseResources/R.jar"
+      type="MAIN"
+      applicationId="com.appswella.wisepaise"
+      generatedSourceFolders="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/generated/ap_generated_sources/release/out"
+      generatedResourceFolders="/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/generated/res/processReleaseGoogleServices:/Users/mohamedshaikna/StudioProjects/wisepaise/build/app/generated/res/resValues/release"
+      desugaredMethodsFiles="/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/deef90cc83a9a743682a1190b468053f/transformed/desugar_jdk_libs_configuration-2.1.4-desugar-lint.txt:/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/adda07ecc5db0c6454454a4cd2963571/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

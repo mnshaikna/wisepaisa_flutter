@@ -1,0 +1,26 @@
+<lint-module
+    format="1"
+    dir="/Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_timezone-5.0.0/android"
+    name=":flutter_timezone"
+    type="LIBRARY"
+    maven="net.wolverinebeach.flutter_timezone:flutter_timezone:1.0-SNAPSHOT"
+    agpVersion="8.7.0"
+    buildFolder="/Users/mohamedshaikna/StudioProjects/wisepaise/build/flutter_timezone"
+    bootClassPath="/Users/mohamedshaikna/Android/Sdk/platforms/android-35/android.jar:/Users/mohamedshaikna/Android/Sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="17"
+    compileTarget="android-35"
+    neverShrinking="true">
+  <lintOptions
+      disable="InvalidPackage"
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true">
+    <severities>
+      <severity
+        id="InvalidPackage"
+        severity="IGNORE" />
+    </severities>
+  </lintOptions>
+  <variant name="release"/>
+</lint-module>
