@@ -58,6 +58,10 @@ class _DashboardPageState extends State<DashboardPage>
     ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
     api.setLoading();
     AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+    SettingsProvider set = Provider.of<SettingsProvider>(
+      context,
+      listen: false,
+    );
     NotificationProvider notification = Provider.of<NotificationProvider>(
       context,
       listen: false,
@@ -68,8 +72,9 @@ class _DashboardPageState extends State<DashboardPage>
       api.getReminders(auth.user!.id, context),
       api.getUserExpenses(auth.user!.id, context),
     ]);
-
-    if (getActiveButExpired(api).isNotEmpty) {
+    debugPrint('getActiveButExpired:::${getActiveButExpired(api).length}');
+    if (getActiveButExpired(api).isNotEmpty && set.getExpiredReminderAlert()) {
+      set.setExpiredReminderAlert();
       DialogUtils.showGenericDialog(
         context: context,
         title: DialogUtils.titleText('Expired Reminders'),
