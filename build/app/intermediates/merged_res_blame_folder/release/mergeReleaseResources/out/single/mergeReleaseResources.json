@@ -89,7 +89,7 @@
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/layout_toast_custom.xml.flat",
-        "source": "com.appswella.wisepaise.app-release-37:/layout/toast_custom.xml"
+        "source": "com.appswella.wisepaise.app-release-38:/layout/toast_custom.xml"
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/drawable-ldpi-v4_ic_call_answer_low.png.flat",
@@ -201,7 +201,7 @@
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/drawable_corner.xml.flat",
-        "source": "com.appswella.wisepaise.app-release-37:/drawable/corner.xml"
+        "source": "com.appswella.wisepaise.app-release-38:/drawable/corner.xml"
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/layout_notification_template_media_custom.xml.flat",
@@ -605,7 +605,7 @@
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/xml_flutter_image_picker_file_paths.xml.flat",
-        "source": "com.appswella.wisepaise.app-release-39:/xml/flutter_image_picker_file_paths.xml"
+        "source": "com.appswella.wisepaise.app-release-40:/xml/flutter_image_picker_file_paths.xml"
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/layout_notification_template_media.xml.flat",
@@ -645,7 +645,7 @@
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/drawable_toast_bg.xml.flat",
-        "source": "com.appswella.wisepaise.app-release-37:/drawable/toast_bg.xml"
+        "source": "com.appswella.wisepaise.app-release-38:/drawable/toast_bg.xml"
     },
     {
         "merged": "com.appswella.wisepaise.app-release-31:/drawable-night-v21_background.png.flat",

@@ -14,6 +14,9 @@
       jars="/Users/mohamedshaikna/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.8.22/4dabb8248310d833bb6a8b516024a91fd3d275c/kotlin-stdlib-jdk7-1.8.22.jar"
       resolved="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"/>
   <library
+      name=":@@:connectivity_plus::release"
+      project=":connectivity_plus"/>
+  <library
       name=":@@:flutter_local_notifications::release"
       project=":flutter_local_notifications"/>
   <library

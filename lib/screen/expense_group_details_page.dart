@@ -489,6 +489,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     letterSpacing: 1.5,
+                                                    color: Colors.green
                                                   ),
                                                 ),
                                               ],
@@ -509,6 +510,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     letterSpacing: 1.5,
+                                                    color: Colors.red,
                                                   ),
                                                 ),
                                               ],

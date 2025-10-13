@@ -27,6 +27,7 @@
     </queries>
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <permission
         android:name="com.appswella.wisepaise.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"

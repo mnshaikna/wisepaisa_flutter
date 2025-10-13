@@ -9,13 +9,11 @@ import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/connectivity_provider.dart';
 import 'package:wisepaise/providers/notification_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
-import 'package:wisepaise/screen/dashboard_page.dart';
 import 'package:wisepaise/screen/login_page.dart';
 import 'package:wisepaise/screen/home_page.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wisepaise/screen/splash_page.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

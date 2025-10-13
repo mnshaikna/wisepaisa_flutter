@@ -36,6 +36,20 @@
       jars="/Users/mohamedshaikna/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.8.22/4dabb8248310d833bb6a8b516024a91fd3d275c/kotlin-stdlib-jdk7-1.8.22.jar"
       resolved="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"/>
   <library
+      name=":@@:connectivity_plus::release"
+      jars="/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/cea9d9d825f29989363bfe6a5fb7185d/transformed/out/jars/classes.jar:/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/cea9d9d825f29989363bfe6a5fb7185d/transformed/out/jars/libs/R.jar"
+      resolved="dev.fluttercommunity.plus.connectivity:connectivity_plus:1.0-SNAPSHOT"
+      partialResultsDir="/Users/mohamedshaikna/StudioProjects/wisepaise/build/connectivity_plus/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out"
+      folder="/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/cea9d9d825f29989363bfe6a5fb7185d/transformed/out"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name=":@@:flutter_local_notifications::release"
       jars="/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/24c046fb82d58a9d17a1153fdd865315/transformed/out/jars/classes.jar:/Users/mohamedshaikna/.gradle/caches/8.10.2/transforms/24c046fb82d58a9d17a1153fdd865315/transformed/out/jars/libs/R.jar"
       resolved="com.dexterous.flutterlocalnotifications:flutter_local_notifications:1.0-SNAPSHOT"

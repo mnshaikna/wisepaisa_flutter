@@ -7718,6 +7718,17 @@ com.google.gson.stream.MalformedJsonException:
     public void <init>(java.lang.String,java.lang.Throwable)
     public void <init>(java.lang.Throwable)
 com.google.gson.stream.package-info
+dev.fluttercommunity.plus.connectivity.Connectivity:
+    static final java.lang.String CONNECTIVITY_BLUETOOTH
+    static final java.lang.String CONNECTIVITY_ETHERNET
+    static final java.lang.String CONNECTIVITY_MOBILE
+    static final java.lang.String CONNECTIVITY_NONE
+    static final java.lang.String CONNECTIVITY_OTHER
+    static final java.lang.String CONNECTIVITY_VPN
+    static final java.lang.String CONNECTIVITY_WIFI
+dev.fluttercommunity.plus.connectivity.ConnectivityBroadcastReceiver:
+    public static final java.lang.String CONNECTIVITY_ACTION
+dev.fluttercommunity.plus.connectivity.R
 io.flutter.Build$API_LEVELS
 io.flutter.Build
 io.flutter.BuildConfig
@@ -17708,8 +17719,6 @@ androidx.window.reflection.ReflectionUtils:
     public static boolean isPublic$window_release(java.lang.reflect.Method)
 com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver$ActionEventSink:
     public static void addItem()
-    public static void onCancel()
-    public static void onListen()
 com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver-IA
 com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver:
     public static void initializeEventChannel()
@@ -19364,6 +19373,21 @@ com.google.gson.stream.JsonWriter:
     public final void replaceTop(int)
     public static void setHtmlSafe()
     public static void setSerializeNulls()
+dev.fluttercommunity.plus.connectivity.Connectivity:
+    public final java.util.ArrayList getCapabilitiesFromNetwork(android.net.Network)
+    public static android.net.ConnectivityManager getConnectivityManager()
+    public static java.util.List getNetworkTypesLegacy()
+dev.fluttercommunity.plus.connectivity.ConnectivityBroadcastReceiver:
+    public static synthetic void lambda$sendCurrentStatusWithDelay$1()
+    public static synthetic void lambda$sendEvent$0()
+    public static void sendCurrentStatusWithDelay()
+    public final void sendEvent(java.util.ArrayList)
+dev.fluttercommunity.plus.connectivity.ConnectivityMethodChannelHandler:
+    public static final synthetic boolean $assertionsDisabled
+    static void <clinit>()
+dev.fluttercommunity.plus.connectivity.ConnectivityPlugin:
+    public static void setupChannels()
+    public static void teardownChannels()
 io.flutter.FlutterInjector$1
 io.flutter.FlutterInjector$Builder$NamedThreadFactory:
     public final synthetic io.flutter.FlutterInjector$Builder this$0
@@ -19720,7 +19744,6 @@ io.flutter.embedding.engine.dart.DartExecutor:
     public static void notifyLowMemoryWarning()
     public static void onAttachedToJNI()
     public static void onDetachedFromJNI()
-    public final void send(java.lang.String,java.nio.ByteBuffer)
 io.flutter.embedding.engine.dart.DartMessenger$1
 io.flutter.embedding.engine.dart.DartMessenger$ConcurrentTaskQueue
 io.flutter.embedding.engine.dart.DartMessenger$DefaultTaskQueueFactory:
@@ -19735,7 +19758,6 @@ io.flutter.embedding.engine.dart.DartMessenger:
     public final void handlePlatformMessageResponse()
     public static void invokeHandler()
     public static void lambda$dispatchMessageToQueue$0()
-    public final void send(java.lang.String,java.nio.ByteBuffer)
 io.flutter.embedding.engine.dart.PlatformMessageHandler:
     public abstract void handleMessageFromDart()
     public abstract void handlePlatformMessageResponse()
@@ -20102,16 +20124,13 @@ io.flutter.plugin.common.BinaryMessenger$TaskQueueOptions:
     public static boolean getIsSerial()
 io.flutter.plugin.common.BinaryMessenger:
     public abstract io.flutter.embedding.engine.dart.DartMessenger$TaskQueueToken makeBackgroundTaskQueue(io.flutter.plugin.common.BinaryMessenger$TaskQueueOptions)
-    public abstract void send(java.lang.String,java.nio.ByteBuffer)
 io.flutter.plugin.common.EventChannel$1
 io.flutter.plugin.common.EventChannel$EventSink
 io.flutter.plugin.common.EventChannel$IncomingStreamRequestHandler:
     public static void onCancel()
     public static void onListen()
-io.flutter.plugin.common.EventChannel$StreamHandler
 io.flutter.plugin.common.EventChannel:
     public final io.flutter.embedding.engine.dart.DartMessenger$TaskQueueToken taskQueue
-    public static void setStreamHandler()
 io.flutter.plugin.common.JSONMethodCodec:
     public static java.lang.Object unwrapNull(java.lang.Object)
 io.flutter.plugin.common.MethodCall:

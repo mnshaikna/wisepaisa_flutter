@@ -373,7 +373,10 @@ class _AllReminderPageState extends State<AllReminderPage>
                                                     ? Icons.arrow_downward
                                                     : Icons.arrow_upward,
                                                 size: 14,
-                                                color: Colors.white,
+                                                color:
+                                                    isExpense
+                                                        ? Colors.red
+                                                        : Colors.green,
                                               ),
                                               Expanded(
                                                 child: Text(
@@ -386,10 +389,13 @@ class _AllReminderPageState extends State<AllReminderPage>
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   softWrap: true,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
-                                                    color: Colors.white,
+                                                    color:
+                                                        isExpense
+                                                            ? Colors.red
+                                                            : Colors.green,
                                                   ),
                                                 ),
                                               ),
