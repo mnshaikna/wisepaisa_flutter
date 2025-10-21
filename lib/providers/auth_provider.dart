@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:wisepaise/models/user_model.dart';
+import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/screen/home_page.dart';
 import 'package:wisepaise/utils/toast.dart';
+import 'package:wisepaise/utils/utils.dart';
 
 class AuthProvider extends ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -51,6 +55,15 @@ class AuthProvider extends ChangeNotifier {
 
       user = account;
 
+      ApiProvider api = Provider.of(context, listen: false);
+      UserModel myUser = UserModel(
+        userId: account.id,
+        userName: account.displayName ?? '',
+        userEmail: account.email,
+        userImageUrl: account.photoUrl ?? '',
+        userCreatedOn: formatDate(DateTime.now(), pattern: 'yyyy-MM-dd'),
+      );
+      await api.createUser(context, myUser.toJson());
       notifyListeners();
 
       Toasts.show(
@@ -73,13 +86,22 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> signOut(BuildContext context) async {
+  Future<void> signOut(
+    BuildContext context, {
+    String source = 'signout',
+  }) async {
     try {
       _setLoading(true);
       await _googleSignIn.signOut();
       user = null;
       notifyListeners();
-      Toasts.show(context, 'You have been signed out', type: ToastType.info);
+      Toasts.show(
+        context,
+        source == 'signout'
+            ? 'You have been signed out'
+            : 'User Account Deleted',
+        type: ToastType.info,
+      );
     } catch (e) {
       _setError('Sign out failed: $e');
       Toasts.show(

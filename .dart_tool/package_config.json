@@ -452,6 +452,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "math_expressions",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/math_expressions-2.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "meta",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/meta-1.16.0",
       "packageUri": "lib/",
@@ -554,10 +560,22 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "shimmer",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/shimmer-3.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "sky_engine",
       "rootUri": "file:///Users/mohamedshaikna/Android/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
       "languageVersion": "3.7"
+    },
+    {
+      "name": "slide_to_act",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/slide_to_act-2.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "source_span",
@@ -674,7 +692,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-10-13T12:10:29.384258Z",
+  "generated": "2025-10-21T10:30:51.488467Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/mohamedshaikna/Android/flutter",

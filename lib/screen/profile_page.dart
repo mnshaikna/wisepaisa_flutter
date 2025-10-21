@@ -1,5 +1,7 @@
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/utils/expense_chart.dart';
@@ -7,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../utils/dialog_utils.dart';
 import 'login_page.dart';
+import 'package:slide_to_act/slide_to_act.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -83,6 +86,109 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               ),
               const SizedBox(height: 6),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    AuthProvider authProvider = Provider.of<AuthProvider>(
+      context,
+      listen: false,
+    );
+    ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
+    showModalBottomSheet(
+      isDismissible: false,
+      isScrollControlled: false,
+      showDragHandle: true,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Icon(FontAwesomeIcons.triangleExclamation),
+                      SizedBox(width: 10.0),
+                      Text(
+                        'Permanently Delete Account?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Divider(height: 1),
+              SizedBox(height: 15.0),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'You are about to delete your account and all associated data.\n'
+                  'This action is permanent and cannot be reversed.',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1.5,
+                    fontSize: 15.0,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 15.0,
+                ),
+                child: SlideAction(
+                  borderRadius: 10.0,
+                  text: 'Slide to Delete',
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                  outerColor: Colors.red,
+                  innerColor: Colors.white,
+                  sliderButtonIcon: const Icon(Icons.delete, color: Colors.red),
+                  onSubmit: () async {
+                    try {
+                      Navigator.of(context).pop(true);
+                      authProvider.signOut(context, source: 'delete');
+                      await api.deleteUser(context, authProvider.user!.id);
+                      if (context.mounted) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error signing out: ${e.toString()}'),
+                          ),
+                        );
+                      }
+                    }
+                    return null;
+                  },
+                ),
+              ),
             ],
           ),
         );
@@ -497,6 +603,56 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                       icon: const Icon(Icons.logout),
                       label: const Text('Sign Out'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 24,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 15.0,
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 5.0),
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          () => DialogUtils.showGenericDialog(
+                            title: DialogUtils.titleText('Delete Account'),
+                            message: const Text(
+                              'User data will be deleted!!!\nDo you want to Delete your account?',
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                letterSpacing: 1.5,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            confirmText: 'Cancel',
+                            cancelText: 'Delete',
+                            confirmColor: Colors.red,
+                            showCancel: true,
+                            onCancel: () {
+                              Navigator.of(context).pop();
+                              _showDeleteConfirmation(context);
+                            },
+                            onConfirm: () => Navigator.of(context).pop(),
+                            context: context,
+                          ),
+                      icon: const Icon(FontAwesomeIcons.trashCan),
+                      label: const Text('Delete Account'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,

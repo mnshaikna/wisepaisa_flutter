@@ -12,6 +12,7 @@ import 'package:wisepaise/providers/settings_provider.dart';
 import 'package:wisepaise/utils/toast.dart';
 import 'package:wisepaise/utils/utils.dart';
 
+import '../utils/calculator_bottom_sheet.dart';
 import 'home_page.dart';
 
 class CreateReminderPage extends StatefulWidget {
@@ -318,7 +319,6 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                       TextCapitalization.sentences,
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
-
                                     labelText: 'Description (Optional)',
                                     border: _outlineBorder(),
                                   ),
@@ -329,6 +329,11 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   controller: _amountController,
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
+                                    suffixIcon: IconButton(
+                                      onPressed:
+                                          () => _openCalculatorBottomSheet(),
+                                      icon: Icon(Icons.calculate_outlined),
+                                    ),
                                     prefixIcon: Icon(
                                       _isExpense ? Icons.remove : Icons.add,
                                       color:
@@ -578,5 +583,24 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         );
       },
     );
+  }
+
+  Future<void> _openCalculatorBottomSheet() async {
+    final result = await showModalBottomSheet<double>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const CalculatorBottomSheet(),
+    );
+
+    if (result != null) {
+      setState(() {
+        _amountController.text = result.toStringAsFixed(2);
+      });
+    }
   }
 }

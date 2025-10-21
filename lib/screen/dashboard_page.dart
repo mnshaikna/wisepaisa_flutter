@@ -31,11 +31,12 @@ class _DashboardPageState extends State<DashboardPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
+  bool isInitComplete = false;
 
   @override
   void initState() {
     super.initState();
-
+    init();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -45,7 +46,6 @@ class _DashboardPageState extends State<DashboardPage>
       begin: 0.4,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    init();
   }
 
   @override
@@ -55,46 +55,52 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   init() async {
-    ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
-    api.setLoading();
-    AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
-    SettingsProvider set = Provider.of<SettingsProvider>(
-      context,
-      listen: false,
-    );
-    NotificationProvider notification = Provider.of<NotificationProvider>(
-      context,
-      listen: false,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      api.getGroups(auth.user!.id, context);
-      api.getReminders(auth.user!.id, context);
-      api.getUserExpenses(auth.user!.id, context);
-    });
-
-    debugPrint('getActiveButExpired:::${getActiveButExpired(api).length}');
-    if (getActiveButExpired(api).isNotEmpty && set.getExpiredReminderAlert()) {
-      set.setExpiredReminderAlert();
-      DialogUtils.showGenericDialog(
-        context: context,
-        title: DialogUtils.titleText('Expired Reminders'),
-        message: Text(
-          'You have Expired Reminders. Do you want to View all reminders?',
-        ),
-        onCancel: () => Navigator.pop(context),
-        cancelText: 'Cancel',
-        confirmColor: Colors.green,
-        confirmText: 'View all',
-        showCancel: true,
-        onConfirm: () {
-          Navigator.pop(context);
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => AllReminderPage()));
-        },
+    Future.microtask(() async {
+      ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
+      setState(() => isInitComplete = true);
+      api.setLoading();
+      AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+      SettingsProvider set = Provider.of<SettingsProvider>(
+        context,
+        listen: false,
       );
-    }
+      NotificationProvider notification = Provider.of<NotificationProvider>(
+        context,
+        listen: false,
+      );
+
+      try {
+        api.getGroups(auth.user!.id, context);
+        api.getReminders(auth.user!.id, context);
+        api.getUserExpenses(auth.user!.id, context);
+      } catch (e) {
+        debugPrint("Error in API: $e");
+      }
+
+      debugPrint('getActiveButExpired:::${getActiveButExpired(api).length}');
+      if (getActiveButExpired(api).isNotEmpty &&
+          set.getExpiredReminderAlert()) {
+        set.setExpiredReminderAlert();
+        DialogUtils.showGenericDialog(
+          context: context,
+          title: DialogUtils.titleText('Expired Reminders'),
+          message: Text(
+            'You have Expired Reminders. Do you want to View all reminders?',
+          ),
+          onCancel: () => Navigator.pop(context),
+          cancelText: 'Cancel',
+          confirmColor: Colors.green,
+          confirmText: 'View all',
+          showCancel: true,
+          onConfirm: () {
+            Navigator.pop(context);
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => AllReminderPage()));
+          },
+        );
+      }
+    });
 
     /*await notification.scheduleNotification(seconds: 30);
     Toasts.show(
@@ -133,6 +139,7 @@ class _DashboardPageState extends State<DashboardPage>
         });
 
         top5Groups = top5Groups.take(5).toList();
+
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
@@ -148,8 +155,8 @@ class _DashboardPageState extends State<DashboardPage>
             ),
           ),
           body:
-              api.isAPILoading
-                  ? buildLoadingContainer(showBgColor: true, context: context)
+              !isInitComplete || api.isAPILoading
+                  ? buildDashboardShimmer(context)
                   : api.isTimedOut
                   ? Container(
                     padding: EdgeInsets.all(35.0),
@@ -210,6 +217,93 @@ class _DashboardPageState extends State<DashboardPage>
                       ),
                     ),
                   )
+                  : api.groupList.isEmpty &&
+                      getActiveReminders(api).isEmpty &&
+                      api.userExpenseList.isEmpty
+                  ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hello, ${auth.user!.displayName}',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          maxLines: 1,
+                        ),
+                        SizedBox(height: 15.0),
+                        buildCreateDataBox(
+                          context,
+                          "Looks empty 👀\n\n➕ Add your first expense reminder!",
+                          () async {
+                            Map<String, dynamic>? data = await Navigator.of(
+                              context,
+                            ).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => CreateReminderPage(
+                                      reminder: ReminderModel.empty(),
+                                    ),
+                              ),
+                            );
+
+                            if (data != null) {
+                              api.expenseReminderList.add(data);
+                              getActiveReminders(api).add(data);
+                            }
+                          },
+                          LinearGradient(
+                            colors: [Color(0xFF757F9A), Color(0xFFD7DDE8)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        SizedBox(height: 15.0),
+                        buildCreateDataBox(
+                          context,
+                          "Start organizing your spending 📊\n\n➕ Add your first group",
+                          () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CreateExpenseGroupPage(),
+                              ),
+                            );
+                          },
+                          LinearGradient(
+                            colors: [Color(0xFF56CCF2), Color(0xFF2F80ED)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        SizedBox(height: 15.0),
+                        buildCreateDataBox(
+                          context,
+                          "Be on Track 📊\n\n➕ Add your first Expense",
+                          () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => CreateExpensePage(
+                                      group: {},
+                                      expense: {},
+                                    ),
+                              ),
+                            );
+                          },
+                          LinearGradient(
+                            colors: [Color(0xFFEFEFBB), Color(0xFFD4D3DD)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                   : RefreshIndicator(
                     onRefresh: () async {
                       await init();
@@ -221,453 +315,305 @@ class _DashboardPageState extends State<DashboardPage>
                             horizontal: 10.0,
                             vertical: 0.0,
                           ),
-                          child:
-                              api.groupList.isEmpty &&
-                                      getActiveReminders(api).isEmpty &&
-                                      api.userExpenseList.isEmpty
-                                  ? ListView(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    children: [
-                                      Text(
-                                        'Welcome, ${auth.user!.displayName}',
-                                        style: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
-                                        maxLines: 1,
-                                      ),
-                                      SizedBox(height: 15.0),
-                                      buildCreateDataBox(
-                                        context,
-                                        "Looks empty 👀\n\n➕ Add your first expense reminder!",
-                                        () async {
-                                          Map<String, dynamic>?
-                                          data = await Navigator.of(
-                                            context,
-                                          ).push(
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (
+                          child: ListView(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5.0,
+                                  vertical: 5.0,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Expense Reminders",
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    if (api.expenseReminderList.isNotEmpty)
+                                      ElevatedButton.icon(
+                                        onPressed:
+                                            api.expenseReminderList.isEmpty
+                                                ? null
+                                                : () async {
+                                                  await Navigator.of(
                                                     context,
-                                                  ) => CreateReminderPage(
-                                                    reminder:
-                                                        ReminderModel.empty(),
-                                                  ),
-                                            ),
-                                          );
+                                                  ).push(
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              AllReminderPage(),
+                                                    ),
+                                                  );
+                                                  // Rebuild after coming back
+                                                  setState(() {});
+                                                },
 
-                                          if (data != null) {
-                                            api.expenseReminderList.add(data);
-                                            getActiveReminders(api).add(data);
-                                          }
-                                        },
-                                        LinearGradient(
-                                          colors: [
-                                            Color(0xFF757F9A),
-                                            Color(0xFFD7DDE8),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                      ),
-                                      SizedBox(height: 15.0),
-                                      buildCreateDataBox(
-                                        context,
-                                        "Start organizing your spending 📊\n\n➕ Add your first group",
-                                        () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      CreateExpenseGroupPage(),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
                                             ),
-                                          );
-                                        },
-                                        LinearGradient(
-                                          colors: [
-                                            Color(0xFF56CCF2),
-                                            Color(0xFF2F80ED),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
+                                          ),
+                                          elevation: 0.0,
+                                          animationDuration: Duration(
+                                            milliseconds: 500,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 15.0),
-                                      buildCreateDataBox(
-                                        context,
-                                        "Be on Track 📊\n\n➕ Add your first Expense",
-                                        () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      CreateExpensePage(
-                                                        group: {},
-                                                        expense: {},
-                                                      ),
-                                            ),
-                                          );
-                                        },
-                                        LinearGradient(
-                                          colors: [
-                                            Color(0xFFEFEFBB),
-                                            Color(0xFFD4D3DD),
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
+                                        label: Text(
+                                          'View all',
+                                          style: TextStyle(letterSpacing: 1.5),
                                         ),
+                                        icon: Icon(Icons.arrow_forward),
                                       ),
-                                    ],
+                                  ],
+                                ),
+                              ),
+                              getActiveReminders(api).isEmpty
+                                  ? buildCreateDataBox(
+                                    context,
+                                    "Looks empty 👀\n\nAdd your first expense reminder!",
+                                    () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => CreateReminderPage(
+                                                reminder: ReminderModel.empty(),
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    LinearGradient(
+                                      colors: [
+                                        Color(0xFF2193b0),
+                                        Color(0xFF6dd5ed),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
                                   )
-                                  : ListView(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    padding: EdgeInsets.zero,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 5.0,
-                                          vertical: 5.0,
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Expense Reminders",
-                                              style: theme.textTheme.titleLarge
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                            ),
-                                            if (api
-                                                .expenseReminderList
-                                                .isNotEmpty)
-                                              ElevatedButton.icon(
-                                                onPressed:
-                                                    api
-                                                            .expenseReminderList
-                                                            .isEmpty
-                                                        ? null
-                                                        : () async {
-                                                          await Navigator.of(
-                                                            context,
-                                                          ).push(
-                                                            MaterialPageRoute(
-                                                              builder:
-                                                                  (context) =>
-                                                                      AllReminderPage(),
-                                                            ),
-                                                          );
-                                                          // Rebuild after coming back
-                                                          setState(() {});
-                                                        },
+                                  : SizedBox(
+                                    height: 165,
+                                    child: ListView.separated(
+                                      physics: BouncingScrollPhysics(),
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: getActiveReminders(api).length,
+                                      separatorBuilder:
+                                          (context, index) =>
+                                              const SizedBox(width: 12),
+                                      itemBuilder: (context, index) {
+                                        final reminder =
+                                            getActiveReminders(api)[index];
 
-                                                style: ElevatedButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12.0,
-                                                        ),
-                                                  ),
-                                                  elevation: 0.0,
-                                                  animationDuration: Duration(
-                                                    milliseconds: 500,
-                                                  ),
-                                                ),
-                                                label: Text(
-                                                  'View all',
-                                                  style: TextStyle(
-                                                    letterSpacing: 1.5,
-                                                  ),
-                                                ),
-                                                icon: Icon(Icons.arrow_forward),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      getActiveReminders(api).isEmpty
-                                          ? buildCreateDataBox(
-                                            context,
-                                            "Looks empty 👀\n\nAdd your first expense reminder!",
-                                            () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (
-                                                        context,
-                                                      ) => CreateReminderPage(
-                                                        reminder:
-                                                            ReminderModel.empty(),
-                                                      ),
-                                                ),
-                                              );
-                                            },
-                                            LinearGradient(
-                                              colors: [
-                                                Color(0xFF2193b0),
-                                                Color(0xFF6dd5ed),
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
-                                          )
-                                          : SizedBox(
-                                            height: 165,
-                                            child: ListView.separated(
-                                              physics: BouncingScrollPhysics(),
-                                              scrollDirection: Axis.horizontal,
-                                              itemCount:
-                                                  getActiveReminders(
-                                                    api,
-                                                  ).length,
-                                              separatorBuilder:
-                                                  (context, index) =>
-                                                      const SizedBox(width: 12),
-                                              itemBuilder: (context, index) {
-                                                final reminder =
-                                                    getActiveReminders(
-                                                      api,
-                                                    )[index];
-
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      _selectedReminder =
-                                                          reminder;
-                                                      isExpanded = true;
-                                                    });
-                                                  },
-                                                  child: buildReminderCard(
-                                                    reminder,
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                      const SizedBox(height: 15.0),
-
-                                      // 🔹 Expense Groups Section
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 5.0,
-                                          horizontal: 5.0,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-
-                                          children: [
-                                            Text(
-                                              "Expense Groups",
-                                              style: theme.textTheme.titleLarge
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                            ),
-                                            if (api.groupList.isNotEmpty &&
-                                                api.groupList.length > 5)
-                                              ElevatedButton.icon(
-                                                onPressed:
-                                                    api.groupList.isEmpty
-                                                        ? null
-                                                        : () async {
-                                                          await Navigator.of(
-                                                            context,
-                                                          ).push(
-                                                            MaterialPageRoute(
-                                                              builder:
-                                                                  (context) =>
-                                                                      AllGroupPage(),
-                                                            ),
-                                                          );
-                                                          // Rebuild after coming back
-                                                          setState(() {});
-                                                        },
-
-                                                style: ElevatedButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12.0,
-                                                        ),
-                                                  ),
-                                                  elevation: 0.0,
-                                                  animationDuration: Duration(
-                                                    milliseconds: 500,
-                                                  ),
-                                                ),
-                                                label: Text(
-                                                  'View all',
-                                                  style: TextStyle(
-                                                    letterSpacing: 1.5,
-                                                  ),
-                                                ),
-                                                icon: Icon(Icons.arrow_forward),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (api.groupList.isEmpty)
-                                        buildCreateDataBox(
-                                          context,
-                                          "Start organizing your spending 📊\n\n➕ Add your first group",
-                                          () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        CreateExpenseGroupPage(),
-                                              ),
-                                            );
+                                        return GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedReminder = reminder;
+                                              isExpanded = true;
+                                            });
                                           },
-                                          LinearGradient(
-                                            colors: [
-                                              Color(0xFF56CCF2),
-                                              Color(0xFF2F80ED),
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
+                                          child: buildReminderCard(reminder),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                              const SizedBox(height: 15.0),
+
+                              // 🔹 Expense Groups Section
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5.0,
+                                  horizontal: 5.0,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+
+                                  children: [
+                                    Text(
+                                      "Expense Groups",
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                        )
-                                      else
-                                        top5Groups.length <= 2
-                                            ? SizedBox(
-                                              height: 85.0,
-                                              width: 140,
-                                              child: ListView.builder(
-                                                physics:
-                                                    BouncingScrollPhysics(),
-                                                scrollDirection:
-                                                    Axis.horizontal,
-                                                shrinkWrap: false,
-                                                itemCount: top5Groups.length,
-                                                itemBuilder: (context, index) {
-                                                  Map<String, dynamic>
-                                                  thisGroup =
-                                                      api.groupList[index];
-                                                  return Hero(
-                                                    tag:
-                                                        'groupCard_${thisGroup['exGroupId']}',
-                                                    child: SizedBox(
-                                                      width: 300.0,
-                                                      child: Card(
-                                                        elevation: 0,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                        ),
-                                                        child: InkWell(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12.0,
-                                                              ),
-                                                          splashColor: theme
-                                                              .colorScheme
-                                                              .primary
-                                                              .withOpacity(
-                                                                0.15,
-                                                              ),
-                                                          highlightColor: theme
-                                                              .colorScheme
-                                                              .primary
-                                                              .withOpacity(
-                                                                0.08,
-                                                              ),
-                                                          onTap: () {
-                                                            Navigator.of(
-                                                              context,
-                                                            ).push(
-                                                              MaterialPageRoute(
-                                                                builder:
-                                                                    (
-                                                                      context,
-                                                                    ) => ExpenseGroupDetailsPage(
-                                                                      groupMap:
-                                                                          thisGroup,
-                                                                    ),
-                                                              ),
-                                                            );
-                                                          },
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets.all(
-                                                                  10.0,
+                                    ),
+                                    if (api.groupList.isNotEmpty &&
+                                        api.groupList.length > 5)
+                                      ElevatedButton.icon(
+                                        onPressed:
+                                            api.groupList.isEmpty
+                                                ? null
+                                                : () async {
+                                                  await Navigator.of(
+                                                    context,
+                                                  ).push(
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              AllGroupPage(),
+                                                    ),
+                                                  );
+                                                  // Rebuild after coming back
+                                                  setState(() {});
+                                                },
+
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
+                                            ),
+                                          ),
+                                          elevation: 0.0,
+                                          animationDuration: Duration(
+                                            milliseconds: 500,
+                                          ),
+                                        ),
+                                        label: Text(
+                                          'View all',
+                                          style: TextStyle(letterSpacing: 1.5),
+                                        ),
+                                        icon: Icon(Icons.arrow_forward),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (api.groupList.isEmpty)
+                                buildCreateDataBox(
+                                  context,
+                                  "Start organizing your spending 📊\n\n➕ Add your first group",
+                                  () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) =>
+                                                CreateExpenseGroupPage(),
+                                      ),
+                                    );
+                                  },
+                                  LinearGradient(
+                                    colors: [
+                                      Color(0xFF56CCF2),
+                                      Color(0xFF2F80ED),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                )
+                              else
+                                top5Groups.length <= 2
+                                    ? SizedBox(
+                                      height: 85.0,
+                                      width: 140,
+                                      child: ListView.builder(
+                                        physics: BouncingScrollPhysics(),
+                                        scrollDirection: Axis.horizontal,
+                                        shrinkWrap: false,
+                                        itemCount: top5Groups.length,
+                                        itemBuilder: (context, index) {
+                                          Map<String, dynamic> thisGroup =
+                                              api.groupList[index];
+                                          return Hero(
+                                            tag:
+                                                'groupCard_${thisGroup['exGroupId']}',
+                                            child: SizedBox(
+                                              width: 300.0,
+                                              child: Card(
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: InkWell(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        12.0,
+                                                      ),
+                                                  splashColor: theme
+                                                      .colorScheme
+                                                      .primary
+                                                      .withOpacity(0.15),
+                                                  highlightColor: theme
+                                                      .colorScheme
+                                                      .primary
+                                                      .withOpacity(0.08),
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                        builder:
+                                                            (context) =>
+                                                                ExpenseGroupDetailsPage(
+                                                                  groupMap:
+                                                                      thisGroup,
                                                                 ),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Expanded(
-                                                                  child: Row(
-                                                                    children: [
-                                                                      Container(
-                                                                        height:
-                                                                            50.0,
-                                                                        width:
-                                                                            50.0,
-                                                                        decoration: BoxDecoration(
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          10.0,
+                                                        ),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Row(
+                                                            children: [
+                                                              Container(
+                                                                height: 50.0,
+                                                                width: 50.0,
+                                                                decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12.0,
+                                                                      ),
+                                                                ),
+                                                                child:
+                                                                    (thisGroup['exGroupImageURL'] !=
+                                                                                null &&
+                                                                            thisGroup['exGroupImageURL'].toString().trim().isNotEmpty)
+                                                                        ? ClipRRect(
                                                                           borderRadius: BorderRadius.circular(
                                                                             12.0,
                                                                           ),
-                                                                        ),
-                                                                        child:
-                                                                            (thisGroup['exGroupImageURL'] !=
-                                                                                        null &&
-                                                                                    thisGroup['exGroupImageURL'].toString().trim().isNotEmpty)
-                                                                                ? ClipRRect(
-                                                                                  borderRadius: BorderRadius.circular(
-                                                                                    12.0,
-                                                                                  ),
-                                                                                  child: Image.network(
-                                                                                    thisGroup['exGroupImageURL'],
-                                                                                    fit:
-                                                                                        BoxFit.cover,
-                                                                                    loadingBuilder: (
-                                                                                      context,
-                                                                                      child,
-                                                                                      loadingProgress,
-                                                                                    ) {
-                                                                                      if (loadingProgress ==
-                                                                                          null) {
-                                                                                        return child; // Image loaded
-                                                                                      }
-                                                                                      return SizedBox(
-                                                                                        width:
-                                                                                            50,
-                                                                                        height:
-                                                                                            50,
-                                                                                        child: const Center(
-                                                                                          child:
-                                                                                              CupertinoActivityIndicator(),
-                                                                                        ),
-                                                                                      );
-                                                                                    },
-                                                                                    errorBuilder:
-                                                                                        (
-                                                                                          context,
-                                                                                          _,
-                                                                                          __,
-                                                                                        ) => Image.asset(
-                                                                                          Theme.of(
-                                                                                                    context,
-                                                                                                  ).brightness ==
-                                                                                                  Brightness.light
-                                                                                              ? 'assets/logos/logo_light.png'
-                                                                                              : 'assets/logos/logo_dark.png',
-                                                                                          fit:
-                                                                                              BoxFit.contain,
-                                                                                        ),
-                                                                                  ),
-                                                                                )
-                                                                                : Image.asset(
+                                                                          child: Image.network(
+                                                                            thisGroup['exGroupImageURL'],
+                                                                            fit:
+                                                                                BoxFit.cover,
+                                                                            loadingBuilder: (
+                                                                              context,
+                                                                              child,
+                                                                              loadingProgress,
+                                                                            ) {
+                                                                              if (loadingProgress ==
+                                                                                  null) {
+                                                                                return child; // Image loaded
+                                                                              }
+                                                                              return SizedBox(
+                                                                                width:
+                                                                                    50,
+                                                                                height:
+                                                                                    50,
+                                                                                child: const Center(
+                                                                                  child:
+                                                                                      CupertinoActivityIndicator(),
+                                                                                ),
+                                                                              );
+                                                                            },
+                                                                            errorBuilder:
+                                                                                (
+                                                                                  context,
+                                                                                  _,
+                                                                                  __,
+                                                                                ) => Image.asset(
                                                                                   Theme.of(
                                                                                             context,
                                                                                           ).brightness ==
@@ -677,303 +623,305 @@ class _DashboardPageState extends State<DashboardPage>
                                                                                   fit:
                                                                                       BoxFit.contain,
                                                                                 ),
-                                                                      ),
-                                                                      const SizedBox(
-                                                                        width:
-                                                                            10.0,
-                                                                      ),
-                                                                      Expanded(
-                                                                        child: Column(
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.center,
-                                                                          crossAxisAlignment:
-                                                                              CrossAxisAlignment.start,
-                                                                          children: [
-                                                                            Text(
-                                                                              '${thisGroup['exGroupName']}',
-                                                                              style: theme.textTheme.titleMedium?.copyWith(
-                                                                                fontWeight:
-                                                                                    FontWeight.bold,
-                                                                              ),
-                                                                              softWrap:
-                                                                                  true,
-                                                                              overflow:
-                                                                                  TextOverflow.ellipsis,
-                                                                              maxLines:
-                                                                                  1,
-                                                                            ),
-                                                                            Row(
-                                                                              children: [
-                                                                                Icon(
-                                                                                  typeList
-                                                                                      .elementAt(
-                                                                                        int.parse(
-                                                                                          thisGroup['exGroupType'],
-                                                                                        ),
-                                                                                      )
-                                                                                      .icon,
-                                                                                  size:
-                                                                                      17.5,
-                                                                                  color: theme.colorScheme.onSurface.withOpacity(
-                                                                                    0.7,
-                                                                                  ),
-                                                                                ),
-                                                                                const SizedBox(
-                                                                                  width:
-                                                                                      2.5,
-                                                                                ),
-                                                                                Expanded(
-                                                                                  child: Text(
-                                                                                    typeList
-                                                                                        .elementAt(
-                                                                                          int.parse(
-                                                                                            thisGroup['exGroupType'],
-                                                                                          ),
-                                                                                        )
-                                                                                        .name,
-                                                                                    maxLines:
-                                                                                        1,
-                                                                                    overflow:
-                                                                                        TextOverflow.ellipsis,
-                                                                                    style: theme.textTheme.labelSmall?.copyWith(
-                                                                                      color: theme.colorScheme.onSurface.withOpacity(
-                                                                                        0.7,
-                                                                                      ),
-                                                                                      fontWeight:
-                                                                                          FontWeight.bold,
-                                                                                      letterSpacing:
-                                                                                          1.2,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ],
+                                                                          ),
+                                                                        )
+                                                                        : Image.asset(
+                                                                          Theme.of(
+                                                                                    context,
+                                                                                  ).brightness ==
+                                                                                  Brightness.light
+                                                                              ? 'assets/logos/logo_light.png'
+                                                                              : 'assets/logos/logo_dark.png',
+                                                                          fit:
+                                                                              BoxFit.contain,
                                                                         ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 12,
-                                                                ),
-                                                                Column(
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 10.0,
+                                                              ),
+                                                              Expanded(
+                                                                child: Column(
                                                                   mainAxisAlignment:
                                                                       MainAxisAlignment
                                                                           .center,
                                                                   crossAxisAlignment:
                                                                       CrossAxisAlignment
-                                                                          .end,
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
+                                                                          .start,
                                                                   children: [
+                                                                    Text(
+                                                                      '${thisGroup['exGroupName']}',
+                                                                      style: theme
+                                                                          .textTheme
+                                                                          .titleMedium
+                                                                          ?.copyWith(
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                          ),
+                                                                      softWrap:
+                                                                          true,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          1,
+                                                                    ),
                                                                     Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
                                                                       children: [
-                                                                        const Icon(
-                                                                          Icons
-                                                                              .arrow_upward,
-                                                                          color:
-                                                                              Colors.green,
+                                                                        Icon(
+                                                                          typeList
+                                                                              .elementAt(
+                                                                                int.parse(
+                                                                                  thisGroup['exGroupType'],
+                                                                                ),
+                                                                              )
+                                                                              .icon,
                                                                           size:
-                                                                              20,
+                                                                              17.5,
+                                                                          color: theme
+                                                                              .colorScheme
+                                                                              .onSurface
+                                                                              .withOpacity(
+                                                                                0.7,
+                                                                              ),
                                                                         ),
                                                                         const SizedBox(
                                                                           width:
-                                                                              2,
+                                                                              2.5,
                                                                         ),
-                                                                        Text(
-                                                                          formatCurrency(
-                                                                            thisGroup['exGroupIncome'],
-                                                                            context,
-                                                                          ),
-                                                                          style: theme.textTheme.titleSmall?.copyWith(
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                            color:
-                                                                                Colors.green,
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    const SizedBox(
-                                                                      height: 5,
-                                                                    ),
-                                                                    Row(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      children: [
-                                                                        const Icon(
-                                                                          Icons
-                                                                              .arrow_downward,
-                                                                          color:
-                                                                              Colors.red,
-                                                                          size:
-                                                                              20,
-                                                                        ),
-                                                                        const SizedBox(
-                                                                          width:
-                                                                              2,
-                                                                        ),
-                                                                        Text(
-                                                                          formatCurrency(
-                                                                            thisGroup['exGroupExpenses'],
-                                                                            context,
-                                                                          ),
-                                                                          style: theme.textTheme.titleSmall?.copyWith(
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                            color:
-                                                                                Colors.red,
+                                                                        Expanded(
+                                                                          child: Text(
+                                                                            typeList
+                                                                                .elementAt(
+                                                                                  int.parse(
+                                                                                    thisGroup['exGroupType'],
+                                                                                  ),
+                                                                                )
+                                                                                .name,
+                                                                            maxLines:
+                                                                                1,
+                                                                            overflow:
+                                                                                TextOverflow.ellipsis,
+                                                                            style: theme.textTheme.labelSmall?.copyWith(
+                                                                              color: theme.colorScheme.onSurface.withOpacity(
+                                                                                0.7,
+                                                                              ),
+                                                                              fontWeight:
+                                                                                  FontWeight.bold,
+                                                                              letterSpacing:
+                                                                                  1.2,
+                                                                            ),
                                                                           ),
                                                                         ),
                                                                       ],
                                                                     ),
                                                                   ],
                                                                 ),
-                                                              ],
-                                                            ),
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
-                                                      ),
+                                                        const SizedBox(
+                                                          width: 12,
+                                                        ),
+                                                        Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                const Icon(
+                                                                  Icons
+                                                                      .arrow_upward,
+                                                                  color:
+                                                                      Colors
+                                                                          .green,
+                                                                  size: 20,
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 2,
+                                                                ),
+                                                                Text(
+                                                                  formatCurrency(
+                                                                    thisGroup['exGroupIncome'],
+                                                                    context,
+                                                                  ),
+                                                                  style: theme
+                                                                      .textTheme
+                                                                      .titleSmall
+                                                                      ?.copyWith(
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        color:
+                                                                            Colors.green,
+                                                                      ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 5,
+                                                            ),
+                                                            Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                const Icon(
+                                                                  Icons
+                                                                      .arrow_downward,
+                                                                  color:
+                                                                      Colors
+                                                                          .red,
+                                                                  size: 20,
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 2,
+                                                                ),
+                                                                Text(
+                                                                  formatCurrency(
+                                                                    thisGroup['exGroupExpenses'],
+                                                                    context,
+                                                                  ),
+                                                                  style: theme
+                                                                      .textTheme
+                                                                      .titleSmall
+                                                                      ?.copyWith(
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        color:
+                                                                            Colors.red,
+                                                                      ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    : SizedBox(
+                                      height: 175.0,
+                                      child: GridView.builder(
+                                        physics: BouncingScrollPhysics(),
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: top5Groups.length,
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 2, // 2 rows
+                                              mainAxisSpacing:
+                                                  8.0, // spacing between columns
+                                              crossAxisSpacing:
+                                                  8.0, // spacing between rows
+                                              mainAxisExtent: 300,
+                                            ),
+                                        itemBuilder: (context, index) {
+                                          Map<String, dynamic> thisGroup =
+                                              api.groupList[index];
+                                          return Hero(
+                                            tag:
+                                                'groupCard_${thisGroup['exGroupId']}',
+                                            child: Card(
+                                              elevation: 1,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: InkWell(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                splashColor: theme
+                                                    .colorScheme
+                                                    .primary
+                                                    .withOpacity(0.15),
+                                                highlightColor: theme
+                                                    .colorScheme
+                                                    .primary
+                                                    .withOpacity(0.08),
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              ExpenseGroupDetailsPage(
+                                                                groupMap:
+                                                                    thisGroup,
+                                                              ),
                                                     ),
                                                   );
                                                 },
-                                              ),
-                                            )
-                                            : SizedBox(
-                                              height: 175.0,
-                                              child: GridView.builder(
-                                                physics:
-                                                    BouncingScrollPhysics(),
-                                                scrollDirection:
-                                                    Axis.horizontal,
-                                                itemCount: top5Groups.length,
-                                                gridDelegate:
-                                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                                      crossAxisCount:
-                                                          2, // 2 rows
-                                                      mainAxisSpacing:
-                                                          8.0, // spacing between columns
-                                                      crossAxisSpacing:
-                                                          8.0, // spacing between rows
-                                                      mainAxisExtent: 300,
-                                                    ),
-                                                itemBuilder: (context, index) {
-                                                  Map<String, dynamic>
-                                                  thisGroup =
-                                                      api.groupList[index];
-                                                  return Hero(
-                                                    tag:
-                                                        'groupCard_${thisGroup['exGroupId']}',
-                                                    child: Card(
-                                                      elevation: 1,
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12,
-                                                            ),
-                                                      ),
-                                                      child: InkWell(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12.0,
-                                                            ),
-                                                        splashColor: theme
-                                                            .colorScheme
-                                                            .primary
-                                                            .withOpacity(0.15),
-                                                        highlightColor: theme
-                                                            .colorScheme
-                                                            .primary
-                                                            .withOpacity(0.08),
-                                                        onTap: () {
-                                                          Navigator.of(
-                                                            context,
-                                                          ).push(
-                                                            MaterialPageRoute(
-                                                              builder:
-                                                                  (
-                                                                    context,
-                                                                  ) => ExpenseGroupDetailsPage(
-                                                                    groupMap:
-                                                                        thisGroup,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    10.0,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Row(
+                                                          children: [
+                                                            Container(
+                                                              height: 75.0,
+                                                              width: 75.0,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          12.0,
+                                                                        ),
                                                                   ),
-                                                            ),
-                                                          );
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.all(
-                                                                10.0,
-                                                              ),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Expanded(
-                                                                child: Row(
-                                                                  children: [
-                                                                    Container(
-                                                                      height:
-                                                                          75.0,
-                                                                      width:
-                                                                          75.0,
-                                                                      decoration: BoxDecoration(
+                                                              child:
+                                                                  (thisGroup['exGroupImageURL'] !=
+                                                                              null &&
+                                                                          thisGroup['exGroupImageURL']
+                                                                              .toString()
+                                                                              .trim()
+                                                                              .isNotEmpty)
+                                                                      ? ClipRRect(
                                                                         borderRadius:
                                                                             BorderRadius.circular(
                                                                               12.0,
                                                                             ),
-                                                                      ),
-                                                                      child:
-                                                                          (thisGroup['exGroupImageURL'] !=
-                                                                                      null &&
-                                                                                  thisGroup['exGroupImageURL'].toString().trim().isNotEmpty)
-                                                                              ? ClipRRect(
-                                                                                borderRadius: BorderRadius.circular(
-                                                                                  12.0,
-                                                                                ),
-                                                                                child: Image.network(
-                                                                                  thisGroup['exGroupImageURL'],
-                                                                                  fit:
-                                                                                      BoxFit.cover,
-                                                                                  loadingBuilder: (
-                                                                                    context,
-                                                                                    child,
-                                                                                    loadingProgress,
-                                                                                  ) {
-                                                                                    if (loadingProgress ==
-                                                                                        null) {
-                                                                                      return child; // Image loaded
-                                                                                    }
-                                                                                    return const Center(
-                                                                                      child:
-                                                                                          CupertinoActivityIndicator(),
-                                                                                    );
-                                                                                  },
-                                                                                  errorBuilder:
-                                                                                      (
-                                                                                        context,
-                                                                                        _,
-                                                                                        __,
-                                                                                      ) => Image.asset(
-                                                                                        Theme.of(
-                                                                                                  context,
-                                                                                                ).brightness ==
-                                                                                                Brightness.light
-                                                                                            ? 'assets/logos/logo_light.png'
-                                                                                            : 'assets/logos/logo_dark.png',
-                                                                                        fit:
-                                                                                            BoxFit.contain,
-                                                                                      ),
-                                                                                ),
-                                                                              )
-                                                                              : Image.asset(
+                                                                        child: Image.network(
+                                                                          thisGroup['exGroupImageURL'],
+                                                                          fit:
+                                                                              BoxFit.cover,
+                                                                          loadingBuilder: (
+                                                                            context,
+                                                                            child,
+                                                                            loadingProgress,
+                                                                          ) {
+                                                                            if (loadingProgress ==
+                                                                                null) {
+                                                                              return child; // Image loaded
+                                                                            }
+                                                                            return const Center(
+                                                                              child:
+                                                                                  CupertinoActivityIndicator(),
+                                                                            );
+                                                                          },
+                                                                          errorBuilder:
+                                                                              (
+                                                                                context,
+                                                                                _,
+                                                                                __,
+                                                                              ) => Image.asset(
                                                                                 Theme.of(
                                                                                           context,
                                                                                         ).brightness ==
@@ -983,267 +931,278 @@ class _DashboardPageState extends State<DashboardPage>
                                                                                 fit:
                                                                                     BoxFit.contain,
                                                                               ),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                      width:
-                                                                          10.0,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child: Column(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          Text(
-                                                                            '${thisGroup['exGroupName']}',
-                                                                            style: theme.textTheme.titleMedium?.copyWith(
-                                                                              fontWeight:
-                                                                                  FontWeight.bold,
-                                                                            ),
-                                                                            softWrap:
-                                                                                true,
-                                                                            overflow:
-                                                                                TextOverflow.ellipsis,
-                                                                            maxLines:
-                                                                                1,
-                                                                          ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Icon(
-                                                                                typeList
-                                                                                    .elementAt(
-                                                                                      int.parse(
-                                                                                        thisGroup['exGroupType'],
-                                                                                      ),
-                                                                                    )
-                                                                                    .icon,
-                                                                                size:
-                                                                                    17.5,
-                                                                                color: theme.colorScheme.onSurface.withOpacity(
-                                                                                  0.7,
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(
-                                                                                width:
-                                                                                    2.5,
-                                                                              ),
-                                                                              Expanded(
-                                                                                child: Text(
-                                                                                  typeList
-                                                                                      .elementAt(
-                                                                                        int.parse(
-                                                                                          thisGroup['exGroupType'],
-                                                                                        ),
-                                                                                      )
-                                                                                      .name,
-                                                                                  maxLines:
-                                                                                      1,
-                                                                                  overflow:
-                                                                                      TextOverflow.ellipsis,
-                                                                                  style: theme.textTheme.labelSmall?.copyWith(
-                                                                                    color: theme.colorScheme.onSurface.withOpacity(
-                                                                                      0.7,
-                                                                                    ),
-                                                                                    fontWeight:
-                                                                                        FontWeight.bold,
-                                                                                    letterSpacing:
-                                                                                        1.2,
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
+                                                                        ),
+                                                                      )
+                                                                      : Image.asset(
+                                                                        Theme.of(
+                                                                                  context,
+                                                                                ).brightness ==
+                                                                                Brightness.light
+                                                                            ? 'assets/logos/logo_light.png'
+                                                                            : 'assets/logos/logo_dark.png',
+                                                                        fit:
+                                                                            BoxFit.contain,
                                                                       ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 12,
-                                                              ),
-                                                              Column(
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 10.0,
+                                                            ),
+                                                            Expanded(
+                                                              child: Column(
                                                                 mainAxisAlignment:
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 crossAxisAlignment:
                                                                     CrossAxisAlignment
-                                                                        .end,
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
+                                                                        .start,
                                                                 children: [
+                                                                  Text(
+                                                                    '${thisGroup['exGroupName']}',
+                                                                    style: theme
+                                                                        .textTheme
+                                                                        .titleMedium
+                                                                        ?.copyWith(
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                        ),
+                                                                    softWrap:
+                                                                        true,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    maxLines: 1,
+                                                                  ),
                                                                   Row(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .min,
                                                                     children: [
-                                                                      const Icon(
-                                                                        Icons
-                                                                            .arrow_upward,
-                                                                        color:
-                                                                            Colors.green,
+                                                                      Icon(
+                                                                        typeList
+                                                                            .elementAt(
+                                                                              int.parse(
+                                                                                thisGroup['exGroupType'],
+                                                                              ),
+                                                                            )
+                                                                            .icon,
                                                                         size:
-                                                                            20,
+                                                                            17.5,
+                                                                        color: theme
+                                                                            .colorScheme
+                                                                            .onSurface
+                                                                            .withOpacity(
+                                                                              0.7,
+                                                                            ),
                                                                       ),
                                                                       const SizedBox(
                                                                         width:
-                                                                            2,
+                                                                            2.5,
                                                                       ),
-                                                                      Text(
-                                                                        formatCurrency(
-                                                                          thisGroup['exGroupIncome'],
-                                                                          context,
-                                                                        ),
-                                                                        style: theme
-                                                                            .textTheme
-                                                                            .titleSmall
-                                                                            ?.copyWith(
-                                                                              fontWeight:
-                                                                                  FontWeight.bold,
+                                                                      Expanded(
+                                                                        child: Text(
+                                                                          typeList
+                                                                              .elementAt(
+                                                                                int.parse(
+                                                                                  thisGroup['exGroupType'],
+                                                                                ),
+                                                                              )
+                                                                              .name,
+                                                                          maxLines:
+                                                                              1,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                          style: theme.textTheme.labelSmall?.copyWith(
+                                                                            color: theme.colorScheme.onSurface.withOpacity(
+                                                                              0.7,
                                                                             ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  const SizedBox(
-                                                                    height: 5,
-                                                                  ),
-                                                                  Row(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .min,
-                                                                    children: [
-                                                                      const Icon(
-                                                                        Icons
-                                                                            .arrow_downward,
-                                                                        color:
-                                                                            Colors.red,
-                                                                        size:
-                                                                            20,
-                                                                      ),
-                                                                      const SizedBox(
-                                                                        width:
-                                                                            2,
-                                                                      ),
-                                                                      Text(
-                                                                        formatCurrency(
-                                                                          thisGroup['exGroupExpenses'],
-                                                                          context,
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            letterSpacing:
+                                                                                1.2,
+                                                                          ),
                                                                         ),
-                                                                        style: theme
-                                                                            .textTheme
-                                                                            .titleSmall
-                                                                            ?.copyWith(
-                                                                              fontWeight:
-                                                                                  FontWeight.bold,
-                                                                            ),
                                                                       ),
                                                                     ],
                                                                   ),
                                                                 ],
                                                               ),
-                                                            ],
-                                                          ),
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-
-                                      const SizedBox(height: 10.0),
-
-                                      // 🔹 Expenses Section
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 5.0,
-                                          bottom: 10.0,
-                                          left: 5.0,
-                                          right: 5.0,
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Expenses",
-                                              style: theme.textTheme.titleLarge
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                            ),
-                                            if (api.userExpenseList.isNotEmpty)
-                                              ElevatedButton.icon(
-                                                onPressed:
-                                                    api.userExpenseList.isEmpty
-                                                        ? null
-                                                        : () => Navigator.of(
-                                                          context,
-                                                        ).push(
-                                                          MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    AllExpensePage(),
+                                                      const SizedBox(width: 12),
+                                                      Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              const Icon(
+                                                                Icons
+                                                                    .arrow_upward,
+                                                                color:
+                                                                    Colors
+                                                                        .green,
+                                                                size: 20,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 2,
+                                                              ),
+                                                              Text(
+                                                                formatCurrency(
+                                                                  thisGroup['exGroupIncome'],
+                                                                  context,
+                                                                ),
+                                                                style: theme
+                                                                    .textTheme
+                                                                    .titleSmall
+                                                                    ?.copyWith(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ),
-                                                style: ElevatedButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12.0,
-                                                        ),
-                                                  ),
-                                                  elevation: 0.0,
-                                                  animationDuration: Duration(
-                                                    milliseconds: 500,
+                                                          const SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              const Icon(
+                                                                Icons
+                                                                    .arrow_downward,
+                                                                color:
+                                                                    Colors.red,
+                                                                size: 20,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 2,
+                                                              ),
+                                                              Text(
+                                                                formatCurrency(
+                                                                  thisGroup['exGroupExpenses'],
+                                                                  context,
+                                                                ),
+                                                                style: theme
+                                                                    .textTheme
+                                                                    .titleSmall
+                                                                    ?.copyWith(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                                label: Text(
-                                                  'View all',
-                                                  style: TextStyle(
-                                                    letterSpacing: 1.5,
-                                                  ),
-                                                ),
-                                                icon: Icon(Icons.arrow_forward),
                                               ),
-                                          ],
-                                        ),
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      if (api.userExpenseList.isEmpty)
-                                        buildCreateDataBox(
-                                          context,
-                                          "Start tracking your spending 📊\n\n➕ Add your first Expense",
-                                          () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        CreateExpensePage(
-                                                          group: {},
-                                                          expense: {},
-                                                        ),
-                                              ),
-                                            );
-                                          },
-                                          LinearGradient(
-                                            colors: [
-                                              Color(0xFF56CCF2),
-                                              Color(0xFF2F80ED),
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
+                                    ),
+
+                              const SizedBox(height: 10.0),
+
+                              // 🔹 Expenses Section
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 5.0,
+                                  bottom: 10.0,
+                                  left: 5.0,
+                                  right: 5.0,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Expenses",
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                        )
-                                      else
-                                        ...buildGroupedExpenseWidgets(
-                                          api.userExpenseList,
-                                          context,
+                                    ),
+                                    if (api.userExpenseList.isNotEmpty)
+                                      ElevatedButton.icon(
+                                        onPressed:
+                                            api.userExpenseList.isEmpty
+                                                ? null
+                                                : () => Navigator.of(
+                                                  context,
+                                                ).push(
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            AllExpensePage(),
+                                                  ),
+                                                ),
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
+                                            ),
+                                          ),
+                                          elevation: 0.0,
+                                          animationDuration: Duration(
+                                            milliseconds: 500,
+                                          ),
                                         ),
+                                        label: Text(
+                                          'View all',
+                                          style: TextStyle(letterSpacing: 1.5),
+                                        ),
+                                        icon: Icon(Icons.arrow_forward),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (api.userExpenseList.isEmpty)
+                                buildCreateDataBox(
+                                  context,
+                                  "Start tracking your spending 📊\n\n➕ Add your first Expense",
+                                  () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => CreateExpensePage(
+                                              group: {},
+                                              expense: {},
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                  LinearGradient(
+                                    colors: [
+                                      Color(0xFF56CCF2),
+                                      Color(0xFF2F80ED),
                                     ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
+                                )
+                              else
+                                ...buildGroupedExpenseWidgets(
+                                  api.userExpenseList,
+                                  context,
+                                ),
+                            ],
+                          ),
                         ),
                         if (_selectedReminder != null)
                           _buildExpandedReminderOverlay(context),

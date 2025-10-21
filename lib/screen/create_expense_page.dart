@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:typed_data/typed_data.dart';
 import 'dart:typed_data';
 
@@ -12,6 +13,7 @@ import 'package:wisepaise/models/expense_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
+import 'package:wisepaise/utils/calculator_bottom_sheet.dart';
 import 'package:wisepaise/utils/utils.dart';
 
 import '../models/type_model.dart';
@@ -198,7 +200,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       TextCapitalization.sentences,
                                   keyboardType: TextInputType.text,
                                   textInputAction: TextInputAction.next,
-                                  autofocus: true,
+                                  //autofocus: true,
                                   decoration: InputDecoration(
                                     labelText: "Enter a Desc",
                                     border: OutlineInputBorder(
@@ -216,6 +218,11 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       isExpense ? Icons.remove : Icons.add,
                                       color:
                                           isExpense ? Colors.red : Colors.green,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      onPressed:
+                                          () => _openCalculatorBottomSheet(),
+                                      icon: Icon(Icons.calculate_outlined),
                                     ),
                                     hintText: set.currency,
                                     labelText: 'Amount',
@@ -1171,5 +1178,24 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
       return false;
     }
     return true;
+  }
+
+  Future<void> _openCalculatorBottomSheet() async {
+    final result = await showModalBottomSheet<double>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const CalculatorBottomSheet(),
+    );
+
+    if (result != null) {
+      setState(() {
+        amountController.text = result.toStringAsFixed(2);
+      });
+    }
   }
 }

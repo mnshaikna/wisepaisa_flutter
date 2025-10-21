@@ -17,6 +17,7 @@ import 'constants.dart';
 import 'dialog_utils.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:shimmer/shimmer.dart';
 
 void unfocusKeyboard() {
   FocusManager.instance.primaryFocus?.unfocus();
@@ -113,6 +114,103 @@ Widget buildLoadingContainer({
           child: Image.asset('assets/loader.gif', fit: BoxFit.fill),
         ),
       ),
+    ),
+  );
+}
+
+Widget buildDashboardShimmer(BuildContext context) {
+  bool isDark = Theme.of(context).brightness == Brightness.dark;
+  return Shimmer.fromColors(
+    direction: ShimmerDirection.ltr,
+    period: Duration(seconds: 2),
+    baseColor: isDark ? Colors.grey : Colors.grey.shade300,
+    highlightColor: isDark ? Colors.white70 : Colors.white,
+    child: SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title Bar Placeholder
+          titleShimmer(),
+
+          const SizedBox(height: 10),
+
+          // Horizontal Reminder List Placeholder
+          SizedBox(
+            height: 150,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder:
+                  (context, index) => Container(
+                    width: 280,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          titleShimmer(),
+
+          const SizedBox(height: 10),
+
+          // Expense/Income cards placeholder
+          SizedBox(
+            height: 75,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder:
+                  (context, index) => Container(
+                    width: 280,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+            ),
+          ),
+
+          SizedBox(height: 20.0),
+          titleShimmer(),
+
+          const SizedBox(height: 10),
+
+          ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: 5,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return Container(
+                width: double.infinity,
+                height: 50,
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Container titleShimmer() {
+  return Container(
+    width: 200,
+    height: 20,
+    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
     ),
   );
 }

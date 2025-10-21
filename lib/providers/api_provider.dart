@@ -234,4 +234,21 @@ class ApiProvider extends ChangeNotifier {
     isTimedOut = timedOut;
     notifyListeners();
   }
+
+  Future<Response> createUser(
+    BuildContext context,
+    Map<String, dynamic> body,
+  ) async {
+    var finalUrl = '$baseUrl/users/create';
+    Response resp = await getHttp(context, finalUrl, 'POST', requestBody: body);
+    notifyListeners();
+    return resp;
+  }
+
+  Future<Response> deleteUser(BuildContext context, String userId) async {
+    var finalUrl = '$baseUrl/users/delete/$userId';
+    Response resp = await getHttp(context, finalUrl, 'DELETE');
+    notifyListeners();
+    return resp;
+  }
 }
