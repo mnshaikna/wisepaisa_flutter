@@ -70,9 +70,9 @@ class _DashboardPageState extends State<DashboardPage>
       );
 
       try {
-        api.getGroups(auth.user!.id, context);
-        api.getReminders(auth.user!.id, context);
-        api.getUserExpenses(auth.user!.id, context);
+        await api.getGroups(auth.user!.id, context);
+        await api.getReminders(auth.user!.id, context);
+        await api.getUserExpenses(auth.user!.id, context);
       } catch (e) {
         debugPrint("Error in API: $e");
       }
@@ -270,7 +270,9 @@ class _DashboardPageState extends State<DashboardPage>
                           () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => CreateExpenseGroupPage(),
+                                builder:
+                                    (context) =>
+                                        CreateExpenseGroupPage(group: {}),
                               ),
                             );
                           },
@@ -491,8 +493,9 @@ class _DashboardPageState extends State<DashboardPage>
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder:
-                                            (context) =>
-                                                CreateExpenseGroupPage(),
+                                            (context) => CreateExpenseGroupPage(
+                                              group: {},
+                                            ),
                                       ),
                                     );
                                   },
@@ -729,7 +732,7 @@ class _DashboardPageState extends State<DashboardPage>
                                                                   .center,
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
-                                                                  .end,
+                                                                  .start,
                                                           mainAxisSize:
                                                               MainAxisSize.min,
                                                           children: [

@@ -1,3 +1,5 @@
+import 'package:wisepaise/models/user_model.dart';
+
 class ReminderModel {
   String reminderId;
   String reminderName;
@@ -9,7 +11,7 @@ class ReminderModel {
   String reminderCreatedDate;
   String reminderAmount;
   String reminderAmountType;
-  String reminderUserId;
+  UserModel reminderUserId;
   bool reminderIsRecurring;
   bool reminderIsActive;
 
@@ -41,7 +43,7 @@ class ReminderModel {
       '',
       '0',
       'expense',
-      '',
+      UserModel.empty(),
       false,
       false,
     );
@@ -59,7 +61,7 @@ class ReminderModel {
       (json['reminderCreatedDate'] ?? '').toString(),
       (json['reminderAmount'] ?? '').toString(),
       (json['reminderAmountType'] ?? '').toString(),
-      (json['reminderUserId'] ?? '').toString(),
+      (json['reminderUserId'] ?? UserModel.empty()),
       json['reminderIsRecurring'] == true || json['reminderIsRecurring'] == 1,
       json['reminderIsActive'] == true || json['reminderIsActive'] == 1,
     );

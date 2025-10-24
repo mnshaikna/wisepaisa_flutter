@@ -1,7 +1,4 @@
 import 'dart:math';
-
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:typed_data/typed_data.dart';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -17,6 +14,7 @@ import 'package:wisepaise/utils/calculator_bottom_sheet.dart';
 import 'package:wisepaise/utils/utils.dart';
 
 import '../models/type_model.dart';
+import '../models/user_model.dart';
 import '../utils/toast.dart';
 import 'home_page.dart';
 
@@ -43,23 +41,23 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
       descController = TextEditingController(),
       amountController = TextEditingController(),
       expenseNote = TextEditingController();
-  String? paidBy;
+  dynamic paidBy;
   CategoryModel? selectedCategory;
   PaymentMethodModel? payMethod;
   String? subCategoryValue;
-  final Set<String> paidTo = {};
+  final Set<dynamic> paidTo = {};
   dynamic members;
 
   @override
   void initState() {
     super.initState();
     if (group.isNotEmpty) {
-      debugPrint('groupId:::${group['exGroupId']}');
-      AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+      //debugPrint('group:::${group.toString()}');
+
       dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      members =
-          {...group['exGroupMembers'] ?? [], auth.user!.displayName!}.toList();
+      members = (group['exGroupMembers'] ?? []).toList();
     }
+    debugPrint('members:::${members.toString()}');
     if (expense.isNotEmpty) {
       descController.text = expense['expenseTitle'];
       amountController.text = expense['expenseAmount'].toString();
@@ -78,7 +76,20 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
         (pay) => pay.payMethod == expense['expensePaymentMethod'],
       );
     }
-    debugPrint("URL:::${expense['expenseReceiptURL']}");
+    if (group.isEmpty && expense.isEmpty) {
+      dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+  }
+
+  UserModel getUser() {
+    AuthProvider auth = Provider.of(context, listen: false);
+    return UserModel(
+      userId: auth.user!.id,
+      userName: auth.user!.displayName!,
+      userEmail: auth.user!.email,
+      userImageUrl: auth.user!.photoUrl!,
+      userCreatedOn: '',
+    );
   }
 
   @override
@@ -592,6 +603,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         runSpacing: 10.0,
                                         children:
                                             members.map<Widget>((name) {
+                                              debugPrint(
+                                                'name:::${name.toString()}',
+                                              );
                                               final isSelected = paidBy == name;
                                               return GestureDetector(
                                                 onTap: () {
@@ -612,31 +626,21 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                             .center,
                                                     children: [
                                                       CircleAvatar(
-                                                        radius: 28,
+                                                        radius: 20,
                                                         backgroundColor:
                                                             isSelected
                                                                 ? Colors.green
                                                                 : Colors
                                                                     .grey
                                                                     .shade300,
-                                                        child: Text(
-                                                          name[0].toUpperCase(),
-                                                          // First letter
-                                                          style: TextStyle(
-                                                            color:
-                                                                isSelected
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
+                                                        backgroundImage:
+                                                            NetworkImage(
+                                                              name['userImageUrl'],
+                                                            ),
                                                       ),
                                                       const SizedBox(height: 5),
                                                       Text(
-                                                        name,
+                                                        name['userName'],
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
@@ -670,7 +674,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                               );
                                             }).toList(),
                                       ),
-                                      const SizedBox(height: 5),
+                                      const SizedBox(height: 15),
                                       const Text(
                                         "Paid To",
                                         style: TextStyle(
@@ -679,89 +683,79 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         ),
                                       ),
                                       const SizedBox(height: 10),
-                                      Wrap(
-                                        spacing: 10.0,
-                                        runSpacing: 10.0,
+                                      Column(
                                         children:
                                             members.map<Widget>((name) {
                                               final isSelected = paidTo
                                                   .contains(name);
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  setState(() {
-                                                    if (isSelected) {
-                                                      paidTo.remove(name);
-                                                    } else {
-                                                      paidTo.add(name);
-                                                    }
-                                                  });
-                                                },
-                                                child: SizedBox(
-                                                  width: 75.0,
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      CircleAvatar(
-                                                        radius: 28,
-                                                        backgroundColor:
-                                                            isSelected
-                                                                ? Colors.green
-                                                                : Colors
-                                                                    .grey
-                                                                    .shade300,
-                                                        child: Text(
-                                                          name[0].toUpperCase(),
-                                                          style: TextStyle(
-                                                            color:
-                                                                isSelected
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 2.5,
+                                                    ),
+                                                child: ListTile(
+                                                  style: ListTileStyle.drawer,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8.0,
                                                         ),
-                                                      ),
-                                                      const SizedBox(height: 5),
-                                                      Text(
-                                                        name,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              isSelected
-                                                                  ? FontWeight
-                                                                      .bold
-                                                                  : FontWeight
-                                                                      .normal,
-                                                          color:
-                                                              isSelected
-                                                                  ? Colors.green
-                                                                  : Theme.of(
-                                                                        context,
-                                                                      ).brightness ==
-                                                                      Brightness
-                                                                          .light
-                                                                  ? Colors.black
-                                                                  : Colors
-                                                                      .white,
-                                                        ),
-                                                        overflow:
-                                                            TextOverflow
-                                                                .ellipsis,
-                                                        maxLines: 2,
-                                                      ),
-                                                    ],
                                                   ),
+                                                  selected: isSelected,
+                                                  selectedColor:
+                                                      Theme.of(
+                                                                context,
+                                                              ).brightness ==
+                                                              Brightness.dark
+                                                          ? Colors.white
+                                                          : Colors.black,
+                                                  selectedTileColor:
+                                                      Theme.of(
+                                                                context,
+                                                              ).brightness ==
+                                                              Brightness.dark
+                                                          ? Colors.grey[800]
+                                                          : Colors.grey[300],
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                        horizontal: 5.0,
+                                                      ),
+                                                  onTap:
+                                                      () => setState(
+                                                        () =>
+                                                            isSelected
+                                                                ? paidTo.remove(
+                                                                  name,
+                                                                )
+                                                                : paidTo.add(
+                                                                  name,
+                                                                ),
+                                                      ),
+                                                  leading: CircleAvatar(
+                                                    backgroundImage:
+                                                        NetworkImage(
+                                                          name['userImageUrl'],
+                                                        ),
+                                                  ),
+                                                  title: Text(
+                                                    name['userName'],
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          isSelected
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 2,
+                                                  ),
+                                                  trailing:
+                                                      isSelected
+                                                          ? Icon(
+                                                            Icons.check_circle,
+                                                          )
+                                                          : SizedBox.shrink(),
                                                 ),
                                               );
                                             }).toList(),
@@ -792,8 +786,8 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                           context,
                                           listen: false,
                                         );
-                                    paidBy = auth.user!.displayName!;
-                                    paidTo.add(auth.user!.displayName!);
+                                    paidBy = getUser();
+                                    paidTo.add(getUser());
                                   }
                                   if (imageBytes != null) {
                                     url = await uploadImage(
@@ -820,17 +814,20 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     expenseSpendType:
                                         isExpense ? 'expense' : 'income',
                                     expenseDate: dateController.text.trim(),
-                                    expensePaidTo: paidTo.toList(),
+                                    expensePaidTo:
+                                        paidTo.toList().isEmpty
+                                            ? [getUser().toJson()]
+                                            : paidTo.toList(),
                                     expenseCategory:
                                         selectedCategory!.cat.toString(),
                                     expenseSubCategory:
                                         subCategoryValue.toString(),
                                     expensePaymentMethod:
                                         payMethod!.payMethod.toString(),
-                                    expensePaidBy: paidBy.toString(),
+                                    expensePaidBy: paidBy ?? getUser().toJson(),
                                     expenseReceiptURL:
                                         url.isNotEmpty ? url : '',
-                                    expenseUserId: '',
+                                    expenseUserId: UserModel.empty(),
                                   );
                                   List<dynamic> expenses =
                                       group['expenses'] ?? [];
@@ -877,8 +874,8 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                           context,
                                           listen: false,
                                         );
-                                    paidBy = auth.user!.displayName!;
-                                    paidTo.add(auth.user!.displayName!);
+                                    paidBy = getUser();
+                                    paidTo.add(getUser());
 
                                     if (imageBytes != null) {
                                       url = await uploadImage(
@@ -898,17 +895,21 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       expenseSpendType:
                                           isExpense ? 'expense' : 'income',
                                       expenseDate: dateController.text.trim(),
-                                      expensePaidTo: paidTo.toList(),
+                                      expensePaidTo:
+                                          paidTo.toList().isEmpty
+                                              ? [getUser().toJson()]
+                                              : paidTo.toList(),
                                       expenseCategory:
                                           selectedCategory!.cat.toString(),
                                       expenseSubCategory:
                                           subCategoryValue.toString(),
                                       expensePaymentMethod:
                                           payMethod!.payMethod.toString(),
-                                      expensePaidBy: paidBy.toString(),
+                                      expensePaidBy:
+                                          paidBy ?? getUser().toJson(),
                                       expenseReceiptURL:
                                           url.isNotEmpty ? url : '',
-                                      expenseUserId: auth.user!.id,
+                                      expenseUserId: getUser(),
                                     );
 
                                     debugPrint(
@@ -949,8 +950,8 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                           context,
                                           listen: false,
                                         );
-                                    paidBy = auth.user!.displayName!;
-                                    paidTo.add(auth.user!.displayName!);
+                                    paidBy = getUser();
+                                    paidTo.add(getUser());
                                     if (imageBytes != null) {
                                       url = await uploadImage(
                                         imageBytes!,
@@ -975,10 +976,10 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                           subCategoryValue.toString(),
                                       expensePaymentMethod:
                                           payMethod!.payMethod.toString(),
-                                      expensePaidBy: paidBy.toString(),
+                                      expensePaidBy: paidBy!,
                                       expenseReceiptURL:
                                           url.isNotEmpty ? url : '',
-                                      expenseUserId: auth.user!.id,
+                                      expenseUserId: getUser(),
                                     );
 
                                     debugPrint(
@@ -1169,7 +1170,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
       return false;
     }
     if ((members != null && members.length > 1) &&
-        (paidBy == null || paidBy!.isEmpty)) {
+        (paidBy == null || paidBy!['userId'].isEmpty)) {
       Toasts.show(context, 'Select PaidBy', type: ToastType.error);
       return false;
     }

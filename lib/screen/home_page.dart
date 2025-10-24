@@ -122,7 +122,7 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                                 MaterialPageRoute(
                                   builder:
                                       (context) =>
-                                          const CreateExpenseGroupPage(),
+                                          CreateExpenseGroupPage(group: {}),
                                 ),
                               ),
                         ),

@@ -32,4 +32,14 @@ class UserModel {
       'userCreatedOn': userCreatedOn,
     };
   }
+
+  factory UserModel.empty() {
+    return UserModel(
+      userId: '',
+      userName: '',
+      userEmail: '',
+      userImageUrl: '',
+      userCreatedOn: '',
+    );
+  }
 }

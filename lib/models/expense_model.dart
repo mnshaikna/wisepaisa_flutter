@@ -1,3 +1,5 @@
+import 'package:wisepaise/models/user_model.dart';
+
 class ExpenseModel {
   String expenseId;
   String expenseTitle;
@@ -5,13 +7,13 @@ class ExpenseModel {
   double expenseAmount;
   String expensePaymentMethod;
   String expenseDate;
-  List<String> expensePaidTo;
+  List<dynamic> expensePaidTo;
   String expenseCategory;
   String expenseSubCategory;
-  String expensePaidBy;
+  dynamic expensePaidBy;
   String expenseReceiptURL;
   String expenseSpendType;
-  String expenseUserId;
+  dynamic expenseUserId;
 
   ExpenseModel({
     required this.expenseId,
@@ -37,7 +39,7 @@ class ExpenseModel {
       expenseAmount: json['expenseAmount'] ?? 0.0,
       expenseSpendType: json['expenseSpendType'] ?? '',
       expenseDate: json['expenseDate'] ?? '',
-      expensePaidTo: List<String>.from(json['expensePaidTo'] ?? []),
+      expensePaidTo: json['expensePaidTo'] ?? [],
       expenseCategory: json['expenseCategory'] ?? '',
       expenseSubCategory: json['expenseSubCategory'] ?? '',
       expensePaidBy: json['expensePaidBy'] ?? '',
@@ -65,6 +67,24 @@ class ExpenseModel {
     };
   }
 
+  factory ExpenseModel.empty(Map<String, dynamic> json) {
+    return ExpenseModel(
+      expenseId: '',
+      expenseTitle: '',
+      expenseNote: '',
+      expenseAmount: 0,
+      expenseSpendType: '',
+      expenseDate: '',
+      expensePaidTo: [],
+      expenseCategory: '',
+      expenseSubCategory: '',
+      expensePaidBy: UserModel.empty(),
+      expenseReceiptURL: '',
+      expensePaymentMethod: '',
+      expenseUserId: UserModel.empty(),
+    );
+  }
+
   set setExpenseId(String id) => expenseId = id;
 
   set setExpenseTitle(String title) => expenseTitle = title;
@@ -77,18 +97,18 @@ class ExpenseModel {
 
   set setExpenseDate(String date) => expenseDate = date;
 
-  set setExpensePaidTo(List<String> paidTo) => expensePaidTo = paidTo;
+  set setExpensePaidTo(List<UserModel> paidTo) => expensePaidTo = paidTo;
 
   set setExpenseCategory(String category) => expenseCategory = category;
 
   set setExpenseSubCategory(String subCategory) =>
       expenseSubCategory = subCategory;
 
-  set setExpensePaidBy(String paidBy) => expensePaidBy = paidBy;
+  set setExpensePaidBy(UserModel paidBy) => expensePaidBy = paidBy;
 
   set setExpenseReceiptURL(String url) => expenseReceiptURL = url;
 
   set setExpenseSpendType(String spendType) => expenseSpendType = spendType;
 
-  set setExpenseUserId(String userId) => expenseUserId = userId;
+  set setExpenseUserId(UserModel userId) => expenseUserId = userId;
 }

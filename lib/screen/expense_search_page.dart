@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/utils/utils.dart';
 import '../models/group_model.dart';
 import '../models/type_model.dart';
@@ -147,7 +149,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -546,6 +548,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                 physics: BouncingScrollPhysics(),
                 children:
                     getResultList().map((expense) {
+                      String payStatus = getPayStatus(expense, context);
                       return ListTile(
                         onTap: () {
                           DialogUtils.showGenericDialog(
@@ -622,20 +625,47 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                           style: TextStyle(fontSize: 17.5),
                         ),
                         subtitle: Text(
-                          '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
+                          group.exGroupShared
+                              ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
+                              : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
                           style: TextStyle(fontSize: 12.5),
                         ),
-                        trailing: Text(
-                          formatCurrency(expense['expenseAmount'], context),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                            fontSize: 13.5,
-                            color:
-                                expense['expenseSpendType'] == 'income'
-                                    ? Colors.green
-                                    : Colors.red,
-                          ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            group.exGroupShared
+                                ? Text(
+                                  payStatus,
+                                  style: TextStyle(
+                                    letterSpacing: 1.5,
+                                    color:
+                                        payStatus == 'not involved'
+                                            ? Colors.grey
+                                            : payStatus == 'You borrowed'
+                                            ? Colors.green.shade100
+                                            : Colors.redAccent,
+                                  ),
+                                )
+                                : SizedBox.shrink(),
+                            payStatus == 'not involved'
+                                ? SizedBox.shrink()
+                                : Text(
+                                  formatCurrency(
+                                    expense['expenseAmount'],
+                                    context,
+                                  ),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                    fontSize: 13.5,
+                                    color:
+                                        expense['expenseSpendType'] == 'income'
+                                            ? Colors.green
+                                            : Colors.red,
+                                  ),
+                                ),
+                          ],
                         ),
                       );
                     }).toList(),

@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/models/reminder_model.dart';
+import 'package:wisepaise/models/user_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
@@ -125,7 +126,13 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         now,
         _amountController.text.trim(),
         _isExpense ? 'expense' : 'income',
-        user!.id,
+        UserModel(
+          userId: user!.id,
+          userName: user.displayName!,
+          userEmail: user.email,
+          userImageUrl: user.photoUrl!,
+          userCreatedOn: '',
+        ),
         _isRecurring,
         _isActive,
       );

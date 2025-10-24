@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/models/group_model.dart';
+import 'package:wisepaise/models/user_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 
@@ -19,28 +21,53 @@ import 'package:intl/intl.dart';
 import 'expense_group_details_page.dart';
 
 class CreateExpenseGroupPage extends StatefulWidget {
-  const CreateExpenseGroupPage({super.key});
+  Map<String, dynamic> group;
+
+  CreateExpenseGroupPage({super.key, required this.group});
 
   @override
-  State<CreateExpenseGroupPage> createState() => _CreateExpenseGroupPageState();
+  State<CreateExpenseGroupPage> createState() =>
+      _CreateExpenseGroupPageState(group: group);
 }
 
 class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
+  Map<String, dynamic> group;
+
+  _CreateExpenseGroupPageState({required this.group});
+
   bool isGroup = false, isError = false;
   Uint8List? imageBytes;
   int? selectedGroupTypeIndex;
   double verticalGap = 15.0;
-  List<String> groupMembers = [];
+  UserModel thisUser = UserModel.empty();
+  List<dynamic> groupMembers = [];
   TextEditingController memberController = TextEditingController(),
       groupNameController = TextEditingController(),
       groupDescController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    if (group.isNotEmpty) {
+      groupNameController.text = group['exGroupName'];
+      groupDescController.text = group['exGroupDesc'];
+      selectedGroupTypeIndex = int.tryParse(group['exGroupType']);
+      isGroup = group['exGroupShared'];
+      if (isGroup) {
+        groupMembers = (group['exGroupMembers'] ?? []).toList();
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(centerTitle: true, title: Text('Create a group')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(group.isNotEmpty ? group['exGroupName'] : 'Create a group'),
+      ),
       body: Consumer<ApiProvider>(
         builder: (_, api, __) {
           return Stack(
@@ -61,11 +88,40 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                           children: [
                             Row(
                               children: [
-                                imageBytes != null
-                                    ? GestureDetector(
+                                imageBytes == null &&
+                                        (group['exGroupImageURL'] == null ||
+                                            group['exGroupImageURL'].isEmpty)
+                                    ? Card(
+                                      elevation: 1.0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(
+                                          12.0,
+                                        ),
+                                        onTap:
+                                            () =>
+                                                _showAttachmentOptions(context),
+                                        splashColor: Colors.grey.shade500,
+                                        child: Container(
+                                          padding: EdgeInsets.all(15.0),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.add_a_photo_outlined,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    : GestureDetector(
                                       onLongPress: () {
                                         setState(() {
                                           imageBytes = null;
+                                          group['exGroupImageURL'] = '';
                                         });
                                         Toasts.show(
                                           context,
@@ -94,36 +150,19 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                           borderRadius: BorderRadius.circular(
                                             12.0,
                                           ),
-                                          child: Image.memory(
-                                            imageBytes as Uint8List,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    : Card(
-                                      elevation: 1.0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(
-                                          12.0,
-                                        ),
-                                        onTap:
-                                            () =>
-                                                _showAttachmentOptions(context),
-                                        splashColor: Colors.grey.shade500,
-                                        child: Container(
-                                          padding: EdgeInsets.all(15.0),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              12.0,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.add_a_photo_outlined,
-                                          ),
+                                          child:
+                                              group['exGroupImageURL'] !=
+                                                          null &&
+                                                      group['exGroupImageURL']
+                                                          .isNotEmpty
+                                                  ? Image.network(
+                                                    group['exGroupImageURL'],
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                  : Image.memory(
+                                                    imageBytes as Uint8List,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                         ),
                                       ),
                                     ),
@@ -132,7 +171,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                   child: TextField(
                                     controller: groupNameController,
                                     textInputAction: TextInputAction.next,
-                                    autofocus: true,
+                                    //autofocus: true,
                                     textCapitalization:
                                         TextCapitalization.sentences,
                                     decoration: InputDecoration(
@@ -271,6 +310,23 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                     onConfirm:
                                         () => Navigator.of(context).pop(),
                                   );
+                                } else if (isGroup) {
+                                  AuthProvider authProv =
+                                      Provider.of<AuthProvider>(
+                                        context,
+                                        listen: false,
+                                      );
+                                  setState(() {
+                                    groupMembers.add(
+                                      UserModel(
+                                        userId: authProv.user!.id,
+                                        userName: authProv.user!.displayName!,
+                                        userEmail: authProv.user!.email,
+                                        userImageUrl: authProv.user!.photoUrl!,
+                                        userCreatedOn: "userCreatedOn",
+                                      ).toJson(),
+                                    );
+                                  });
                                 }
                               },
                             ),
@@ -315,17 +371,37 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                 groupMembers.map<Widget>((e) {
                                                     return GestureDetector(
                                                       onLongPress: () {
-                                                        setState(() {
-                                                          groupMembers.remove(
-                                                            e,
-                                                          );
+                                                        if (group.isNotEmpty) {
                                                           Toasts.show(
                                                             context,
-                                                            'Member $e removed',
+                                                            'Members can only be added',
                                                             type:
                                                                 ToastType.info,
                                                           );
-                                                        });
+                                                        } else {
+                                                          setState(() {
+                                                            if (e['userId'] ==
+                                                                group['exGroupOwnerId']['userId']) {
+                                                              Toasts.show(
+                                                                context,
+                                                                'Owner cannot be removed',
+                                                                type:
+                                                                    ToastType
+                                                                        .info,
+                                                              );
+                                                            } else {
+                                                              groupMembers
+                                                                  .remove(e);
+                                                              Toasts.show(
+                                                                context,
+                                                                'Member ${e['userName']} removed',
+                                                                type:
+                                                                    ToastType
+                                                                        .info,
+                                                              );
+                                                            }
+                                                          });
+                                                        }
                                                       },
                                                       child: SizedBox(
                                                         width: 85.0,
@@ -333,16 +409,20 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                           children: [
                                                             CircleAvatar(
                                                               maxRadius: 30.0,
-                                                              child: Icon(
-                                                                Icons.person,
-                                                                size: 30.0,
-                                                              ),
+                                                              backgroundImage:
+                                                                  NetworkImage(
+                                                                    e is Map
+                                                                        ? e['userImageUrl']
+                                                                        : e.userImageUrl,
+                                                                  ),
                                                             ),
                                                             SizedBox(
                                                               height: 5.0,
                                                             ),
                                                             Text(
-                                                              e,
+                                                              e is Map
+                                                                  ? e['userName']
+                                                                  : e.userName,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
@@ -406,46 +486,92 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                   context,
                                 );
                               }
-                              GroupModel group = GroupModel(
-                                exGroupId: '',
-                                exGroupName: groupNameController.text.trim(),
-                                exGroupDesc: groupDescController.text.trim(),
-                                exGroupImageURL: url.isNotEmpty ? url : '',
-                                exGroupType: selectedGroupTypeIndex.toString(),
-                                exGroupShared: isGroup,
-                                exGroupMembers: groupMembers,
-                                exGroupOwnerId: authProv.user!.id,
-                                exGroupCreatedOn: DateFormat(
-                                  'yyyy-MM-dd HH:mm:ss',
-                                ).format(DateTime.now()),
-                                expenses: [],
-                                exGroupExpenses: 0,
-                                exGroupIncome: 0,
-                              );
-                              Map<String, dynamic> groupMap = group.toJson();
-                              api.createGroup(context, groupMap).then((
-                                Response resp,
-                              ) {
-                                Toasts.show(
-                                  context,
-                                  'Group ${group.exGroupName} created',
-                                  type: ToastType.success,
+                              if (group.isEmpty) {
+                                GroupModel group = GroupModel(
+                                  exGroupId: '',
+                                  exGroupName: groupNameController.text.trim(),
+                                  exGroupDesc: groupDescController.text.trim(),
+                                  exGroupImageURL: url.isNotEmpty ? url : '',
+                                  exGroupType:
+                                      selectedGroupTypeIndex.toString(),
+                                  exGroupShared: isGroup,
+                                  exGroupMembers: groupMembers,
+                                  exGroupOwnerId:
+                                      UserModel(
+                                        userId: authProv.user!.id,
+                                        userName: authProv.user!.displayName!,
+                                        userEmail: authProv.user!.email,
+                                        userImageUrl: authProv.user!.photoUrl!,
+                                        userCreatedOn: '',
+                                      ).toJson(),
+                                  exGroupCreatedOn: DateFormat(
+                                    'yyyy-MM-dd HH:mm:ss',
+                                  ).format(DateTime.now()),
+                                  expenses: [],
+                                  exGroupExpenses: 0,
+                                  exGroupIncome: 0,
                                 );
-                                clearForm();
-                                Navigator.of(context).pop();
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => ExpenseGroupDetailsPage(
-                                          groupMap: groupMap,
-                                        ),
-                                  ),
+                                Map<String, dynamic> groupMap = group.toJson();
+                                api.createGroup(context, groupMap).then((
+                                  Response resp,
+                                ) {
+                                  Toasts.show(
+                                    context,
+                                    'Group ${group.exGroupName} created',
+                                    type: ToastType.success,
+                                  );
+                                  clearForm();
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => ExpenseGroupDetailsPage(
+                                            groupMap: resp.data,
+                                          ),
+                                    ),
+                                  );
+                                });
+                              } else {
+                                GroupModel group = GroupModel(
+                                  exGroupId: this.group['exGroupId'],
+                                  exGroupName: groupNameController.text.trim(),
+                                  exGroupDesc: groupDescController.text.trim(),
+                                  exGroupImageURL: url.isNotEmpty ? url : '',
+                                  exGroupType:
+                                      selectedGroupTypeIndex.toString(),
+                                  exGroupShared: isGroup,
+                                  exGroupMembers: groupMembers,
+                                  exGroupOwnerId: this.group['exGroupOwnerId'],
+                                  exGroupCreatedOn:
+                                      this.group['exGroupCreatedOn'],
+                                  expenses: this.group['expenses'].toList(),
+                                  exGroupExpenses:
+                                      this.group['exGroupExpenses'],
+                                  exGroupIncome: this.group['exGroupIncome'],
                                 );
-                              });
+                                Map<String, dynamic> groupMap = group.toJson();
+                                api.updateGroup(context, groupMap).then((
+                                  Response resp,
+                                ) {
+                                  Toasts.show(
+                                    context,
+                                    'Group ${group.exGroupName} updated',
+                                    type: ToastType.success,
+                                  );
+                                  clearForm();
+                                  Navigator.pop(context, resp.data);
+                                });
+                              }
                             }
                           },
-                          icon: const Icon(Icons.check),
-                          label: const Text('Create Group'),
+                          icon: Icon(
+                            group.isNotEmpty
+                                ? Icons.edit_outlined
+                                : Icons.check,
+                          ),
+                          label: Text(
+                            group.isNotEmpty ? 'Update Group' : 'Create Group',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -485,6 +611,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
   }
 
   void showAddMembersDialog(BuildContext context) {
+    memberController.clear();
     DialogUtils.showGenericDialog(
       context: context,
       title: Text(
@@ -500,17 +627,47 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
         key: _formKey,
         child: TextFormField(
           validator: (String? str) {
+            AuthProvider auth = Provider.of<AuthProvider>(
+              context,
+              listen: false,
+            );
             if (str!.trim().isEmpty) {
-              return 'Enter a name';
+              return 'Enter an email Id';
+            }
+            if ((str.trim().compareTo(auth.user!.email)) == 0) {
+              return 'Owner cannot be a member';
             }
             return null;
           },
           controller: memberController,
-          autofocus: true,
-          keyboardType: TextInputType.text,
+          //autofocus: true,
+          keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.done,
-          textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(),
+          textCapitalization: TextCapitalization.none,
+          decoration: InputDecoration(
+            hintText: 'abc@gmail.com',
+            hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: BorderSide(width: 0.1, color: Colors.blue),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: BorderSide(width: 0.1, color: Colors.blue),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: BorderSide(width: 0.1, color: Colors.blue),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: BorderSide(width: 0.1, color: Colors.red),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: BorderSide(width: 0.1, color: Colors.red),
+            ),
+          ),
         ),
       ),
       cancelText: 'Cancel',
@@ -522,14 +679,21 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
       },
       onConfirm: () {
         if (_formKey.currentState!.validate()) {
-          setState(() {
-            groupMembers.add(memberController.text.trim());
-          });
-          memberController.clear();
-          unfocusKeyboard();
           Navigator.of(context).pop();
-
-          debugPrint('groupMembers:::${groupMembers.length}');
+          ApiProvider api = Provider.of(context, listen: false);
+          api.getUserByEmail(context, memberController.text.trim()).then((
+            Response resp,
+          ) {
+            setState(() {
+              if (resp.statusCode == HttpStatus.ok) {
+                thisUser = UserModel.fromJson(resp.data);
+              } else {
+                thisUser = UserModel.empty();
+              }
+              unfocusKeyboard();
+              _showAddMemberBottomSheet(context);
+            });
+          });
         }
       },
       showCancel: true,
@@ -546,9 +710,14 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
       Toasts.show(context, 'Select a Type', type: ToastType.error);
       return false;
     }
-    if (isGroup && groupMembers.isEmpty) {
-      Toasts.show(context, 'Add members to group', type: ToastType.error);
-      return false;
+    if (isGroup) {
+      if (group.isEmpty && groupMembers.isEmpty) {
+        Toasts.show(context, 'Add members to group', type: ToastType.error);
+        return false;
+      } else if (group.isNotEmpty && groupMembers.length == 1) {
+        Toasts.show(context, 'Add members to group', type: ToastType.error);
+        return false;
+      }
     }
     return true;
   }
@@ -622,6 +791,74 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                 ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAddMemberBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      showDragHandle: true,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Add Member',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Divider(height: 1),
+              thisUser.userId.isEmpty
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Text(
+                        'Email ${memberController.text.trim()} not found',
+                        style: TextStyle(letterSpacing: 1.5),
+                      ),
+                    ),
+                  )
+                  : ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(thisUser.userImageUrl),
+                    ),
+                    title: Text(thisUser.userName),
+                    subtitle: Text(thisUser.userEmail),
+                    trailing: IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          side: BorderSide(width: 0.25),
+                        ),
+                      ),
+                      icon: Icon(Icons.check),
+                      onPressed: () {
+                        setState(() {
+                          groupMembers.add(thisUser);
+                        });
+                        unfocusKeyboard();
+                        Navigator.of(context).pop();
+
+                        debugPrint('groupMembers:::${groupMembers.length}');
+                      },
+                    ),
+                  ),
+              const SizedBox(height: 6),
+            ],
           ),
         );
       },

@@ -94,7 +94,7 @@ class ApiProvider extends ChangeNotifier {
   ) async {
     var finalUrl = '$baseUrl/expenseGroup/create';
     Response resp = await getHttp(context, finalUrl, 'POST', requestBody: body);
-    groupList.add(body);
+    groupList.add(resp.data);
     notifyListeners();
     return resp;
   }
@@ -248,6 +248,13 @@ class ApiProvider extends ChangeNotifier {
   Future<Response> deleteUser(BuildContext context, String userId) async {
     var finalUrl = '$baseUrl/users/delete/$userId';
     Response resp = await getHttp(context, finalUrl, 'DELETE');
+    notifyListeners();
+    return resp;
+  }
+
+  Future<Response> getUserByEmail(BuildContext context, String emailId) async {
+    var finalUrl = '$baseUrl/users/get/$emailId';
+    Response resp = await getHttp(context, finalUrl, 'GET');
     notifyListeners();
     return resp;
   }

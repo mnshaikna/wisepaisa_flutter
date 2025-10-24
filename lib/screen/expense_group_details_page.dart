@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
+import 'package:wisepaise/screen/create_expense_group_page.dart';
 import 'package:wisepaise/screen/create_expense_page.dart';
 import 'package:wisepaise/screen/expense_search_page.dart';
 
@@ -36,11 +37,15 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
   @override
   void initState() {
     super.initState();
+    AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+    debugPrint('groupOwner:::${groupMap['exGroupOwnerId']['userId']}');
+    debugPrint('loginId:::${auth.user!.id}');
     init();
   }
 
   init() {
     group = GroupModel.fromJson(groupMap);
+
     group.expenses.sort((a, b) {
       final dateA = DateTime.parse(a['expenseDate']);
       final dateB = DateTime.parse(b['expenseDate']);
@@ -256,13 +261,15 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(10.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
-
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12.0),
@@ -359,6 +366,54 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                       ],
                                     ),
                                   ),
+                                  group.exGroupOwnerId['userId'] ==
+                                          auth.user!.id
+                                      ? IconButton(
+                                        iconSize: 20.0,
+                                        onPressed: () async {
+                                          final updatedGroup =
+                                              await Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) =>
+                                                          CreateExpenseGroupPage(
+                                                            group: groupMap,
+                                                          ),
+                                                ),
+                                              );
+
+                                          if (updatedGroup != null) {
+                                            group = GroupModel.fromJson(
+                                              updatedGroup,
+                                            );
+                                            group.expenses.sort((a, b) {
+                                              final dateA = DateTime.parse(
+                                                a['expenseDate'],
+                                              );
+                                              final dateB = DateTime.parse(
+                                                b['expenseDate'],
+                                              );
+                                              return dateB.compareTo(dateA);
+                                            });
+                                            api.groupList.removeWhere(
+                                              (thisGrp) =>
+                                                  thisGrp['exGroupId'] ==
+                                                  group.exGroupId,
+                                            );
+                                            api.groupList.add(group.toJson());
+                                            setState(() {});
+                                          }
+                                        },
+                                        icon: Icon(Icons.edit_outlined),
+                                        style: IconButton.styleFrom(
+                                          padding: EdgeInsets.zero,
+                                          backgroundColor:
+                                              Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                        ),
+                                      )
+                                      : SizedBox.shrink(),
                                 ],
                               ),
                               const SizedBox(height: 10),
@@ -372,7 +427,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                       Icon(Icons.person, size: 20.0),
                                       SizedBox(width: 5.0),
                                       Text(
-                                        auth.user!.displayName!,
+                                        group.exGroupOwnerId['userName'],
                                         style: TextStyle(
                                           fontSize: 13,
                                           color: Colors.grey.shade600,
@@ -406,20 +461,20 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                   Row(
                                     mainAxisAlignment:
                                         group.exGroupShared &&
-                                                group.exGroupMembers.isNotEmpty
+                                                group.exGroupMembers.length > 1
                                             ? MainAxisAlignment.spaceBetween
                                             : MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
                                       if (group.exGroupShared &&
-                                          group.exGroupMembers.isNotEmpty)
+                                          group.exGroupMembers.length > 1)
                                         initialsRow(
                                           group.exGroupMembers,
                                           context,
                                         ),
                                       if (group.exGroupShared &&
-                                          group.exGroupMembers.isNotEmpty)
+                                          group.exGroupMembers.length > 1)
                                         Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
@@ -489,7 +544,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     letterSpacing: 1.5,
-                                                    color: Colors.green
+                                                    color: Colors.green,
                                                   ),
                                                 ),
                                               ],
@@ -588,6 +643,10 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                 itemCount: expenseList.length,
                                 itemBuilder: (context, index) {
                                   final expense = expenseList[index];
+                                  String payStatus = getPayStatus(
+                                    expense,
+                                    context,
+                                  );
                                   return Column(
                                     children: [
                                       Dismissible(
@@ -851,24 +910,56 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                               style: TextStyle(fontSize: 17.5),
                                             ),
                                             subtitle: Text(
-                                              '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
+                                              groupMap['exGroupShared']
+                                                  ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
+                                                  : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
                                               style: TextStyle(fontSize: 12.5),
                                             ),
-                                            trailing: Text(
-                                              formatCurrency(
-                                                expense['expenseAmount'],
-                                                context,
-                                              ),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                letterSpacing: 1.5,
-                                                fontSize: 13.5,
-                                                color:
-                                                    expense['expenseSpendType'] ==
-                                                            'income'
-                                                        ? Colors.green
-                                                        : Colors.red,
-                                              ),
+                                            trailing: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                groupMap['exGroupShared']
+                                                    ? Text(
+                                                      payStatus,
+                                                      style: TextStyle(
+                                                        letterSpacing: 1.5,
+                                                        color:
+                                                            payStatus ==
+                                                                    'not involved'
+                                                                ? Colors.grey
+                                                                : payStatus ==
+                                                                    'You borrowed'
+                                                                ? Colors
+                                                                    .green
+                                                                    .shade100
+                                                                : Colors
+                                                                    .redAccent,
+                                                      ),
+                                                    )
+                                                    : SizedBox.shrink(),
+                                                payStatus == 'not involved'
+                                                    ? SizedBox.shrink()
+                                                    : Text(
+                                                      formatCurrency(
+                                                        expense['expenseAmount'],
+                                                        context,
+                                                      ),
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        letterSpacing: 1.5,
+                                                        fontSize: 13.5,
+                                                        color:
+                                                            expense['expenseSpendType'] ==
+                                                                    'income'
+                                                                ? Colors.green
+                                                                : Colors.red,
+                                                      ),
+                                                    ),
+                                              ],
                                             ),
                                           ),
                                         ),

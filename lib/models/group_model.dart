@@ -1,3 +1,5 @@
+import 'package:wisepaise/models/user_model.dart';
+
 class GroupModel {
   String exGroupId;
   String exGroupName;
@@ -5,9 +7,9 @@ class GroupModel {
   String exGroupImageURL;
   String exGroupType;
   bool exGroupShared;
-  List<String> exGroupMembers;
+  List<dynamic> exGroupMembers;
   String exGroupCreatedOn;
-  String exGroupOwnerId;
+  dynamic exGroupOwnerId;
   List<dynamic> expenses;
   double exGroupIncome;
   double exGroupExpenses;
@@ -36,7 +38,7 @@ class GroupModel {
       exGroupImageURL: json['exGroupImageURL'] ?? '',
       exGroupType: json['exGroupType'] ?? '',
       exGroupShared: json['exGroupShared'] ?? false,
-      exGroupMembers: List<String>.from(json['exGroupMembers'] ?? []),
+      exGroupMembers: json['exGroupMembers'] ?? [],
       exGroupCreatedOn: json['exGroupCreatedOn'] ?? '',
       exGroupOwnerId: json['exGroupOwnerId'] ?? '',
       expenses: json['expenses'] ?? [],
@@ -76,11 +78,11 @@ class GroupModel {
 
   set setExGroupShared(bool shared) => exGroupShared = shared;
 
-  set setExGroupMembers(List<String> members) => exGroupMembers = members;
+  set setExGroupMembers(List<UserModel> members) => exGroupMembers = members;
 
   set setExGroupCreatedOn(String createdOn) => exGroupCreatedOn = createdOn;
 
-  set setExGroupOwnerId(String ownerId) => exGroupOwnerId = ownerId;
+  set setExGroupOwnerId(dynamic ownerId) => exGroupOwnerId = ownerId;
 
   setExpenses(List exp) {
     expenses = exp;

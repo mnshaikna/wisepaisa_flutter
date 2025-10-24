@@ -11,6 +11,7 @@ import 'package:wisepaise/models/type_model.dart';
 import 'package:wisepaise/utils/toast.dart';
 
 import '../providers/api_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../screen/create_expense_page.dart';
 import 'constants.dart';
@@ -119,12 +120,11 @@ Widget buildLoadingContainer({
 }
 
 Widget buildDashboardShimmer(BuildContext context) {
-  bool isDark = Theme.of(context).brightness == Brightness.dark;
   return Shimmer.fromColors(
     direction: ShimmerDirection.ltr,
     period: Duration(seconds: 2),
-    baseColor: isDark ? Colors.grey : Colors.grey.shade300,
-    highlightColor: isDark ? Colors.white70 : Colors.white,
+    baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+    highlightColor: Theme.of(context).colorScheme.surfaceContainerLow,
     child: SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       child: Column(
@@ -132,9 +132,7 @@ Widget buildDashboardShimmer(BuildContext context) {
         children: [
           // Title Bar Placeholder
           titleShimmer(),
-
           const SizedBox(height: 10),
-
           // Horizontal Reminder List Placeholder
           SizedBox(
             height: 150,
@@ -152,12 +150,9 @@ Widget buildDashboardShimmer(BuildContext context) {
                   ),
             ),
           ),
-
           const SizedBox(height: 20),
           titleShimmer(),
-
           const SizedBox(height: 10),
-
           // Expense/Income cards placeholder
           SizedBox(
             height: 75,
@@ -175,12 +170,9 @@ Widget buildDashboardShimmer(BuildContext context) {
                   ),
             ),
           ),
-
           SizedBox(height: 20.0),
           titleShimmer(),
-
           const SizedBox(height: 10),
-
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             itemCount: 5,
@@ -568,7 +560,7 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Paid By: ${expense['expensePaidBy']}",
+                  "Paid By: ${expense['expensePaidBy']['userName']}",
                   style: TextStyle(fontSize: 14),
                 ),
 
@@ -590,7 +582,8 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
             spacing: 6,
             children:
                 expense['expensePaidTo'].map<Widget>((name) {
-                  return Chip(label: Text(name));
+                  debugPrint('name:::${name.toString()}');
+                  return Chip(label: Text(name['userName']));
                 }).toList(),
           ),
 
@@ -654,7 +647,7 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
   );
 }
 
-Widget initialsRow(List<String> names, BuildContext context) {
+Widget initialsRow(List<dynamic> names, BuildContext context) {
   final double avatarSize = 32;
   final double overlap = 25;
   final int maxToShow = 5;
@@ -673,6 +666,7 @@ Widget initialsRow(List<String> names, BuildContext context) {
 
   return GestureDetector(
     onTap: () {
+      debugPrint(names.toString());
       DialogUtils.showGenericDialog(
         context: context,
         title: DialogUtils.titleText('Group Members'),
@@ -690,14 +684,12 @@ Widget initialsRow(List<String> names, BuildContext context) {
                     contentPadding: EdgeInsets.zero,
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        color: Colors.grey.shade300,
-                        child: Icon(Icons.group, size: 20, color: Colors.grey),
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(name['userImageUrl']),
                       ),
                     ),
-                    title: Text(name),
+                    title: Text(name['userName']),
+                    subtitle: Text(name['userEmail']),
                   );
                 }).toList(),
           ),
@@ -723,7 +715,9 @@ Widget initialsRow(List<String> names, BuildContext context) {
                 radius: avatarSize / 2,
                 backgroundColor: Colors.lightBlue,
                 child: Text(
-                  getInitials(visibleNames[i]),
+                  getInitials(
+                    visibleNames[i]['userName'] ?? visibleNames[i].userName,
+                  ),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -851,4 +845,23 @@ showSnackBar(context, text, Icon icon) {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
     ),
   );
+}
+
+String getPayStatus(Map<String, dynamic> expense, BuildContext context) {
+  AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+  if (expense['expensePaidBy']['userId'] == auth.user!.id) {
+    return 'You lent';
+  }
+  List<dynamic> paidTo = expense['expensePaidTo'];
+  debugPrint('paidTo:::${paidTo.toString()}');
+
+  final payItem = paidTo.firstWhere(
+    (pay) => pay['userId'] == auth.user!.id,
+    orElse: () => null, // returns null if not found
+  );
+  debugPrint('payItem:::${payItem.toString()}');
+  if (payItem != null) {
+    return 'You borrowed';
+  }
+  return 'not involved';
 }
