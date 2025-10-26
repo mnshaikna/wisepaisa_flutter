@@ -11,7 +11,7 @@ class ReminderModel {
   String reminderCreatedDate;
   String reminderAmount;
   String reminderAmountType;
-  UserModel reminderUserId;
+  dynamic reminderUserId;
   bool reminderIsRecurring;
   bool reminderIsActive;
 

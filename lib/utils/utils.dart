@@ -865,3 +865,53 @@ String getPayStatus(Map<String, dynamic> expense, BuildContext context) {
   }
   return 'not involved';
 }
+
+String formatCompactCurrency(num amount, BuildContext context) {
+  SettingsProvider settings = Provider.of<SettingsProvider>(
+    context,
+    listen: false,
+  );
+  final format = NumberFormat.compactCurrency(
+    symbol: settings.currency, // or manually set '₹', '$', etc.
+    decimalDigits: 1,
+  );
+  return format.format(amount);
+}
+
+Widget noDataWidget(String header, String subHead, BuildContext context) {
+  return Column(
+    key: const ValueKey('noData'),
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      // 🔹 Illustration (optional Lottie or PNG)
+      Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Image.asset(
+          'assets/images/no-data.png',
+          height: 100,
+          fit: BoxFit.contain,
+        ),
+      ),
+
+      // 🔹 Headline
+      Text(
+        header,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+      ),
+
+      const SizedBox(height: 2),
+
+      // 🔹 Subtext
+      Text(
+        subHead,
+        textAlign: TextAlign.center,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor),
+      ),
+    ],
+  );
+}

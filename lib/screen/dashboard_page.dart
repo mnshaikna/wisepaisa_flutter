@@ -1319,7 +1319,15 @@ class _DashboardPageState extends State<DashboardPage>
                                       ? Icons.arrow_downward
                                       : Icons.arrow_upward,
                                   size: 14,
-                                  color: isExpense ? Colors.red : Colors.green,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? isExpense
+                                              ? Colors.red
+                                              : Colors.green
+                                          : isExpense
+                                          ? Colors.red.shade200
+                                          : Colors.green.shade200,
                                 ),
                                 Expanded(
                                   child: Text(
@@ -1332,9 +1340,16 @@ class _DashboardPageState extends State<DashboardPage>
                                     softWrap: true,
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.bold,
                                       color:
-                                          isExpense ? Colors.red : Colors.green,
+                                          Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? isExpense
+                                                  ? Colors.red
+                                                  : Colors.green
+                                              : isExpense
+                                              ? Colors.red.shade200
+                                              : Colors.green.shade200,
                                     ),
                                   ),
                                 ),

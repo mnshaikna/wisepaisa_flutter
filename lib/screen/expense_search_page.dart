@@ -68,6 +68,9 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
         startDate = DateTime.parse(earliest['expenseDate']);
         endDate = DateTime.parse(latest['expenseDate']);
       });
+    } else {
+      startDate = DateTime.now();
+      endDate = DateTime.now();
     }
   }
 
@@ -455,13 +458,11 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                               ...currentSubCategories.map(
                                 (sub) => DropdownMenuItem(
                                   value: sub,
-                                  child: Flexible(
-                                    child: Text(
-                                      sub.capitalize(),
-                                      softWrap: true,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
+                                  child: Text(
+                                    sub.capitalize(),
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                               ),
@@ -527,20 +528,10 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
       body:
           getResultList().isEmpty
               ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(FontAwesomeIcons.sliders, color: Colors.grey),
-                    SizedBox(height: 10.0),
-                    Text(
-                      'No matching results'.toUpperCase(),
-                      style: TextStyle(
-                        letterSpacing: 1.5,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                child: noDataWidget(
+                  'No Matching Results',
+                  'Change the filter criteria to view data',
+                  context,
                 ),
               )
               : ListView(

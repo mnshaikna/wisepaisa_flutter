@@ -54,7 +54,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
 
     _descController.text =
         widget.reminder.reminderDescription.isNotEmpty
-            ? widget.reminder.reminderName
+            ? widget.reminder.reminderDescription
             : '';
 
     _amountController.text =

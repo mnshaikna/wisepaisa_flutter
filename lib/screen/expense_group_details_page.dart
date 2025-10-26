@@ -13,7 +13,7 @@ import '../models/group_model.dart';
 import '../models/type_model.dart';
 import '../utils/constants.dart';
 import '../utils/dialog_utils.dart';
-import '../utils/expense_pie_chart.dart';
+import 'expense_chart_screen.dart';
 import '../utils/toast.dart';
 import '../utils/utils.dart';
 
@@ -54,49 +54,6 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
     debugPrint(group.expenses.toString());
   }
 
-  void _showChartSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      isDismissible: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Expenses Chart',
-                    style: TextStyle(
-                      letterSpacing: 1.5,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ExpensePieChart(expenses: group.expenses),
-              ),
-              const SizedBox(height: 6),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
@@ -110,20 +67,11 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
               tag: 'searchHero',
               child: GestureDetector(
                 onTap:
-                    () =>
-                        group.expenses.isNotEmpty
-                            ? Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) =>
-                                        ExpenseSearchPage(group: group),
-                              ),
-                            )
-                            : Toasts.show(
-                              context,
-                              'Add atleast one expense',
-                              type: ToastType.info,
-                            ),
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ExpenseSearchPage(group: group),
+                      ),
+                    ),
                 child: AbsorbPointer(
                   child: CupertinoSearchTextField(
                     padding: const EdgeInsets.symmetric(
@@ -152,12 +100,51 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                 itemBuilder:
                     (BuildContext context) => <PopupMenuEntry<String>>[
                       PopupMenuItem(
-                        onTap: () => _showChartSheet(context),
+                        onTap:
+                            () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ExpenseChartScreen(
+                                      expenses: group.expenses,
+                                    ),
+                              ),
+                            ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 6,
                         ),
                         value: 'OptionA',
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Icon(FontAwesomeIcons.share, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text('Export/Share')),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        onTap:
+                            () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ExpenseChartScreen(
+                                      expenses: group.expenses,
+                                    ),
+                              ),
+                            ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        value: 'OptionB',
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -174,60 +161,96 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                           ],
                         ),
                       ),
-                      PopupMenuItem(
-                        onTap: () {
-                          DialogUtils.showGenericDialog(
-                            context: context,
-                            title: DialogUtils.titleText('Delete Group?'),
-                            message: Text(
-                              'Are you sure you want to delete this Expense Group?',
-                            ),
-                            confirmText: 'Delete',
-                            confirmColor: Colors.red,
-                            onConfirm: () async {
-                              Navigator.pop(context);
-                              await api
-                                  .deleteGroups(group.exGroupId, context)
-                                  .then((Response res) {
-                                    api.groupList.removeWhere(
-                                      (element) =>
-                                          element['exGroupId'] ==
-                                          group.exGroupId,
-                                    );
-                                    Navigator.pop(context);
-                                    Toasts.show(
-                                      context,
-                                      'Expense Group Deleted',
-                                      type: ToastType.success,
-                                    );
-                                  });
-                            },
-                            showCancel: true,
-                            cancelText: 'Cancel',
-                            onCancel: () => Navigator.pop(context),
-                          );
-                        },
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 6,
-                        ),
-                        value: 'OptionB',
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12.0),
+                      if (group.exGroupShared)
+                        PopupMenuItem(
+                          onTap:
+                              () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => ExpenseChartScreen(
+                                        expenses: group.expenses,
+                                      ),
+                                ),
                               ),
-                              child: Icon(Icons.delete, size: 20),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(child: Text('Delete group')),
-                          ],
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          value: 'OptionC',
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Icon(
+                                  FontAwesomeIcons.scaleUnbalancedFlip,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(child: Text('Member Balances')),
+                            ],
+                          ),
                         ),
-                      ),
+                      if (group.exGroupOwnerId['userId'] == auth.user!.id)
+                        PopupMenuItem(
+                          onTap: () {
+                            DialogUtils.showGenericDialog(
+                              context: context,
+                              title: DialogUtils.titleText('Delete Group?'),
+                              message: Text(
+                                'Are you sure you want to delete this Expense Group?',
+                              ),
+                              confirmText: 'Delete',
+                              confirmColor: Colors.red,
+                              onConfirm: () async {
+                                Navigator.pop(context);
+                                await api
+                                    .deleteGroups(group.exGroupId, context)
+                                    .then((Response res) {
+                                      api.groupList.removeWhere(
+                                        (element) =>
+                                            element['exGroupId'] ==
+                                            group.exGroupId,
+                                      );
+                                      Navigator.pop(context);
+                                      Toasts.show(
+                                        context,
+                                        'Expense Group Deleted',
+                                        type: ToastType.success,
+                                      );
+                                    });
+                              },
+                              showCancel: true,
+                              cancelText: 'Cancel',
+                              onCancel: () => Navigator.pop(context),
+                            );
+                          },
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          value: 'OptionD',
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Icon(Icons.delete, size: 20),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(child: Text('Delete group')),
+                            ],
+                          ),
+                        ),
                     ],
               ),
             ],
