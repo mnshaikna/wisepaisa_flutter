@@ -13,6 +13,8 @@ class GroupModel {
   List<dynamic> expenses;
   double exGroupIncome;
   double exGroupExpenses;
+  List<dynamic> exGroupMembersSettlements;
+  Map<String, dynamic> exGroupMembersBalance;
 
   GroupModel({
     required this.exGroupId,
@@ -27,6 +29,8 @@ class GroupModel {
     required this.expenses,
     required this.exGroupIncome,
     required this.exGroupExpenses,
+    required this.exGroupMembersBalance,
+    required this.exGroupMembersSettlements,
   });
 
   /// Create object from JSON
@@ -44,6 +48,8 @@ class GroupModel {
       expenses: json['expenses'] ?? [],
       exGroupExpenses: json['exGroupExpenses'] ?? 0,
       exGroupIncome: json['exGroupIncome'] ?? 0,
+      exGroupMembersBalance: json['exGroupMembersBalance'] ?? {},
+      exGroupMembersSettlements: json['exGroupMembersSettlements'] ?? [],
     );
   }
 
@@ -62,6 +68,8 @@ class GroupModel {
       'expenses': expenses,
       'exGroupIncome': exGroupIncome,
       'exGroupExpenses': exGroupExpenses,
+      'exGroupMembersBalance': exGroupMembersBalance,
+      'exGroupMembersSettlements': exGroupMembersSettlements,
     };
   }
 

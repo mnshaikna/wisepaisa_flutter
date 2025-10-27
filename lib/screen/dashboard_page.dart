@@ -55,7 +55,7 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   init() async {
-    Future.microtask(() async {
+    await Future.microtask(() async {
       ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
       setState(() => isInitComplete = true);
       api.setLoading();

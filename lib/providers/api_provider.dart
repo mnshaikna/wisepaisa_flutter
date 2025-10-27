@@ -253,7 +253,14 @@ class ApiProvider extends ChangeNotifier {
   }
 
   Future<Response> getUserByEmail(BuildContext context, String emailId) async {
-    var finalUrl = '$baseUrl/users/get/$emailId';
+    var finalUrl = '$baseUrl/users/get/emailId/$emailId';
+    Response resp = await getHttp(context, finalUrl, 'GET');
+    notifyListeners();
+    return resp;
+  }
+
+  Future<Response> getUserById(BuildContext context, String userId) async {
+    var finalUrl = '$baseUrl/users/get/userId/$userId';
     Response resp = await getHttp(context, finalUrl, 'GET');
     notifyListeners();
     return resp;

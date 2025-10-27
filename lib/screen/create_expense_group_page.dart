@@ -510,6 +510,8 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                   expenses: [],
                                   exGroupExpenses: 0,
                                   exGroupIncome: 0,
+                                  exGroupMembersBalance: {},
+                                  exGroupMembersSettlements: [],
                                 );
                                 Map<String, dynamic> groupMap = group.toJson();
                                 api.createGroup(context, groupMap).then((
@@ -548,6 +550,8 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                   exGroupExpenses:
                                       this.group['exGroupExpenses'],
                                   exGroupIncome: this.group['exGroupIncome'],
+                                  exGroupMembersBalance: {},
+                                  exGroupMembersSettlements: [],
                                 );
                                 Map<String, dynamic> groupMap = group.toJson();
                                 api.updateGroup(context, groupMap).then((

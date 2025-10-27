@@ -540,6 +540,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                 children:
                     getResultList().map((expense) {
                       String payStatus = getPayStatus(expense, context);
+                      debugPrint('payStatus:::$payStatus');
                       return ListTile(
                         onTap: () {
                           DialogUtils.showGenericDialog(
@@ -631,15 +632,18 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                   style: TextStyle(
                                     letterSpacing: 1.5,
                                     color:
-                                        payStatus == 'not involved'
+                                        payStatus == 'not involved' ||
+                                                payStatus == 'no balance'
                                             ? Colors.grey
-                                            : payStatus == 'You borrowed'
-                                            ? Colors.green.shade100
-                                            : Colors.redAccent,
+                                            : payStatus == 'you borrowed'
+                                            ? Colors.red
+                                            : Colors.green,
                                   ),
                                 )
                                 : SizedBox.shrink(),
-                            payStatus == 'not involved'
+                            group.exGroupShared &&
+                                    (payStatus == 'not involved' ||
+                                        payStatus == 'no balance')
                                 ? SizedBox.shrink()
                                 : Text(
                                   formatCurrency(

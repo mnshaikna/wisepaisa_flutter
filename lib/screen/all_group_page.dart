@@ -196,7 +196,7 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                 children: [
                                   if (group.exGroupShared &&
                                       group.exGroupMembers.isNotEmpty)
-                                    initialsRow(group.exGroupMembers, context),
+                                    initialsRow(group.exGroupMembers, context,showImage: true),
                                   if (group.exGroupShared &&
                                       group.exGroupMembers.isNotEmpty)
                                     Column(

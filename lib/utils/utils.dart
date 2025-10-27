@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -269,9 +268,6 @@ List<Widget> buildGroupedExpenseWidgets(
     );
     widgets.addAll(
       items.take(10).map((e) {
-        final String spendType =
-            (e['expenseSpendType'] ?? 'expense').toString();
-        final bool isExpense = spendType.toLowerCase() == 'expense';
         return Dismissible(
           key: ValueKey(e['expenseId']),
           direction: DismissDirection.endToStart,
@@ -647,9 +643,13 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
   );
 }
 
-Widget initialsRow(List<dynamic> names, BuildContext context) {
-  final double avatarSize = 32;
-  final double overlap = 25;
+Widget initialsRow(
+  List<dynamic> names,
+  BuildContext context, {
+  bool showImage = false,
+}) {
+  final double avatarSize = 35;
+  final double overlap = 26.5;
   final int maxToShow = 5;
 
   // show max 5 names, rest go in "+X"
@@ -714,15 +714,26 @@ Widget initialsRow(List<dynamic> names, BuildContext context) {
               child: CircleAvatar(
                 radius: avatarSize / 2,
                 backgroundColor: Colors.lightBlue,
-                child: Text(
-                  getInitials(
-                    visibleNames[i]['userName'] ?? visibleNames[i].userName,
-                  ),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+                backgroundImage:
+                    showImage
+                        ? NetworkImage(
+                          visibleNames[i]['userImageUrl'] ??
+                              visibleNames[i].userImageUrl,
+                        )
+                        : null,
+                child:
+                    showImage
+                        ? SizedBox.shrink()
+                        : Text(
+                          getInitials(
+                            visibleNames[i]['userName'] ??
+                                visibleNames[i].userName,
+                          ),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
               ),
             ),
 
@@ -849,11 +860,17 @@ showSnackBar(context, text, Icon icon) {
 
 String getPayStatus(Map<String, dynamic> expense, BuildContext context) {
   AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
-  if (expense['expensePaidBy']['userId'] == auth.user!.id) {
-    return 'You lent';
-  }
   List<dynamic> paidTo = expense['expensePaidTo'];
   debugPrint('paidTo:::${paidTo.toString()}');
+
+  if (expense['expensePaidBy']['userId'] == auth.user!.id &&
+      (paidTo.length == 1 && paidTo.first['userId'] == auth.user!.id)) {
+    return 'no balance';
+  }
+
+  if (expense['expensePaidBy']['userId'] == auth.user!.id) {
+    return 'you lent';
+  }
 
   final payItem = paidTo.firstWhere(
     (pay) => pay['userId'] == auth.user!.id,
@@ -861,7 +878,7 @@ String getPayStatus(Map<String, dynamic> expense, BuildContext context) {
   );
   debugPrint('payItem:::${payItem.toString()}');
   if (payItem != null) {
-    return 'You borrowed';
+    return 'you borrowed';
   }
   return 'not involved';
 }

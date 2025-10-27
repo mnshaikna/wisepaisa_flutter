@@ -8,6 +8,7 @@ import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/screen/create_expense_group_page.dart';
 import 'package:wisepaise/screen/create_expense_page.dart';
 import 'package:wisepaise/screen/expense_search_page.dart';
+import 'package:wisepaise/screen/group_balance_screen.dart';
 
 import '../models/group_model.dart';
 import '../models/type_model.dart';
@@ -167,9 +168,8 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                               () => Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder:
-                                      (context) => ExpenseChartScreen(
-                                        expenses: group.expenses,
-                                      ),
+                                      (context) =>
+                                          GroupBalanceScreen(group: groupMap),
                                 ),
                               ),
                           padding: const EdgeInsets.symmetric(
@@ -495,6 +495,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                         initialsRow(
                                           group.exGroupMembers,
                                           context,
+                                          showImage: true,
                                         ),
                                       if (group.exGroupShared &&
                                           group.exGroupMembers.length > 1)
@@ -779,6 +780,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                     group = GroupModel.fromJson(
                                                       resp.data,
                                                     );
+                                                    groupMap = resp.data;
                                                   });
                                                 }
                                               });
@@ -852,7 +854,10 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                             api.groupList.add(
                                                               group.toJson(),
                                                             );
-                                                            setState(() {});
+                                                            setState(() {
+                                                              groupMap =
+                                                                  updatedGroup;
+                                                            });
                                                           }
                                                           Navigator.of(
                                                             context,
@@ -934,7 +939,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                             ),
                                             subtitle: Text(
                                               groupMap['exGroupShared']
-                                                  ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
+                                                  ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)} ${payStatus == 'no balance' ? 'for yourself' : ''}'
                                                   : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
                                               style: TextStyle(fontSize: 12.5),
                                             ),
@@ -951,23 +956,30 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                         letterSpacing: 1.5,
                                                         color:
                                                             payStatus ==
-                                                                    'not involved'
+                                                                        'not involved' ||
+                                                                    payStatus ==
+                                                                        'no balance'
                                                                 ? Colors.grey
                                                                 : payStatus ==
                                                                     'You borrowed'
-                                                                ? Colors
-                                                                    .green
-                                                                    .shade100
-                                                                : Colors
-                                                                    .redAccent,
+                                                                ? Colors.red
+                                                                : Colors.green,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     )
                                                     : SizedBox.shrink(),
-                                                payStatus == 'not involved'
+                                                group.exGroupShared &&
+                                                    (payStatus == 'not involved' ||
+                                                        payStatus == 'no balance')
                                                     ? SizedBox.shrink()
                                                     : Text(
                                                       formatCurrency(
-                                                        expense['expenseAmount'],
+                                                        double.parse(
+                                                          getPaidAmount(
+                                                            expense,
+                                                          ),
+                                                        ),
                                                         context,
                                                       ),
                                                       style: TextStyle(
@@ -1026,7 +1038,9 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                   (thisGrp) => thisGrp['exGroupId'] == group.exGroupId,
                 );
                 api.groupList.add(group.toJson());
-                setState(() {});
+                setState(() {
+                  groupMap = updatedGroup;
+                });
               }
             },
             shape: RoundedRectangleBorder(
@@ -1037,5 +1051,22 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
         );
       },
     );
+  }
+
+  getPaidAmount(Map<String, dynamic> expense) {
+    AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+    List<dynamic> paidFor = expense['expensePaidTo'];
+
+    debugPrint('paidFor:::${paidFor.toString()}');
+    var itsme = paidFor.firstWhere(
+      (ele) => ele['userId'] == auth.user!.id,
+      orElse: () => {},
+    );
+
+    if (itsme.isEmpty) {
+      return expense['expenseAmount'].toStringAsFixed(2);
+    } else {
+      return (expense['expenseAmount'] / paidFor.length).toStringAsFixed(2);
+    }
   }
 }
