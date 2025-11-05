@@ -3,6 +3,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/providers/api_provider.dart';
+import 'package:wisepaise/screen/create_savings_goal_page.dart';
 
 import '../models/reminder_model.dart';
 import '../utils/toast.dart';
@@ -142,6 +143,23 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                                       (context) => CreateReminderPage(
                                         reminder: ReminderModel.empty(),
                                       ),
+                                ),
+                              ),
+                        ),
+
+                        SpeedDialChild(
+                          child: Icon(
+                            FontAwesomeIcons.piggyBank,
+                            size: 20.0,
+                            color: speedDialIconColor,
+                          ),
+                          label: 'Add Savings Goal',
+                          labelBackgroundColor: speedDialBgColor,
+                          labelStyle: TextStyle(color: speedDialIconColor),
+                          onTap:
+                              () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => CreateSavingsGoalPage(goal: {},),
                                 ),
                               ),
                         ),

@@ -21,25 +21,11 @@ class _AllExpensePageState extends State<AllExpensePage> {
           appBar: AppBar(centerTitle: true, title: Text('Expenses')),
           body:
               api.userExpenseList.isEmpty
-                  ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: buildCreateDataBox(
-                        context,
-                        "Start tracking your spending 📊\n\n➕ Add your first Expense",
-                        () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    CreateExpensePage(group: {}, expense: {}),
-                          ),
-                        ),
-                        LinearGradient(
-                          colors: [Color(0xFF56CCF2), Color(0xFF2F80ED)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
+                  ? Center(
+                    child: noDataWidget(
+                      'Expenses not found',
+                      'Create an Expense and track spends wisely',
+                      context,
                     ),
                   )
                   : SingleChildScrollView(
@@ -52,7 +38,8 @@ class _AllExpensePageState extends State<AllExpensePage> {
                       ),
                     ),
                   ),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: FloatingActionButton.extended(
+            icon: Icon(Icons.receipt_outlined),
             onPressed:
                 () => Navigator.of(context).push(
                   MaterialPageRoute(
@@ -61,10 +48,13 @@ class _AllExpensePageState extends State<AllExpensePage> {
                   ),
                 ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(12.0),
             ),
-
-            child: Icon(Icons.add),
+            extendedIconLabelSpacing: 15.0,
+            label: Text(
+              'Add Expenses',
+              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+            ),
           ),
         );
       },

@@ -18,7 +18,7 @@ class ExpenseChartScreen extends StatefulWidget {
 }
 
 class _ExpenseChartScreenState extends State<ExpenseChartScreen> {
-  ChartType selectedChart = ChartType.donut;
+  ChartType selectedChart = ChartType.bar;
   SpendFilter selectedFilter = SpendFilter.expense;
 
   final List<Color> chartColors = [
@@ -285,7 +285,7 @@ class ExpenseVerticalBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final sortedEntries =
         groupedData.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
+          /*..sort((a, b) => b.value.compareTo(a.value))*/;
     final maxValue = sortedEntries
         .map((e) => e.value)
         .fold(0.0, (a, b) => a > b ? a : b);
@@ -305,8 +305,7 @@ class ExpenseVerticalBarChart extends StatelessWidget {
       );
     });
 
-    return Container(
-      padding: const EdgeInsets.only(top: 25),
+    return SizedBox(
       height: MediaQuery.of(context).size.height / 1.25,
       child: BarChart(
         BarChartData(

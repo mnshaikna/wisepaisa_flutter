@@ -124,86 +124,90 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                SizedBox(height: 10.0),
-                                Card(
-                                  elevation: 2.0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              debugPrint('came here');
-                                              setState(() {
-                                                isExpense = true;
-                                                selectedCategory = null;
-                                                subCategoryValue = null;
-                                              });
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 14,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    isExpense
-                                                        ? Colors.green
-                                                        : Colors.transparent,
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  "Expense",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w600,
+                                if (group.isEmpty || !group['exGroupShared'])
+                                  SizedBox(height: 10.0),
+                                if (group.isEmpty || !group['exGroupShared'])
+                                  Card(
+                                    elevation: 2.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                debugPrint('came here');
+                                                setState(() {
+                                                  isExpense = true;
+                                                  selectedCategory = null;
+                                                  subCategoryValue = null;
+                                                });
+                                              },
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 14,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      isExpense
+                                                          ? Colors.green
+                                                          : Colors.transparent,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    "Expense",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                isExpense = false;
-                                                selectedCategory = null;
-                                                subCategoryValue = null;
-                                              });
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 14,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    !isExpense
-                                                        ? Colors.green
-                                                        : Colors.transparent,
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  "Income",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w600,
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  isExpense = false;
+                                                  selectedCategory = null;
+                                                  subCategoryValue = null;
+                                                });
+                                              },
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 14,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      !isExpense
+                                                          ? Colors.green
+                                                          : Colors.transparent,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    "Income",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
                                 const SizedBox(height: 16),
                                 TextField(
                                   controller: descController,
@@ -534,17 +538,8 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       ),
                                     )
                                     : GestureDetector(
-                                      onLongPress: () {
-                                        setState(() {
-                                          imageBytes = null;
-                                          expense['expenseReceiptURL'] = '';
-                                        });
-                                        Toasts.show(
-                                          context,
-                                          'Image removed',
-                                          type: ToastType.info,
-                                        );
-                                      },
+                                      onTap:
+                                          () => _showAttachmentOptions(context),
                                       child: Container(
                                         height: 250.0,
                                         width: double.infinity,
@@ -560,6 +555,13 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                         Brightness.light
                                                     ? Colors.black54
                                                     : Colors.white54,
+                                            style:
+                                                imageBytes != null ||
+                                                        expense['expenseReceiptURL']
+                                                            .toString()
+                                                            .isNotEmpty
+                                                    ? BorderStyle.none
+                                                    : BorderStyle.solid,
                                           ),
                                         ),
                                         child: ClipRRect(
@@ -792,7 +794,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                   if (imageBytes != null) {
                                     url = await uploadImage(
                                       imageBytes!,
-                                      Random().nextInt(1000000).toString(),
+                                      '${Random().nextInt(1000000)}',
                                       context,
                                     );
                                   }
@@ -880,7 +882,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     if (imageBytes != null) {
                                       url = await uploadImage(
                                         imageBytes!,
-                                        Random().nextInt(1000000).toString(),
+                                        '${Random().nextInt(1000000)}',
                                         context,
                                       );
                                     }
@@ -955,7 +957,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     if (imageBytes != null) {
                                       url = await uploadImage(
                                         imageBytes!,
-                                        Random().nextInt(1000000).toString(),
+                                        '${Random().nextInt(1000000)}',
                                         context,
                                       );
                                     }
@@ -1022,8 +1024,12 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                             ),
                             label: Text(
                               expense.isNotEmpty
-                                  ? 'Edit Expense'
-                                  : 'Add Expense',
+                                  ? isExpense
+                                      ? 'Edit Expense'
+                                      : "Edit Income"
+                                  : isExpense
+                                  ? 'Add Expense'
+                                  : 'Add Income',
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -1132,6 +1138,20 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                       setState(() {
                         imageBytes = bytes!;
                       });
+                    });
+                  },
+                ),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text("Remove Photo"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      imageBytes = null;
+                      expense['expenseReceiptURL'] = '';
                     });
                   },
                 ),

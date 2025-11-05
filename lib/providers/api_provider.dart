@@ -11,7 +11,8 @@ class ApiProvider extends ChangeNotifier {
   bool isAPILoading = false, isTimedOut = false;
   List<Map<String, dynamic>> groupList = [],
       expenseReminderList = [],
-      userExpenseList = [];
+      userExpenseList = [],
+      savingsGoalList = [];
 
   setLoading() {
     isAPILoading = true;
@@ -262,6 +263,53 @@ class ApiProvider extends ChangeNotifier {
   Future<Response> getUserById(BuildContext context, String userId) async {
     var finalUrl = '$baseUrl/users/get/userId/$userId';
     Response resp = await getHttp(context, finalUrl, 'GET');
+    notifyListeners();
+    return resp;
+  }
+
+  Future<Response> createGoal(
+    BuildContext context,
+    Map<String, dynamic> body,
+  ) async {
+    var finalUrl = '$baseUrl/savingsGoal/create';
+    Response resp = await getHttp(context, finalUrl, 'POST', requestBody: body);
+    notifyListeners();
+    return resp;
+  }
+
+  Future getUserGoals(String userId, BuildContext context) async {
+    var finalUrl = '$baseUrl/savingsGoal/user/$userId';
+    savingsGoalList = [];
+    try {
+      await getHttp(context, finalUrl, 'GET').then((Response resp) {
+        debugPrint('resp:::${resp.data}');
+        savingsGoalList = (resp.data as List).cast<Map<String, dynamic>>();
+      });
+    } catch (e) {
+      debugPrint('Error Occurred:::$e');
+    }
+    debugPrint('savingsGoalList Length:::${savingsGoalList.length}');
+    notifyListeners();
+  }
+
+  Future<Response> updateGoal(
+    BuildContext context,
+    Map<String, dynamic> body,
+  ) async {
+    var finalUrl = '$baseUrl/savingsGoal/update';
+    Response resp = await getHttp(context, finalUrl, 'PUT', requestBody: body);
+    savingsGoalList.removeWhere(
+      (exp) => exp['savingsGoalId'] == body['savingsGoalId'],
+    );
+    savingsGoalList.add(resp.data);
+    notifyListeners();
+    return resp;
+  }
+
+  Future<Response> deleteGoal(BuildContext context, String goalId) async {
+    var finalUrl = '$baseUrl/savingsGoal/$goalId';
+    Response resp = await getHttp(context, finalUrl, 'DELETE');
+    savingsGoalList.removeWhere((exp) => exp['savingsGoalId'] == goalId);
     notifyListeners();
     return resp;
   }

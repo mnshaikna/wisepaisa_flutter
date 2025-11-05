@@ -336,6 +336,8 @@ class _ProfilePageState extends State<ProfilePage> {
           return SingleChildScrollView(
             physics: BouncingScrollPhysics(),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 Column(
                   children: [
@@ -553,14 +555,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20.0),
-                SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: ElevatedButton.icon(
-                      onPressed:
-                          () => DialogUtils.showGenericDialog(
+                Column(
+                  children: [SizedBox(height: 20.0),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              () => DialogUtils.showGenericDialog(
                             title: DialogUtils.titleText('Sign Out?'),
                             message: const Text(
                               'Do you want to Signout?',
@@ -600,36 +603,36 @@ class _ProfilePageState extends State<ProfilePage> {
                             onCancel: () => Navigator.of(context).pop(),
                             context: context,
                           ),
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Sign Out'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 24,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 15.0,
-                          letterSpacing: 1.5,
-                          fontWeight: FontWeight.bold,
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Sign Out'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 24,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 15.0,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
 
-                SizedBox(height: 5.0),
-                SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: ElevatedButton.icon(
-                      onPressed:
-                          () => DialogUtils.showGenericDialog(
+                    SizedBox(height: 5.0),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              () => DialogUtils.showGenericDialog(
                             title: DialogUtils.titleText('Delete Account'),
                             message: const Text(
                               'User data will be deleted!!!\nDo you want to Delete your account?',
@@ -650,28 +653,29 @@ class _ProfilePageState extends State<ProfilePage> {
                             onConfirm: () => Navigator.of(context).pop(),
                             context: context,
                           ),
-                      icon: const Icon(FontAwesomeIcons.trashCan),
-                      label: const Text('Delete Account'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 24,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 15.0,
-                          letterSpacing: 1.5,
-                          fontWeight: FontWeight.bold,
+                          icon: const Icon(FontAwesomeIcons.trashCan),
+                          label: const Text('Delete Account'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 24,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 15.0,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
+                    const SizedBox(height: 20),],
+                )
               ],
             ),
           );

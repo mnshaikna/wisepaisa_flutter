@@ -32,6 +32,18 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "barcode",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/barcode-2.2.9",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "bidi",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/bidi-2.0.13",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",
@@ -122,6 +134,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "dots_indicator",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/dots_indicator-4.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "equatable",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/equatable-2.0.7",
       "packageUri": "lib/",
@@ -208,6 +226,36 @@
     {
       "name": "flutter_image_compress_web",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_image_compress_web-0.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_keyboard_visibility_linux",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_keyboard_visibility_macos",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_macos-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_keyboard_visibility_platform_interface",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_platform_interface-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_keyboard_visibility_temp_fork",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_temp_fork-0.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_keyboard_visibility_windows",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_windows-1.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -434,6 +482,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "introduction_screen",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/introduction_screen-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "json_annotation",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/json_annotation-4.9.0",
       "packageUri": "lib/",
@@ -460,6 +514,12 @@
     {
       "name": "lints",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/lints-5.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "lottie",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/lottie-3.3.1",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
@@ -554,6 +614,18 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "pdf",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/pdf-3.11.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "pdf_widget_wrapper",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/pdf_widget_wrapper-1.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "petitparser",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/petitparser-6.1.0",
       "packageUri": "lib/",
@@ -578,10 +650,46 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "printing",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/printing-5.14.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "provider",
       "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/provider-6.1.5+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "qr",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/qr-3.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "quick_actions",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/quick_actions-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "quick_actions_android",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/quick_actions_android-1.0.23",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "quick_actions_ios",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/quick_actions_ios-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "quick_actions_platform_interface",
+      "rootUri": "file:///Users/mohamedshaikna/.pub-cache/hosted/pub.dev/quick_actions_platform_interface-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "shimmer",
@@ -716,7 +824,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-10-27T09:12:48.547899Z",
+  "generated": "2025-11-05T08:41:55.480404Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///Users/mohamedshaikna/Android/flutter",

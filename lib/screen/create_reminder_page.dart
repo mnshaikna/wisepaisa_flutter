@@ -56,7 +56,6 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         widget.reminder.reminderDescription.isNotEmpty
             ? widget.reminder.reminderDescription
             : '';
-
     _amountController.text =
         widget.reminder.reminderAmount.isNotEmpty
             ? widget.reminder.reminderAmount
@@ -491,7 +490,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                     ],
                                   ),
                                 ),
-                                SwitchListTile.adaptive(
+                                /*SwitchListTile.adaptive(
                                   contentPadding: EdgeInsets.zero,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
@@ -509,7 +508,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   value: _isActive,
                                   onChanged:
                                       (v) => setState(() => _isActive = v),
-                                ),
+                                ),*/
                               ],
                             ),
                           ),

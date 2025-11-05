@@ -9,17 +9,21 @@ import 'package:provider/provider.dart';
 import 'package:wisepaise/models/type_model.dart';
 import 'package:wisepaise/utils/toast.dart';
 
+import '../models/reminder_model.dart';
 import '../providers/api_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../screen/create_expense_group_page.dart';
 import '../screen/create_expense_page.dart';
+import '../screen/create_reminder_page.dart';
+import '../screen/create_savings_goal_page.dart';
 import 'constants.dart';
 import 'dialog_utils.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:shimmer/shimmer.dart';
 
-void unfocusKeyboard() {
+unfocusKeyboard() {
   FocusManager.instance.primaryFocus?.unfocus();
 }
 
@@ -61,14 +65,15 @@ Material buildCreateDataBox(
     color: Colors.grey.shade100,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
     child: InkWell(
-      borderRadius: BorderRadius.circular(12.0),
+      borderRadius: BorderRadius.circular(8.0),
       onTap: onTapFunction,
       child: Ink(
         height: 125,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(8.0),
           gradient: gradients,
         ),
+        padding: EdgeInsets.all(5.0),
         child: Center(
           child: Text(
             title,
@@ -82,6 +87,94 @@ Material buildCreateDataBox(
           ),
         ),
       ),
+    ),
+  );
+}
+
+buildCreateReminder(BuildContext context, ApiProvider api) {
+  return buildCreateDataBox(
+    context,
+    addReminderMsg,
+    () async {
+      Map<String, dynamic>? data = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder:
+              (context) => CreateReminderPage(reminder: ReminderModel.empty()),
+        ),
+      );
+
+      if (data != null) {
+        api.expenseReminderList.add(data);
+        getActiveReminders(api).add(data);
+      }
+    },
+    LinearGradient(
+      colors: [Color(0xFFD66D75), Color(0xFFE29587)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  );
+}
+
+List<Map<String, dynamic>> getActiveReminders(ApiProvider api) {
+  return api.expenseReminderList.where((rem) {
+    return rem['reminderIsActive'] == true;
+  }).toList();
+}
+
+buildCreateGroup(BuildContext context) {
+  return buildCreateDataBox(
+    context,
+    addGroupMsg,
+    () {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CreateExpenseGroupPage(group: {}),
+        ),
+      );
+    },
+    LinearGradient(
+      colors: [Color(0xFFE8CBC0), Color(0xFF636FA4)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  );
+}
+
+buildCreateGoal(BuildContext context) {
+  return buildCreateDataBox(
+    context,
+    addGoalMsg,
+    () {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CreateSavingsGoalPage(goal: {}),
+        ),
+      );
+    },
+    LinearGradient(
+      colors: [Color(0xFFff9966), Color(0xFFff5e62)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  );
+}
+
+buildCreateExpense(BuildContext context) {
+  return buildCreateDataBox(
+    context,
+    addExpenseMsg,
+    () {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CreateExpensePage(group: {}, expense: {}),
+        ),
+      );
+    },
+    LinearGradient(
+      colors: [Color(0xFF642B73), Color(0xFFC6426E)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
     ),
   );
 }
@@ -781,7 +874,7 @@ Future<String> uploadImage(
       "file": MultipartFile.fromBytes(
         compressedBytes as List<int>,
         filename: fileName,
-        contentType: MediaType("image", "png"),
+        contentType: MediaType("image", "jpg"),
       ),
     });
 
@@ -798,7 +891,11 @@ Future<String> uploadImage(
         "Image successfully uploaded!",
         type: ToastType.success,
       );
-      imageUrl = response.data['url'];
+      imageUrl = response.data['url'] ?? '';
+      if (imageUrl.isEmpty) {
+        Toasts.show(context, "Image upload failed", type: ToastType.error);
+        api.removeLoading();
+      }
     } else {
       Toasts.show(context, "Image upload failed", type: ToastType.error);
     }

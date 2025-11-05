@@ -61,7 +61,8 @@ class _AllReminderPageState extends State<AllReminderPage>
       builder: (_, api, __) {
         return Scaffold(
           appBar: AppBar(centerTitle: true, title: Text('Expense Reminders')),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: FloatingActionButton.extended(
+            icon: Icon(Icons.alarm),
             onPressed:
                 () => Navigator.of(context).push(
                   MaterialPageRoute(
@@ -71,68 +72,80 @@ class _AllReminderPageState extends State<AllReminderPage>
                   ),
                 ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(12.0),
             ),
-            child: Icon(Icons.add),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              physics: BouncingScrollPhysics(),
+            extendedIconLabelSpacing: 15.0,
 
-              children: [
-                getActiveReminders(api).isEmpty
-                    ? SizedBox.shrink()
-                    : Text(
-                      'Active Reminders',
-                      style: TextStyle(
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17.5,
-                      ),
-                    ),
-                SizedBox(height: 10.0),
-                getActiveReminders(api).isEmpty
-                    ? SizedBox.shrink()
-                    : ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: getActiveReminders(api).length,
-                      itemBuilder: (context, index) {
-                        Map<String, dynamic> thisRem = getActiveReminders(
-                          api,
-                        ).elementAt(index);
-                        return buildReminderCard(thisRem, isGlow: true);
-                      },
-                    ),
-                SizedBox(height: 10.0),
-                getInactiveReminders(api).isEmpty
-                    ? SizedBox.shrink()
-                    : Text(
-                      'Inactive Reminders',
-                      style: TextStyle(
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17.5,
-                      ),
-                    ),
-                SizedBox(height: 10.0),
-                getInactiveReminders(api).isEmpty
-                    ? SizedBox.shrink()
-                    : ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: getInactiveReminders(api).length,
-                      itemBuilder: (context, index) {
-                        Map<String, dynamic> thisRem = getInactiveReminders(
-                          api,
-                        ).elementAt(index);
-                        return buildReminderCard(thisRem);
-                      },
-                    ),
-              ],
+            label: Text(
+              'Add Reminders',
+              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
             ),
           ),
+          body:
+              api.expenseReminderList.isEmpty
+                  ? Center(
+                    child: noDataWidget(
+                      'Reminders not found',
+                      'Create a Reminder and never miss a Payment',
+                      context,
+                    ),
+                  )
+                  : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListView(
+                      physics: BouncingScrollPhysics(),
+
+                      children: [
+                        getActiveReminders(api).isEmpty
+                            ? SizedBox.shrink()
+                            : Text(
+                              'Active Reminders',
+                              style: TextStyle(
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17.5,
+                              ),
+                            ),
+                        SizedBox(height: 10.0),
+                        getActiveReminders(api).isEmpty
+                            ? SizedBox.shrink()
+                            : ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: getActiveReminders(api).length,
+                              itemBuilder: (context, index) {
+                                Map<String, dynamic> thisRem =
+                                    getActiveReminders(api).elementAt(index);
+                                return buildReminderCard(thisRem, isGlow: true);
+                              },
+                            ),
+                        SizedBox(height: 10.0),
+                        getInactiveReminders(api).isEmpty
+                            ? SizedBox.shrink()
+                            : Text(
+                              'Inactive Reminders',
+                              style: TextStyle(
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17.5,
+                              ),
+                            ),
+                        SizedBox(height: 10.0),
+                        getInactiveReminders(api).isEmpty
+                            ? SizedBox.shrink()
+                            : ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: getInactiveReminders(api).length,
+                              itemBuilder: (context, index) {
+                                Map<String, dynamic> thisRem =
+                                    getInactiveReminders(api).elementAt(index);
+                                return buildReminderCard(thisRem);
+                              },
+                            ),
+                      ],
+                    ),
+                  ),
         );
       },
     );

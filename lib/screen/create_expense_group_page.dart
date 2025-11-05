@@ -50,6 +50,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
   void initState() {
     super.initState();
     if (group.isNotEmpty) {
+      debugPrint('group:::$group');
       groupNameController.text = group['exGroupName'];
       groupDescController.text = group['exGroupDesc'];
       selectedGroupTypeIndex = int.tryParse(group['exGroupType']);
@@ -118,17 +119,8 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                       ),
                                     )
                                     : GestureDetector(
-                                      onLongPress: () {
-                                        setState(() {
-                                          imageBytes = null;
-                                          group['exGroupImageURL'] = '';
-                                        });
-                                        Toasts.show(
-                                          context,
-                                          'Image removed',
-                                          type: ToastType.info,
-                                        );
-                                      },
+                                      onTap:
+                                          () => _showAttachmentOptions(context),
                                       child: Container(
                                         height: 60.0,
                                         width: 60.0,
@@ -482,7 +474,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                               if (imageBytes != null) {
                                 url = await uploadImage(
                                   imageBytes!,
-                                  Random().nextInt(1000000).toString(),
+                                  '${Random().nextInt(1000000)}',
                                   context,
                                 );
                               }
@@ -791,6 +783,20 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                       });
                     });
                     // open gallery picker
+                  },
+                ),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text("Remove Photo"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      imageBytes = null;
+                      group['exGroupImageURL'] = '';
+                    });
                   },
                 ),
               ],

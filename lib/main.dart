@@ -5,21 +5,32 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_actions/quick_actions.dart';
+import 'package:shimmer/main.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/connectivity_provider.dart';
 import 'package:wisepaise/providers/notification_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
+import 'package:wisepaise/screen/create_expense_group_page.dart';
+import 'package:wisepaise/screen/create_expense_page.dart';
+import 'package:wisepaise/screen/create_reminder_page.dart';
+import 'package:wisepaise/screen/intro_screen.dart';
 import 'package:wisepaise/screen/login_page.dart';
 import 'package:wisepaise/screen/home_page.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wisepaise/screen/splash_page.dart';
 
+import 'models/reminder_model.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Hive.initFlutter();
   await Hive.openBox('settings');
+  var box = await Hive.openBox('appBox');
+
+  bool hasSeenIntro = box.get('hasSeenIntro', defaultValue: false);
 
   runApp(
     MultiProvider(
@@ -30,13 +41,15 @@ void main() async {
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
         ChangeNotifierProvider(create: (context) => ConnectivityProvider()),
       ],
-      child: const MyApp(),
+      child: MyApp(hasSeenIntro: hasSeenIntro),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final bool hasSeenIntro;
+
+  const MyApp({super.key, required this.hasSeenIntro});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -48,11 +61,76 @@ class _MyAppState extends State<MyApp> {
   bool _checking = true;
   bool? _previousConnection;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final QuickActions quickActions = const QuickActions();
+  String shortcut = 'no action set';
 
   @override
   void initState() {
     super.initState();
     _initGoogleSignIn();
+    quickActions.initialize((String? shortcutType) {
+      setState(() {
+        shortcut = shortcutType ?? 'none';
+      });
+
+      if (shortcutType == null) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final auth = Provider.of<AuthProvider>(context, listen: false);
+        final isLoggedIn = await auth.isUserLoggedIn();
+
+        if (!isLoggedIn) {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+          );
+          return;
+        }
+
+        switch (shortcutType) {
+          case 'add_expense':
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => CreateExpensePage(expense: {}, group: {}),
+              ),
+            );
+            break;
+          case 'add_reminder':
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        CreateReminderPage(reminder: ReminderModel.empty()),
+              ),
+            );
+            break;
+          case 'create_group':
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => CreateExpenseGroupPage(group: {}),
+              ),
+            );
+            break;
+        }
+      });
+    });
+
+    quickActions.setShortcutItems(<ShortcutItem>[
+      const ShortcutItem(
+        type: 'add_expense',
+        localizedTitle: 'Create an Expense Record',
+        icon: 'receipt',
+      ),
+      const ShortcutItem(
+        type: 'add_reminder',
+        localizedTitle: 'Create an Expense Reminder',
+        icon: 'alarm',
+      ),
+      const ShortcutItem(
+        type: 'create_group',
+        localizedTitle: 'Create an Expense Group',
+        icon: 'people',
+      ),
+    ]);
   }
 
   Future<void> _initGoogleSignIn() async {
@@ -86,7 +164,8 @@ class _MyAppState extends State<MyApp> {
 
           if (_previousConnection == false && isConnected) {
             final auth = Provider.of<AuthProvider>(context, listen: false);
-            final isLoggedIn = await auth.isUserLoggedIn(); // <-- new method (see below)
+            final isLoggedIn =
+                await auth.isUserLoggedIn(); // <-- new method (see below)
 
             if (isLoggedIn) {
               navigatorKey.currentState?.pushReplacement(
@@ -99,7 +178,6 @@ class _MyAppState extends State<MyApp> {
             }
           }
 
-
           _previousConnection = isConnected;
         });
 
@@ -109,8 +187,9 @@ class _MyAppState extends State<MyApp> {
           themeMode: settings.themeMode,
           // 🌞 Light theme
           theme: ThemeData(
+            scaffoldBackgroundColor: Colors.white,
             useMaterial3: true,
-            fontFamily: GoogleFonts.rubik().fontFamily,
+            fontFamily: GoogleFonts.karla().fontFamily,
             brightness: Brightness.light,
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
@@ -120,8 +199,9 @@ class _MyAppState extends State<MyApp> {
 
           // 🌙 Dark theme
           darkTheme: ThemeData(
+            scaffoldBackgroundColor: Colors.black,
             useMaterial3: true,
-            fontFamily: GoogleFonts.rubik().fontFamily,
+            fontFamily: GoogleFonts.karla().fontFamily,
             brightness: Brightness.dark,
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
@@ -129,7 +209,9 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           home:
-              _checking
+              !widget.hasSeenIntro
+                  ? IntroScreen()
+                  : _checking
                   ? SplashPage(conn: false)
                   : StreamBuilder<GoogleSignInAccount?>(
                     stream: _googleSignIn.onCurrentUserChanged,

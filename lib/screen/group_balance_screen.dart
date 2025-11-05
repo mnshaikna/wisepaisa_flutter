@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/providers/api_provider.dart';
-import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/utils/utils.dart';
 
 class GroupBalanceScreen extends StatefulWidget {
@@ -77,6 +76,7 @@ class _GroupBalanceScreenState extends State<GroupBalanceScreen> {
                           debugPrint('key:::$key');
                           Map<String, dynamic> thisUser = users.firstWhere(
                             (ele) => ele['userId'] == key,
+                            orElse: () => {},
                           );
                           debugPrint('thisUser:::$thisUser');
 
@@ -124,11 +124,13 @@ class _GroupBalanceScreenState extends State<GroupBalanceScreen> {
                                     Map<String, dynamic> fromUserMap = users
                                         .firstWhere(
                                           (ele) => ele['userId'] == fromUser,
+                                          orElse: () => {},
                                         );
 
                                     Map<String, dynamic> toUserMap = users
                                         .firstWhere(
                                           (ele) => ele['userId'] == toUser,
+                                          orElse: () => {},
                                         );
 
                                     return ListTile(

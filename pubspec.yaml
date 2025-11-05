@@ -55,7 +55,12 @@ dependencies:
   slide_to_act: ^2.0.2
   shimmer: ^3.0.0
   math_expressions: ^2.3.1
-  flutter_launcher_icons: "^0.13.1"
+  flutter_launcher_icons: ^0.13.1
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  quick_actions: ^1.1.0
+  introduction_screen: ^4.0.0
+  lottie: ^3.3.1
 
 dependency_overrides:
   vector_math: ^2.1.4
@@ -89,6 +94,7 @@ flutter:
     - assets/logos/
     - assets/images/
     - assets/
+    - assets/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -124,16 +130,16 @@ flutter_native_splash:
   color: "#FFFFFF"
   color_dark: "#000000"
 
-  image: assets/logos/logo_light_splash.png
-  image_dark: assets/logos/logo_dark_splash.png
+  image: "assets/logos/logo_light_splash.png"
+  image_dark: "assets/logos/logo_dark_splash.png"
 
   # Improve image fitting/positioning
   ios_content_mode: scaleAspectFit
   android_gravity: center
 
   android_12:
-    image: assets/logos/logo_light_splash.png
-    image_dark: assets/logos/logo_dark_splash.png
+    image: "assets/logos/logo_light_splash.png"
+    image_dark: "assets/logos/logo_dark_splash.png"
     icon_background_color: "#FFFFFF"
     icon_background_color_dark: "#000000"
 

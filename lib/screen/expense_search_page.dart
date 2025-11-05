@@ -1,13 +1,18 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/utils/utils.dart';
 import '../models/group_model.dart';
 import '../models/type_model.dart';
 import '../utils/constants.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/print_share_pdf.dart';
 import 'create_expense_page.dart';
 
 class ExpenseSearchPage extends StatefulWidget {
@@ -525,146 +530,183 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
           ),
         ),
       ),
-      body:
-          getResultList().isEmpty
-              ? Center(
-                child: noDataWidget(
-                  'No Matching Results',
-                  'Change the filter criteria to view data',
-                  context,
-                ),
-              )
-              : ListView(
-                padding: EdgeInsets.all(5.0),
-                physics: BouncingScrollPhysics(),
-                children:
-                    getResultList().map((expense) {
-                      String payStatus = getPayStatus(expense, context);
-                      debugPrint('payStatus:::$payStatus');
-                      return ListTile(
-                        onTap: () {
-                          DialogUtils.showGenericDialog(
-                            context: context,
-                            showCancel: true,
-                            onConfirm: () {
-                              Navigator.pop(context);
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => CreateExpensePage(
-                                        group: {},
-                                        expense: expense,
-                                      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          unfocusKeyboard();
+          Uint8List pdfBytes = await generateProfessionalGroupPdf(
+            group,
+            context,
+            expenses: getResultList(),
+          );
+
+          await Printing.sharePdf(
+            bytes: pdfBytes,
+            filename: '${group.exGroupName}_report.pdf',
+          );
+        },
+        icon: Icon(FontAwesomeIcons.share),
+        extendedIconLabelSpacing: 15.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        label: Text(
+          'Export Report',
+          style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Consumer<ApiProvider>(
+        builder: (_, api, __) {
+          return Stack(
+            children: [
+              getResultList().isEmpty
+                  ? Center(
+                    child: noDataWidget(
+                      'No Matching Results',
+                      'Change the filter criteria to view data',
+                      context,
+                    ),
+                  )
+                  : ListView(
+                    padding: EdgeInsets.all(5.0),
+                    physics: BouncingScrollPhysics(),
+                    children:
+                        getResultList().map((expense) {
+                          String payStatus = getPayStatus(expense, context);
+                          debugPrint('payStatus:::$payStatus');
+                          return ListTile(
+                            onTap: () {
+                              DialogUtils.showGenericDialog(
+                                context: context,
+                                showCancel: true,
+                                onConfirm: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => CreateExpensePage(
+                                            group: {},
+                                            expense: expense,
+                                          ),
+                                    ),
+                                  );
+                                },
+                                onCancel: () => Navigator.pop(context),
+
+                                confirmColor: Colors.green,
+                                cancelText: 'Cancel',
+                                confirmText: 'Edit',
+                                title: SizedBox.shrink(),
+                                message: SizedBox(
+                                  child: expenseCard(context, expense),
                                 ),
                               );
                             },
-                            onCancel: () => Navigator.pop(context),
-
-                            confirmColor: Colors.green,
-                            cancelText: 'Cancel',
-                            confirmText: 'Edit',
-                            title: SizedBox.shrink(),
-                            message: SizedBox(
-                              child: expenseCard(context, expense),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
-                          );
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        splashColor: Colors.grey.shade100,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 5.0),
-                        leading: Card(
-                          elevation: 0.0,
-                          margin: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: Container(
-                            padding: EdgeInsets.all(4.0),
-                            decoration: BoxDecoration(shape: BoxShape.circle),
-                            height: 65.0,
-                            width: 65.0,
-                            child: Column(
+                            splashColor: Colors.grey.shade100,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 5.0,
+                            ),
+                            leading: Card(
+                              elevation: 0.0,
+                              margin: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.all(4.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                ),
+                                height: 65.0,
+                                width: 65.0,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      getCategoryIcon(
+                                        expense['expenseCategory'],
+                                        expense['expenseSpendType'],
+                                      ),
+                                      size: 15.0,
+                                    ),
+                                    Divider(
+                                      endIndent: 10.0,
+                                      indent: 10.0,
+                                      thickness: 0.5,
+                                    ),
+                                    Text(
+                                      '${DateTime.parse(expense['expenseDate']).day.toString()} ${month.elementAt(int.parse(DateTime.parse(expense['expenseDate']).month.toString()) - 1).toUpperCase()}',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              expense['expenseTitle'],
+                              style: TextStyle(fontSize: 17.5),
+                            ),
+                            subtitle: Text(
+                              group.exGroupShared
+                                  ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
+                                  : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
+                              style: TextStyle(fontSize: 12.5),
+                            ),
+                            trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Icon(
-                                  getCategoryIcon(
-                                    expense['expenseCategory'],
-                                    expense['expenseSpendType'],
-                                  ),
-                                  size: 15.0,
-                                ),
-                                Divider(
-                                  endIndent: 10.0,
-                                  indent: 10.0,
-                                  thickness: 0.5,
-                                ),
-                                Text(
-                                  '${DateTime.parse(expense['expenseDate']).day.toString()} ${month.elementAt(int.parse(DateTime.parse(expense['expenseDate']).month.toString()) - 1).toUpperCase()}',
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                group.exGroupShared
+                                    ? Text(
+                                      payStatus,
+                                      style: TextStyle(
+                                        letterSpacing: 1.5,
+                                        color:
+                                            payStatus == 'not involved' ||
+                                                    payStatus == 'no balance'
+                                                ? Colors.grey
+                                                : payStatus == 'you borrowed'
+                                                ? Colors.red
+                                                : Colors.green,
+                                      ),
+                                    )
+                                    : SizedBox.shrink(),
+                                group.exGroupShared &&
+                                        (payStatus == 'not involved' ||
+                                            payStatus == 'no balance')
+                                    ? SizedBox.shrink()
+                                    : Text(
+                                      formatCurrency(
+                                        expense['expenseAmount'],
+                                        context,
+                                      ),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.5,
+                                        fontSize: 13.5,
+                                        color:
+                                            expense['expenseSpendType'] ==
+                                                    'income'
+                                                ? Colors.green
+                                                : Colors.red,
+                                      ),
+                                    ),
                               ],
                             ),
-                          ),
-                        ),
-                        title: Text(
-                          expense['expenseTitle'],
-                          style: TextStyle(fontSize: 17.5),
-                        ),
-                        subtitle: Text(
-                          group.exGroupShared
-                              ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
-                              : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
-                          style: TextStyle(fontSize: 12.5),
-                        ),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            group.exGroupShared
-                                ? Text(
-                                  payStatus,
-                                  style: TextStyle(
-                                    letterSpacing: 1.5,
-                                    color:
-                                        payStatus == 'not involved' ||
-                                                payStatus == 'no balance'
-                                            ? Colors.grey
-                                            : payStatus == 'you borrowed'
-                                            ? Colors.red
-                                            : Colors.green,
-                                  ),
-                                )
-                                : SizedBox.shrink(),
-                            group.exGroupShared &&
-                                    (payStatus == 'not involved' ||
-                                        payStatus == 'no balance')
-                                ? SizedBox.shrink()
-                                : Text(
-                                  formatCurrency(
-                                    expense['expenseAmount'],
-                                    context,
-                                  ),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
-                                    fontSize: 13.5,
-                                    color:
-                                        expense['expenseSpendType'] == 'income'
-                                            ? Colors.green
-                                            : Colors.red,
-                                  ),
-                                ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-              ),
+                          );
+                        }).toList(),
+                  ),
+              if (api.isAPILoading) buildLoadingContainer(context: context),
+            ],
+          );
+        },
+      ),
     );
   }
 

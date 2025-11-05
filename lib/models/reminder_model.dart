@@ -41,11 +41,11 @@ class ReminderModel {
       '',
       '',
       '',
-      '0',
+      '',
       'expense',
       UserModel.empty(),
       false,
-      false,
+      true,
     );
   }
 
