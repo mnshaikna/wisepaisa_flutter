@@ -12,12 +12,9 @@ import 'package:wisepaise/providers/notification_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
 import 'package:wisepaise/screen/all_expense_page.dart';
 import 'package:wisepaise/screen/all_savings_goals_page.dart';
-import 'package:wisepaise/screen/create_expense_group_page.dart';
-import 'package:wisepaise/screen/create_expense_page.dart';
 import 'package:wisepaise/screen/expense_group_details_page.dart';
 import 'package:wisepaise/screen/create_reminder_page.dart';
 import 'package:wisepaise/screen/savings_goal_details_page.dart';
-import 'package:wisepaise/utils/constants.dart';
 import 'package:wisepaise/utils/dialog_utils.dart';
 import 'package:wisepaise/utils/utils.dart';
 
@@ -27,7 +24,6 @@ import '../providers/auth_provider.dart';
 import '../utils/toast.dart';
 import 'all_group_page.dart';
 import 'all_reminder_page.dart';
-import 'create_savings_goal_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -84,6 +80,7 @@ class _DashboardPageState extends State<DashboardPage>
           await api.getReminders(auth.user!.id, context);
           await api.getUserExpenses(auth.user!.id, context);
           await api.getUserGoals(auth.user!.id, context);
+          await api.getGoogleUsers(context);
         }
       } catch (e) {
         debugPrint("Error in API: $e");
@@ -149,10 +146,10 @@ class _DashboardPageState extends State<DashboardPage>
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           appBar:
-          api.groupList.isEmpty &&
-              api.expenseReminderList.isEmpty &&
-              api.userExpenseList.isEmpty &&
-              api.savingsGoalList.isEmpty
+              api.groupList.isEmpty &&
+                      api.expenseReminderList.isEmpty &&
+                      api.userExpenseList.isEmpty &&
+                      api.savingsGoalList.isEmpty
                   ? null
                   : AppBar(
                     backgroundColor: theme.scaffoldBackgroundColor,
@@ -477,41 +474,36 @@ class _DashboardPageState extends State<DashboardPage>
                                           ),
                                     ),
 
-                                    if(api.groupList.isNotEmpty)ElevatedButton.icon(
-                                      onPressed:
+                                    if (api.groupList.isNotEmpty)
+                                      ElevatedButton.icon(
+                                        onPressed: () async {
+                                          await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) => AllGroupPage(),
+                                            ),
+                                          );
+                                          // Rebuild after coming back
+                                          setState(() {});
+                                        },
 
-
-                                               () async {
-                                                await Navigator.of(
-                                                  context,
-                                                ).push(
-                                                  MaterialPageRoute(
-                                                    builder:
-                                                        (context) =>
-                                                            AllGroupPage(),
-                                                  ),
-                                                );
-                                                // Rebuild after coming back
-                                                setState(() {});
-                                              },
-
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12.0,
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
+                                            ),
+                                          ),
+                                          elevation: 0.0,
+                                          animationDuration: Duration(
+                                            milliseconds: 500,
                                           ),
                                         ),
-                                        elevation: 0.0,
-                                        animationDuration: Duration(
-                                          milliseconds: 500,
+                                        label: Text(
+                                          'View all',
+                                          style: TextStyle(letterSpacing: 1.5),
                                         ),
+                                        icon: Icon(Icons.arrow_forward),
                                       ),
-                                      label: Text(
-                                        'View all',
-                                        style: TextStyle(letterSpacing: 1.5),
-                                      ),
-                                      icon: Icon(Icons.arrow_forward),
-                                    ),
                                   ],
                                 ),
                               ),

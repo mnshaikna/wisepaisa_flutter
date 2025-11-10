@@ -6,7 +6,6 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_actions/quick_actions.dart';
-import 'package:shimmer/main.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/connectivity_provider.dart';
 import 'package:wisepaise/providers/notification_provider.dart';
@@ -185,6 +184,14 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           navigatorKey: navigatorKey,
           themeMode: settings.themeMode,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(0.85)),
+              child: child!,
+            );
+          },
           // 🌞 Light theme
           theme: ThemeData(
             scaffoldBackgroundColor: Colors.white,

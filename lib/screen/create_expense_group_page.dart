@@ -11,7 +11,7 @@ import 'package:wisepaise/models/group_model.dart';
 import 'package:wisepaise/models/user_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
-
+import 'package:wisepaise/screen/add_members_screen.dart';
 import '../models/type_model.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/toast.dart';
@@ -40,7 +40,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
   int? selectedGroupTypeIndex;
   double verticalGap = 15.0;
   UserModel thisUser = UserModel.empty();
-  List<dynamic> groupMembers = [];
+  List<Map<String, dynamic>> groupMembers = [];
   TextEditingController memberController = TextEditingController(),
       groupNameController = TextEditingController(),
       groupDescController = TextEditingController();
@@ -331,7 +331,14 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                         context,
                                         "Share Expenses with friends?\n\n➕ Add members to this group",
                                         () {
-                                          showAddMembersDialog(context);
+                                          //showAddMembersDialog(context);
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      AddMembersScreen(),
+                                            ),
+                                          );
                                         },
                                         LinearGradient(
                                           colors: [
@@ -361,6 +368,9 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                             spacing: 10.0,
                                             children:
                                                 groupMembers.map<Widget>((e) {
+                                                    debugPrint(
+                                                      'e:::${e.toString()}',
+                                                    );
                                                     return GestureDetector(
                                                       onLongPress: () {
                                                         if (group.isNotEmpty) {
@@ -371,9 +381,16 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                                 ToastType.info,
                                                           );
                                                         } else {
+                                                          AuthProvider auth =
+                                                              Provider.of<
+                                                                AuthProvider
+                                                              >(
+                                                                context,
+                                                                listen: false,
+                                                              );
                                                           setState(() {
                                                             if (e['userId'] ==
-                                                                group['exGroupOwnerId']['userId']) {
+                                                                auth.user!.id) {
                                                               Toasts.show(
                                                                 context,
                                                                 'Owner cannot be removed',
@@ -382,8 +399,17 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                                         .info,
                                                               );
                                                             } else {
+                                                              int
+                                                              ind = groupMembers
+                                                                  .indexWhere(
+                                                                    (ele) =>
+                                                                        ele['userId'] ==
+                                                                        e['userId'],
+                                                                  );
                                                               groupMembers
-                                                                  .remove(e);
+                                                                  .removeAt(
+                                                                    ind,
+                                                                  );
                                                               Toasts.show(
                                                                 context,
                                                                 'Member ${e['userName']} removed',
@@ -403,18 +429,14 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                               maxRadius: 30.0,
                                                               backgroundImage:
                                                                   NetworkImage(
-                                                                    e is Map
-                                                                        ? e['userImageUrl']
-                                                                        : e.userImageUrl,
+                                                                    e['userImageUrl'],
                                                                   ),
                                                             ),
                                                             SizedBox(
                                                               height: 5.0,
                                                             ),
                                                             Text(
-                                                              e is Map
-                                                                  ? e['userName']
-                                                                  : e.userName,
+                                                              e['userName'],
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
@@ -431,10 +453,58 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                   }).toList()
                                                   ..add(
                                                     GestureDetector(
-                                                      onTap: () {
-                                                        showAddMembersDialog(
+                                                      onTap: () async {
+                                                        /*showAddMembersDialog(
                                                           context,
-                                                        );
+                                                        );*/
+                                                        List<
+                                                          Map<String, dynamic>
+                                                        >
+                                                        selectedList =
+                                                            await Navigator.of(
+                                                              context,
+                                                            ).push(
+                                                              MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        AddMembersScreen(),
+                                                              ),
+                                                            ) ??
+                                                            [];
+
+                                                        if (selectedList
+                                                            .isNotEmpty) {
+                                                          setState(() {
+                                                            groupMembers.addAll(
+                                                              selectedList,
+                                                            );
+                                                          });
+                                                          groupMembers =
+                                                              groupMembers
+                                                                  .fold<
+                                                                    Map<
+                                                                      String,
+                                                                      Map<
+                                                                        String,
+                                                                        dynamic
+                                                                      >
+                                                                    >
+                                                                  >(
+                                                                    {},
+                                                                    (
+                                                                      map,
+                                                                      item,
+                                                                    ) =>
+                                                                        map
+                                                                          ..[item['userId']] =
+                                                                              item,
+                                                                  )
+                                                                  .values
+                                                                  .toList();
+                                                          debugPrint(
+                                                            'selectedList:::${selectedList.toString()}',
+                                                          );
+                                                        }
                                                       },
                                                       child: Column(
                                                         children: [
@@ -858,7 +928,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                       icon: Icon(Icons.check),
                       onPressed: () {
                         setState(() {
-                          groupMembers.add(thisUser);
+                          groupMembers.add(thisUser.toJson());
                         });
                         unfocusKeyboard();
                         Navigator.of(context).pop();

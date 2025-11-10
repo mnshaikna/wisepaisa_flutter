@@ -9,7 +9,11 @@ import 'package:wisepaise/utils/utils.dart';
 
 class AuthProvider extends ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'https://www.googleapis.com/auth/userinfo.profile'],
+    scopes: [
+      'email',
+      /*'https://www.googleapis.com/auth/userinfo.profile',*/
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
   );
 
   GoogleSignInAccount? user;

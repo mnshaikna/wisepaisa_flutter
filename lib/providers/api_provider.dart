@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 
+import '../models/user_model.dart';
 import '../utils/constants.dart';
 import '../utils/toast.dart';
+import 'auth_provider.dart';
 
 class ApiProvider extends ChangeNotifier {
   final dio = Dio();
@@ -12,7 +16,10 @@ class ApiProvider extends ChangeNotifier {
   List<Map<String, dynamic>> groupList = [],
       expenseReminderList = [],
       userExpenseList = [],
-      savingsGoalList = [];
+      savingsGoalList = [],
+      contactsWithEmail = [],
+      allUsers = [],
+      showContactsList = [];
 
   setLoading() {
     isAPILoading = true;
@@ -267,6 +274,13 @@ class ApiProvider extends ChangeNotifier {
     return resp;
   }
 
+  Future<Response> getAllUsers(BuildContext context) async {
+    var finalUrl = '$baseUrl/users/all';
+    Response resp = await getHttp(context, finalUrl, 'GET');
+    notifyListeners();
+    return resp;
+  }
+
   Future<Response> createGoal(
     BuildContext context,
     Map<String, dynamic> body,
@@ -312,5 +326,115 @@ class ApiProvider extends ChangeNotifier {
     savingsGoalList.removeWhere((exp) => exp['savingsGoalId'] == goalId);
     notifyListeners();
     return resp;
+  }
+
+  getGoogleUsers(BuildContext context) async {
+    AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+
+    setLoading();
+    try {
+      await getContacts(context).then((List<Map<String, dynamic>> list) async {
+        contactsWithEmail = list.toList();
+        await getAllUsers(context).then((Response resp) {
+          if (resp.statusCode == HttpStatus.ok) {
+            allUsers =
+                (resp.data as List<dynamic>)
+                    .map((e) => e as Map<String, dynamic>)
+                    .toList();
+            if (allUsers.isEmpty || contactsWithEmail.isEmpty) {
+              showContactsList = [];
+            } else {
+              for (Map<String, dynamic> googleContact in contactsWithEmail) {
+                String googleEmail = googleContact['email'];
+                if (allUsers.any((ele) => ele['userEmail'] == googleEmail)) {
+                  Map<String, dynamic> dbUser = allUsers.firstWhere(
+                    (ele) => ele['userEmail'] == googleEmail,
+                    orElse: () => {},
+                  );
+                  showContactsList.add(
+                    UserModel(
+                      userId: dbUser['userId'],
+                      userName: dbUser['userName'],
+                      userEmail: dbUser['userEmail'],
+                      userImageUrl: dbUser['userImageUrl'],
+                      userCreatedOn: dbUser['userCreatedOn'],
+                    ).toJson(),
+                  );
+                }
+              }
+            }
+            showContactsList.removeWhere(
+              (ele) => ele['userId'] == auth.user!.id,
+            );
+          }
+        });
+      });
+      removeLoading();
+    } catch (e) {
+      debugPrint(e.toString());
+      removeLoading();
+      Toasts.show(context, 'Error adding members', type: ToastType.error);
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getContacts(BuildContext context) async {
+    Dio dio = Dio();
+    AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+    final header = await auth.user!.authHeaders;
+    List<Map<String, dynamic>> allContacts = [];
+    String? nextPageToken;
+
+    do {
+      final url =
+          '$googleContactHost$googleContactPath'
+          '${nextPageToken != null ? '&pageToken=$nextPageToken' : ''}';
+      final response = await dio.request(
+        url,
+        options: Options(headers: header),
+      );
+
+      if (response.statusCode != 200) {
+        debugPrint('Error fetching contacts: ${response.data}');
+        break;
+      }
+
+      final data = response.data;
+
+      final connections = data['connections'] as List<dynamic>? ?? [];
+
+      // Filter only contacts with email
+      final contactsWithEmail =
+          connections
+              .where(
+                (p) =>
+                    p['emailAddresses'] != null &&
+                    p['emailAddresses'][0]['value']
+                        .toString()
+                        .toLowerCase()
+                        .contains('gmail'),
+              )
+              .map((p) {
+                debugPrint(p.toString());
+                return {
+                  'userName':
+                      (p['names'] != null)
+                          ? p['names'][0]['displayName']
+                          : 'No Name',
+                  'email': p['emailAddresses'][0]['value'],
+                  'userImageUrl':
+                      (p['photos'] != null) ? p['photos'][0]['url'] : null,
+                };
+              })
+              .toList();
+
+      allContacts.addAll(contactsWithEmail);
+
+      // Get next page token
+      nextPageToken = data['nextPageToken'];
+    } while (nextPageToken != null);
+
+    debugPrint('✅ Total contacts fetched: ${allContacts.length}');
+    return Future.value(allContacts);
   }
 }

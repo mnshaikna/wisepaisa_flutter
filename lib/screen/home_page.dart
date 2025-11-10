@@ -97,7 +97,10 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                           ),
                           label: 'Add Expenses',
                           labelBackgroundColor: speedDialBgColor,
-                          labelStyle: TextStyle(color: speedDialIconColor),
+                          labelStyle: TextStyle(
+                            color: speedDialIconColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                           onTap:
                               () => Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -117,7 +120,10 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                           ),
                           label: 'Create Expense Group',
                           labelBackgroundColor: speedDialBgColor,
-                          labelStyle: TextStyle(color: speedDialIconColor),
+                          labelStyle: TextStyle(
+                            color: speedDialIconColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                           onTap:
                               () => Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -135,7 +141,10 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                           ),
                           label: 'Add Expense Reminder',
                           labelBackgroundColor: speedDialBgColor,
-                          labelStyle: TextStyle(color: speedDialIconColor),
+                          labelStyle: TextStyle(
+                            color: speedDialIconColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                           onTap:
                               () => Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -155,11 +164,16 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
                           ),
                           label: 'Add Savings Goal',
                           labelBackgroundColor: speedDialBgColor,
-                          labelStyle: TextStyle(color: speedDialIconColor),
+                          labelStyle: TextStyle(
+                            color: speedDialIconColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                           onTap:
                               () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => CreateSavingsGoalPage(goal: {},),
+                                  builder:
+                                      (context) =>
+                                          CreateSavingsGoalPage(goal: {}),
                                 ),
                               ),
                         ),

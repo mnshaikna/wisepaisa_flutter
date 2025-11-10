@@ -1024,7 +1024,7 @@ Widget noDataWidget(String header, String subHead, BuildContext context) {
         textAlign: TextAlign.center,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor),
+        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
       ),
     ],
   );

@@ -20,7 +20,12 @@ List<String> month = [
 ];
 final imageUploadURL = "https://wisepaisa.cloud/upload.php";
 
-String addGroupMsg = "Start organizing your spending 👥\n\n➕ Add your first group";
+String addGroupMsg =
+    "Start organizing your spending 👥\n\n➕ Add your first group";
 String addReminderMsg = "Looks empty 🔔\n\n➕ Add your first expense reminder!";
 String addGoalMsg = "Having a Goal is always good 🎯\n\n➕ Create one now!";
 String addExpenseMsg = "Be on Track 🧾\n\n➕ Add your first Expense";
+
+final googleContactHost = 'https://people.googleapis.com';
+final googleContactPath =
+    '/v1/people/me/connections?personFields=names,emailAddresses,photos';
