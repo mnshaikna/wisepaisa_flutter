@@ -17,43 +17,59 @@ import '../models/type_model.dart';
 import '../models/user_model.dart';
 import '../utils/toast.dart';
 import 'home_page.dart';
+import 'package:flutter/cupertino.dart';
 
 class CreateExpensePage extends StatefulWidget {
   Map<String, dynamic> group;
   Map<String, dynamic> expense;
+  bool showGroup;
 
-  CreateExpensePage({super.key, required this.expense, required this.group});
+  CreateExpensePage({
+    super.key,
+    required this.expense,
+    required this.group,
+    this.showGroup = false,
+  });
 
   @override
-  State<CreateExpensePage> createState() =>
-      _CreateExpensePageState(group: group, expense: expense);
+  State<CreateExpensePage> createState() => _CreateExpensePageState(
+    group: group,
+    expense: expense,
+    showGroup: showGroup,
+  );
 }
 
 class _CreateExpensePageState extends State<CreateExpensePage> {
   Map<String, dynamic> group;
   Map<String, dynamic> expense;
+  bool showGroup;
   Uint8List? imageBytes;
 
-  _CreateExpensePageState({required this.group, required this.expense});
+  _CreateExpensePageState({
+    required this.group,
+    required this.expense,
+    this.showGroup = false,
+  });
 
   bool isExpense = true;
   TextEditingController dateController = TextEditingController(),
       descController = TextEditingController(),
       amountController = TextEditingController(),
-      expenseNote = TextEditingController();
+      expenseNote = TextEditingController(),
+      groupController = TextEditingController();
   dynamic paidBy;
   CategoryModel? selectedCategory;
   PaymentMethodModel? payMethod;
   String? subCategoryValue;
   final Set<dynamic> paidTo = {};
+  Map<String, dynamic> selectedGroup = {};
   dynamic members;
 
   @override
   void initState() {
     super.initState();
     if (group.isNotEmpty) {
-      //debugPrint('group:::${group.toString()}');
-
+      groupController.text = group['exGroupName'];
       dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       members = (group['exGroupMembers'] ?? []).toList();
     }
@@ -84,11 +100,11 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
   UserModel getUser() {
     AuthProvider auth = Provider.of(context, listen: false);
     return UserModel(
-      userId: auth.user!.id,
-      userName: auth.user!.displayName!,
-      userEmail: auth.user!.email,
-      userImageUrl: auth.user!.photoUrl!,
-      userCreatedOn: '',
+      userId: auth.thisUser!['userId'],
+      userName: auth.thisUser!['userName'],
+      userEmail: auth.thisUser!['userEmail'],
+      userImageUrl: auth.thisUser!['userImageUrl'],
+      userCreatedOn: auth.thisUser!['userCreatedOn'],
     );
   }
 
@@ -107,6 +123,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                       : expense.isNotEmpty
                       ? "Edit Expense"
                       : 'Add Expense',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               body: Stack(
@@ -138,7 +157,6 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                           Expanded(
                                             child: GestureDetector(
                                               onTap: () {
-                                                debugPrint('came here');
                                                 setState(() {
                                                   isExpense = true;
                                                   selectedCategory = null;
@@ -209,15 +227,38 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     ),
                                   ),
                                 const SizedBox(height: 16),
+
+                                if (showGroup)
+                                  TextField(
+                                    readOnly: true,
+                                    controller: groupController,
+                                    onTap:
+                                        group.isEmpty
+                                            ? () => _showGroupSheet(context)
+                                            : null,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    keyboardType: TextInputType.text,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelText: 'Expense Group',
+                                      labelStyle: labelStyle(context),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    maxLines: 1,
+                                  ),
+                                const SizedBox(height: 16),
                                 TextField(
                                   controller: descController,
                                   textCapitalization:
                                       TextCapitalization.sentences,
                                   keyboardType: TextInputType.text,
                                   textInputAction: TextInputAction.next,
-                                  //autofocus: true,
                                   decoration: InputDecoration(
                                     labelText: "Enter a Desc",
+                                    labelStyle: labelStyle(context),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -241,6 +282,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     ),
                                     hintText: set.currency,
                                     labelText: 'Amount',
+                                    labelStyle: labelStyle(context),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -256,7 +298,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       () => _showBottomSheetCalendar(context),
                                   decoration: InputDecoration(
                                     labelText: "Date",
-
+                                    labelStyle: labelStyle(context),
                                     suffixIcon: IconButton(
                                       onPressed:
                                           () =>
@@ -282,6 +324,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         >(
                                           decoration: InputDecoration(
                                             labelText: "Category",
+                                            labelStyle: labelStyle(context),
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(12),
@@ -389,6 +432,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       child: DropdownButtonFormField<String>(
                                         decoration: InputDecoration(
                                           labelText: "Sub-Category",
+                                          labelStyle: labelStyle(context),
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(
                                               12,
@@ -436,6 +480,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                   >(
                                     decoration: InputDecoration(
                                       labelText: "Payment Method",
+                                      labelStyle: labelStyle(context),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
@@ -511,6 +556,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       TextCapitalization.sentences,
                                   decoration: InputDecoration(
                                     labelText: "Write a note (Optional)",
+                                    labelStyle: labelStyle(context),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -592,10 +638,11 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       // Paid By Section (Single Select)
-                                      const Text(
+                                      Text(
                                         "Paid By",
-                                        style: TextStyle(
-                                          fontSize: 18,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge!.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -605,9 +652,6 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         runSpacing: 10.0,
                                         children:
                                             members.map<Widget>((name) {
-                                              debugPrint(
-                                                'name:::${name.toString()}',
-                                              );
                                               final isSelected = paidBy == name;
                                               return GestureDetector(
                                                 onTap: () {
@@ -645,8 +689,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                         name['userName'],
                                                         textAlign:
                                                             TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontSize: 12,
+                                                        style: Theme.of(
+                                                          context,
+                                                        ).textTheme.bodySmall!.copyWith(
                                                           fontWeight:
                                                               isSelected
                                                                   ? FontWeight
@@ -677,10 +722,11 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                             }).toList(),
                                       ),
                                       const SizedBox(height: 15),
-                                      const Text(
+                                      Text(
                                         "Paid To",
-                                        style: TextStyle(
-                                          fontSize: 18,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge!.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -741,13 +787,17 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                   ),
                                                   title: Text(
                                                     name['userName'],
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          isSelected
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                    ),
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              isSelected
+                                                                  ? FontWeight
+                                                                      .bold
+                                                                  : FontWeight
+                                                                      .normal,
+                                                        ),
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     maxLines: 2,
@@ -755,7 +805,8 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                   trailing:
                                                       isSelected
                                                           ? Icon(
-                                                            Icons.check_circle,
+                                                            Icons.check,
+                                                            size: 20.0,
                                                           )
                                                           : SizedBox.shrink(),
                                                 ),
@@ -1041,8 +1092,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
-                              textStyle: TextStyle(
-                                fontSize: 15.0,
+                              textStyle: Theme.of(
+                                context,
+                              ).textTheme.titleMedium!.copyWith(
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1218,5 +1270,111 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
         amountController.text = result.toStringAsFixed(2);
       });
     }
+  }
+
+  void _showGroupSheet(BuildContext context) {
+    showModalBottomSheet(
+      showDragHandle: true,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Select a Group',
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Divider(height: 1),
+              const SizedBox(height: 6),
+              Column(
+                children:
+                    api.groupList.map((grp) {
+                      return ListTile(
+                        title: Text(
+                          grp['exGroupName'],
+                          style: Theme.of(context).textTheme.titleMedium!
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          grp['exGroupDesc'],
+                          style: Theme.of(context).textTheme.titleSmall!
+                              .copyWith(color: Colors.grey.shade500),
+                        ),
+                        leading: Container(
+                          height: 50.0,
+                          width: 50.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child:
+                              (grp['exGroupImageURL'] != null)
+                                  ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    child: Image.network(
+                                      grp['exGroupImageURL'],
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (
+                                        context,
+                                        child,
+                                        loadingProgress,
+                                      ) {
+                                        if (loadingProgress == null) {
+                                          return child; // Image loaded
+                                        }
+                                        return SizedBox(
+                                          width: 50,
+                                          height: 50,
+                                          child: Center(
+                                            child: CupertinoActivityIndicator(),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder:
+                                          (context, _, __) => Image.asset(
+                                            Theme.of(context).brightness ==
+                                                    Brightness.light
+                                                ? 'assets/logos/logo_light.png'
+                                                : 'assets/logos/logo_dark.png',
+                                            fit: BoxFit.contain,
+                                          ),
+                                    ),
+                                  )
+                                  : Image.asset(
+                                    Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? 'assets/logos/logo_light.png'
+                                        : 'assets/logos/logo_dark.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            groupController.text = grp['exGroupName'];
+                            selectedGroup = grp;
+                          });
+                        },
+                      );
+                    }).toList(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

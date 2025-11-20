@@ -45,9 +45,10 @@ class DialogUtils {
                           ),
                           child: Text(
                             cancelText,
-                            style: const TextStyle(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium!.copyWith(
                               color: Colors.grey,
-                              fontSize: 16,
                               letterSpacing: 1.5,
                               fontWeight: FontWeight.w500,
                             ),
@@ -71,10 +72,12 @@ class DialogUtils {
                         ),
                         child: Text(
                           confirmText,
-                          style: const TextStyle(
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium!.copyWith(
                             letterSpacing: 1.5,
-                            fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -89,12 +92,11 @@ class DialogUtils {
     );
   }
 
-  static Widget titleText(String title) {
+  static Widget titleText(String title,BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
+      style: Theme.of(context).textTheme.titleMedium!.copyWith(
         fontWeight: FontWeight.bold,
-        fontSize: 17.5,
         letterSpacing: 1.5,
       ),
       textAlign: TextAlign.left,

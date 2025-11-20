@@ -21,7 +21,8 @@ class _GroupBalanceScreenState extends State<GroupBalanceScreen> {
 
   Map<String, dynamic> balances = {};
   List<Map<String, dynamic>> users = [];
-  List<dynamic> settlements = [];
+
+  List<dynamic> settlements = [], groupMembers = [], remainingMembers = [];
   bool isLoading = false;
 
   @override
@@ -34,20 +35,32 @@ class _GroupBalanceScreenState extends State<GroupBalanceScreen> {
     setState(() {
       isLoading = true;
     });
-    debugPrint('group:::$group');
     balances = group['exGroupMembersBalance'] ?? {};
     settlements = group['exGroupMembersSettlements'] ?? [];
+    groupMembers = group['exGroupMembers'] ?? [];
     await Future.microtask(() async {
       ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
       balances.keys.map((userId) async {
-        await api.getUserById(context, userId).then((Response resp) {
-          users.add(resp.data);
-        });
+        Map<String, dynamic> myUser = api.allUsers.firstWhere(
+          (ele) => ele['userId'] == userId,
+          orElse: () => {},
+        );
+        users.add(myUser);
       }).toList();
     });
+
+    groupMembers.map((ele) {
+      if (!balances.containsKey(ele['userId'])) {
+        remainingMembers.add(ele);
+      }
+    }).toList();
+
     setState(() {
       isLoading = false;
     });
+
+    debugPrint('balances:::$balances');
+    debugPrint('settlements:::${settlements.toString()}');
   }
 
   @override
@@ -61,7 +74,9 @@ class _GroupBalanceScreenState extends State<GroupBalanceScreen> {
         return Scaffold(
           appBar: AppBar(title: const Text('Balances'), centerTitle: true),
           body:
-              (balances.isEmpty || settlements.isEmpty)
+              (remainingMembers.isEmpty &&
+                      balances.isEmpty &&
+                      settlements.isEmpty)
                   ? Center(
                     child: noDataWidget(
                       'No Settlements',
@@ -70,112 +85,210 @@ class _GroupBalanceScreenState extends State<GroupBalanceScreen> {
                     ),
                   )
                   : ListView(
-                    physics: const BouncingScrollPhysics(),
-                    children:
-                        balances.keys.map((key) {
-                          debugPrint('key:::$key');
-                          Map<String, dynamic> thisUser = users.firstWhere(
-                            (ele) => ele['userId'] == key,
-                            orElse: () => {},
-                          );
-                          debugPrint('thisUser:::$thisUser');
-
-                          final double amount = balances[key];
-                          final bool isPositive = amount > 0;
-
-                          return ExpansionTile(
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                thisUser['userImageUrl'],
-                              ),
-                              radius: 25.0,
-                            ),
-                            title: Text(
-                              thisUser['userName'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17.5,
-                              ),
-                            ),
-                            subtitle: Text(
-                              isPositive
-                                  ? 'gets back ${formatCurrency(amount, context)}'
-                                  : 'owes ${formatCurrency((amount * -1), context)}',
-                              style: TextStyle(
-                                color: isPositive ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.25,
-                                fontSize: 13.0,
-                              ),
-                            ),
-                            childrenPadding: EdgeInsets.only(left: 25.0),
-                            minTileHeight: 75.0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-
-                            children:
-                                settlements.map<Widget>((settle) {
-                                  String fromUser = settle['fromUserId'];
-                                  String toUser = settle['toUserId'];
-                                  double amount = settle['amount'];
-
-                                  if (fromUser == key || toUser == key) {
-                                    Map<String, dynamic> fromUserMap = users
-                                        .firstWhere(
-                                          (ele) => ele['userId'] == fromUser,
-                                          orElse: () => {},
-                                        );
-
-                                    Map<String, dynamic> toUserMap = users
-                                        .firstWhere(
-                                          (ele) => ele['userId'] == toUser,
-                                          orElse: () => {},
-                                        );
-
-                                    return ListTile(
-                                      leading: CircleAvatar(
-                                        radius: 15.0,
-                                        backgroundImage: NetworkImage(
-                                          key == fromUser
-                                              ? toUserMap['userImageUrl']
-                                              : fromUserMap['userImageUrl'],
-                                        ),
-                                      ),
-                                      title: RichText(
-                                        text: TextSpan(
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12.5,
-                                          ),
-                                          children: [
-                                            TextSpan(
-                                              text:
-                                                  '${fromUserMap['userName']} owes ',
-                                            ),
-                                            TextSpan(
-                                              text: formatCurrency(
-                                                amount,
-                                                context,
-                                              ),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.blueAccent,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                              text:
-                                                  ' to ${toUserMap['userName']}',
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                    physics: BouncingScrollPhysics(),
+                    children: [
+                      if (balances.isNotEmpty)
+                        Column(
+                          children:
+                              balances.keys.map((key) {
+                                Map<String, dynamic> thisUser = users
+                                    .firstWhere(
+                                      (ele) => ele['userId'] == key,
+                                      orElse: () => {},
                                     );
-                                  }
-                                  return SizedBox.shrink();
-                                }).toList(),
-                          );
-                        }).toList(),
+
+                                final double amount = balances[key];
+                                final bool isPositive = amount > 0;
+
+                                return ExpansionTile(
+                                  tilePadding: EdgeInsets.symmetric(
+                                    horizontal: 15.0,
+                                    vertical: 5.0,
+                                  ),
+                                  leading:
+                                      thisUser['userImageUrl'] != null
+                                          ? CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                              thisUser['userImageUrl'],
+                                            ),
+                                            radius: 25.0,
+                                          )
+                                          : Container(
+                                            height: 25.0,
+                                            width: 25.0,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade500,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                  title: Text(
+                                    thisUser['userName'] ?? '',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    isPositive
+                                        ? 'gets back ${formatCurrency(amount, context)}'
+                                        : 'owes ${formatCurrency((amount * -1), context)}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium!.copyWith(
+                                      color:
+                                          isPositive
+                                              ? Colors.green
+                                              : Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.25,
+                                    ),
+                                  ),
+                                  childrenPadding: EdgeInsets.only(left: 25.0),
+                                  minTileHeight: 75.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+
+                                  children:
+                                      settlements.map<Widget>((settle) {
+                                        String fromUser = settle['fromUserId'];
+                                        String toUser = settle['toUserId'];
+                                        double amount = settle['amount'];
+
+                                        if (fromUser == key || toUser == key) {
+                                          Map<String, dynamic> fromUserMap =
+                                              users.firstWhere(
+                                                (ele) =>
+                                                    ele['userId'] == fromUser,
+                                                orElse: () => {},
+                                              );
+
+                                          Map<String, dynamic> toUserMap = users
+                                              .firstWhere(
+                                                (ele) =>
+                                                    ele['userId'] == toUser,
+                                                orElse: () => {},
+                                              );
+
+                                          return ListTile(
+                                            leading:
+                                                toUserMap['userImageUrl'] !=
+                                                            null &&
+                                                        fromUserMap['userImageUrl'] !=
+                                                            null
+                                                    ? CircleAvatar(
+                                                      radius: 15.0,
+                                                      backgroundImage: NetworkImage(
+                                                        key == fromUser
+                                                            ? toUserMap['userImageUrl']
+                                                            : fromUserMap['userImageUrl'],
+                                                      ),
+                                                    )
+                                                    : Container(
+                                                      height: 15.0,
+                                                      width: 15.0,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color:
+                                                            Colors
+                                                                .grey
+                                                                .shade500,
+                                                      ),
+                                                    ),
+                                            title: RichText(
+                                              text: TextSpan(
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium!
+                                                    .copyWith(
+                                                      color:
+                                                          Colors.grey.shade500,
+                                                    ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                        '${fromUserMap['userName']} owes ',
+                                                  ),
+                                                  TextSpan(
+                                                    text: formatCurrency(
+                                                      amount,
+                                                      context,
+                                                    ),
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Colors.blueAccent,
+                                                        ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        ' to ${toUserMap['userName']}',
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        return SizedBox.shrink();
+                                      }).toList(),
+                                );
+                              }).toList(),
+                        ),
+                      if (remainingMembers.isNotEmpty)
+                        Column(
+                          children:
+                              remainingMembers.map<Widget>((ele) {
+                                return ExpansionTile(
+                                  tilePadding: EdgeInsets.symmetric(
+                                    horizontal: 15.0,
+                                    vertical: 5.0,
+                                  ),
+                                  leading:
+                                      ele['userImageUrl'] != null
+                                          ? CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                              ele['userImageUrl'],
+                                            ),
+                                            radius: 25.0,
+                                          )
+                                          : Container(
+                                            height: 25.0,
+                                            width: 25.0,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade500,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                  title: Text(
+                                    ele['userName'] ?? '',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    'No balance',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium!.copyWith(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.normal,
+                                      letterSpacing: 1.25,
+                                    ),
+                                  ),
+                                  childrenPadding: EdgeInsets.only(left: 25.0),
+                                  minTileHeight: 75.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                );
+                              }).toList(),
+                        ),
+                    ],
                   ),
         );
       },

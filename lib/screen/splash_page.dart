@@ -132,10 +132,8 @@ class _PulsingWarningContainerState extends State<PulsingWarningContainer>
                 const SizedBox(width: 10.0),
                 Text(
                   widget.message,
-                  style: TextStyle(
-                    letterSpacing: 1.5,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16.5,
                     color: Colors.white54,
                   ),
                 ),

@@ -8,16 +8,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/models/type_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
-import 'package:wisepaise/providers/notification_provider.dart';
+import 'package:wisepaise/services/notification_service.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
 import 'package:wisepaise/screen/all_expense_page.dart';
 import 'package:wisepaise/screen/all_savings_goals_page.dart';
-import 'package:wisepaise/screen/create_expense_group_page.dart';
-import 'package:wisepaise/screen/create_expense_page.dart';
 import 'package:wisepaise/screen/expense_group_details_page.dart';
 import 'package:wisepaise/screen/create_reminder_page.dart';
 import 'package:wisepaise/screen/savings_goal_details_page.dart';
-import 'package:wisepaise/utils/constants.dart';
 import 'package:wisepaise/utils/dialog_utils.dart';
 import 'package:wisepaise/utils/utils.dart';
 
@@ -27,7 +24,6 @@ import '../providers/auth_provider.dart';
 import '../utils/toast.dart';
 import 'all_group_page.dart';
 import 'all_reminder_page.dart';
-import 'create_savings_goal_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -73,20 +69,17 @@ class _DashboardPageState extends State<DashboardPage>
         context,
         listen: false,
       );
-      NotificationProvider notification = Provider.of<NotificationProvider>(
-        context,
-        listen: false,
-      );
 
       try {
-        await api.getGroups(auth.user!.id, context);
+        await api.getGroups(auth.thisUser!['userId'], context);
         if (!api.isTimedOut) {
-          await api.getReminders(auth.user!.id, context);
-          await api.getUserExpenses(auth.user!.id, context);
-          await api.getUserGoals(auth.user!.id, context);
+          await api.getReminders(auth.thisUser!['userId'], context);
+          await api.getUserExpenses(auth.thisUser!['userId'], context);
+          await api.getUserGoals(auth.thisUser!['userId'], context);
+          await api.getGoogleUsers(context);
         }
       } catch (e) {
-        debugPrint("Error in API: $e");
+        rethrow;
       }
 
       debugPrint('getActiveButExpired:::${getActiveButExpired(api).length}');
@@ -95,7 +88,7 @@ class _DashboardPageState extends State<DashboardPage>
         set.setExpiredReminderAlert();
         DialogUtils.showGenericDialog(
           context: context,
-          title: DialogUtils.titleText('Expired Reminders'),
+          title: DialogUtils.titleText('Expired Reminders', context),
           message: Text(
             'You have Expired Reminders. Do you want to View all reminders?',
           ),
@@ -113,13 +106,6 @@ class _DashboardPageState extends State<DashboardPage>
         );
       }
     });
-
-    /*await notification.scheduleNotification(seconds: 30);
-    Toasts.show(
-      context,
-      "Notification scheduled at ${DateTime.now().add(const Duration(seconds: 20))}",
-      type: ToastType.info,
-    );*/
   }
 
   List<Map<String, dynamic>> getActiveButExpired(ApiProvider api) {
@@ -147,25 +133,17 @@ class _DashboardPageState extends State<DashboardPage>
         top5Groups = top5Groups.take(5).toList();
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          appBar:
-          api.groupList.isEmpty &&
-              api.expenseReminderList.isEmpty &&
-              api.userExpenseList.isEmpty &&
-              api.savingsGoalList.isEmpty
-                  ? null
-                  : AppBar(
-                    backgroundColor: theme.scaffoldBackgroundColor,
-                    centerTitle: true,
-                    elevation: 0.5,
-                    title: Image.asset(
-                      Theme.of(context).brightness == Brightness.light
-                          ? 'assets/logos/logo_light.png'
-                          : 'assets/logos/logo_dark.png',
-                      fit: BoxFit.contain,
-                      height: 50.0,
-                    ),
-                  ),
+          appBar: AppBar(
+            centerTitle: true,
+            elevation: 0.5,
+            title: Image.asset(
+              Theme.of(context).brightness == Brightness.light
+                  ? 'assets/logos/logo_light.png'
+                  : 'assets/logos/logo_dark.png',
+              fit: BoxFit.contain,
+              height: 50.0,
+            ),
+          ),
           body:
               !isInitComplete || api.isAPILoading
                   ? buildDashboardShimmer(context)
@@ -235,7 +213,7 @@ class _DashboardPageState extends State<DashboardPage>
                       api.savingsGoalList.isEmpty
                   ? Container(
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
+                      /*gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors:
@@ -250,7 +228,8 @@ class _DashboardPageState extends State<DashboardPage>
                                   const Color(0xFFD0E1F4),
                                   const Color(0xFFB8D7F1),
                                 ],
-                      ),
+                      ),*/
+                      color: Theme.of(context).scaffoldBackgroundColor,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: Column(
@@ -258,7 +237,7 @@ class _DashboardPageState extends State<DashboardPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hello, ${auth.user!.displayName}',
+                          'Hello, ${auth.thisUser!['userName']}',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -267,6 +246,7 @@ class _DashboardPageState extends State<DashboardPage>
                           softWrap: true,
                           maxLines: 1,
                         ),
+                        SizedBox(height: 10.0),
                         GridView.count(
                           physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
@@ -348,7 +328,8 @@ class _DashboardPageState extends State<DashboardPage>
                                         ),
                                         label: Text(
                                           'View all',
-                                          style: TextStyle(letterSpacing: 1.5),
+                                          style: theme.textTheme.labelSmall!
+                                              .copyWith(letterSpacing: 1.5),
                                         ),
                                         icon: Icon(Icons.arrow_forward),
                                       ),
@@ -421,7 +402,11 @@ class _DashboardPageState extends State<DashboardPage>
                                             milliseconds: 500,
                                           ),
                                         ),
-                                        label: const Text('View all'),
+                                        label: Text(
+                                          'View all',
+                                          style: theme.textTheme.labelSmall!
+                                              .copyWith(letterSpacing: 1.5),
+                                        ),
                                         icon: const Icon(Icons.arrow_forward),
                                       ),
                                   ],
@@ -477,41 +462,37 @@ class _DashboardPageState extends State<DashboardPage>
                                           ),
                                     ),
 
-                                    if(api.groupList.isNotEmpty)ElevatedButton.icon(
-                                      onPressed:
+                                    if (api.groupList.isNotEmpty)
+                                      ElevatedButton.icon(
+                                        onPressed: () async {
+                                          await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) => AllGroupPage(),
+                                            ),
+                                          );
+                                          // Rebuild after coming back
+                                          setState(() {});
+                                        },
 
-
-                                               () async {
-                                                await Navigator.of(
-                                                  context,
-                                                ).push(
-                                                  MaterialPageRoute(
-                                                    builder:
-                                                        (context) =>
-                                                            AllGroupPage(),
-                                                  ),
-                                                );
-                                                // Rebuild after coming back
-                                                setState(() {});
-                                              },
-
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12.0,
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
+                                            ),
+                                          ),
+                                          elevation: 0.0,
+                                          animationDuration: Duration(
+                                            milliseconds: 500,
                                           ),
                                         ),
-                                        elevation: 0.0,
-                                        animationDuration: Duration(
-                                          milliseconds: 500,
+                                        label: Text(
+                                          'View all',
+                                          style: theme.textTheme.labelSmall!
+                                              .copyWith(letterSpacing: 1.5),
                                         ),
+                                        icon: Icon(Icons.arrow_forward),
                                       ),
-                                      label: Text(
-                                        'View all',
-                                        style: TextStyle(letterSpacing: 1.5),
-                                      ),
-                                      icon: Icon(Icons.arrow_forward),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -530,298 +511,10 @@ class _DashboardPageState extends State<DashboardPage>
                                         itemBuilder: (context, index) {
                                           Map<String, dynamic> thisGroup =
                                               api.groupList[index];
-                                          return Hero(
-                                            tag:
-                                                'groupCard_${thisGroup['exGroupId']}',
-                                            child: SizedBox(
-                                              width: 300.0,
-                                              child: Card(
-                                                elevation: 0,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                child: InkWell(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        12.0,
-                                                      ),
-                                                  splashColor: theme
-                                                      .colorScheme
-                                                      .primary
-                                                      .withOpacity(0.15),
-                                                  highlightColor: theme
-                                                      .colorScheme
-                                                      .primary
-                                                      .withOpacity(0.08),
-                                                  onTap: () {
-                                                    Navigator.of(context).push(
-                                                      MaterialPageRoute(
-                                                        builder:
-                                                            (context) =>
-                                                                ExpenseGroupDetailsPage(
-                                                                  groupMap:
-                                                                      thisGroup,
-                                                                ),
-                                                      ),
-                                                    );
-                                                  },
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          10.0,
-                                                        ),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                          child: Row(
-                                                            children: [
-                                                              Container(
-                                                                height: 50.0,
-                                                                width: 50.0,
-                                                                decoration: BoxDecoration(
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                        12.0,
-                                                                      ),
-                                                                ),
-                                                                child:
-                                                                    (thisGroup['exGroupImageURL'] !=
-                                                                                null &&
-                                                                            thisGroup['exGroupImageURL'].toString().trim().isNotEmpty)
-                                                                        ? ClipRRect(
-                                                                          borderRadius: BorderRadius.circular(
-                                                                            12.0,
-                                                                          ),
-                                                                          child: Image.network(
-                                                                            thisGroup['exGroupImageURL'],
-                                                                            fit:
-                                                                                BoxFit.cover,
-                                                                            loadingBuilder: (
-                                                                              context,
-                                                                              child,
-                                                                              loadingProgress,
-                                                                            ) {
-                                                                              if (loadingProgress ==
-                                                                                  null) {
-                                                                                return child; // Image loaded
-                                                                              }
-                                                                              return SizedBox(
-                                                                                width:
-                                                                                    50,
-                                                                                height:
-                                                                                    50,
-                                                                                child: const Center(
-                                                                                  child:
-                                                                                      CupertinoActivityIndicator(),
-                                                                                ),
-                                                                              );
-                                                                            },
-                                                                            errorBuilder:
-                                                                                (
-                                                                                  context,
-                                                                                  _,
-                                                                                  __,
-                                                                                ) => Image.asset(
-                                                                                  Theme.of(
-                                                                                            context,
-                                                                                          ).brightness ==
-                                                                                          Brightness.light
-                                                                                      ? 'assets/logos/logo_light.png'
-                                                                                      : 'assets/logos/logo_dark.png',
-                                                                                  fit:
-                                                                                      BoxFit.contain,
-                                                                                ),
-                                                                          ),
-                                                                        )
-                                                                        : Image.asset(
-                                                                          Theme.of(
-                                                                                    context,
-                                                                                  ).brightness ==
-                                                                                  Brightness.light
-                                                                              ? 'assets/logos/logo_light.png'
-                                                                              : 'assets/logos/logo_dark.png',
-                                                                          fit:
-                                                                              BoxFit.contain,
-                                                                        ),
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 10.0,
-                                                              ),
-                                                              Expanded(
-                                                                child: Column(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Text(
-                                                                      '${thisGroup['exGroupName']}',
-                                                                      style: theme
-                                                                          .textTheme
-                                                                          .titleMedium
-                                                                          ?.copyWith(
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                          ),
-                                                                      softWrap:
-                                                                          true,
-                                                                      overflow:
-                                                                          TextOverflow
-                                                                              .ellipsis,
-                                                                      maxLines:
-                                                                          1,
-                                                                    ),
-                                                                    Row(
-                                                                      children: [
-                                                                        Icon(
-                                                                          typeList
-                                                                              .elementAt(
-                                                                                int.parse(
-                                                                                  thisGroup['exGroupType'],
-                                                                                ),
-                                                                              )
-                                                                              .icon,
-                                                                          size:
-                                                                              17.5,
-                                                                          color: theme
-                                                                              .colorScheme
-                                                                              .onSurface
-                                                                              .withOpacity(
-                                                                                0.7,
-                                                                              ),
-                                                                        ),
-                                                                        const SizedBox(
-                                                                          width:
-                                                                              2.5,
-                                                                        ),
-                                                                        Expanded(
-                                                                          child: Text(
-                                                                            typeList
-                                                                                .elementAt(
-                                                                                  int.parse(
-                                                                                    thisGroup['exGroupType'],
-                                                                                  ),
-                                                                                )
-                                                                                .name,
-                                                                            maxLines:
-                                                                                1,
-                                                                            overflow:
-                                                                                TextOverflow.ellipsis,
-                                                                            style: theme.textTheme.labelSmall?.copyWith(
-                                                                              color: theme.colorScheme.onSurface.withOpacity(
-                                                                                0.7,
-                                                                              ),
-                                                                              fontWeight:
-                                                                                  FontWeight.bold,
-                                                                              letterSpacing:
-                                                                                  1.2,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 12,
-                                                        ),
-                                                        Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .min,
-                                                              children: [
-                                                                const Icon(
-                                                                  Icons
-                                                                      .arrow_upward,
-                                                                  color:
-                                                                      Colors
-                                                                          .green,
-                                                                  size: 20,
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 2,
-                                                                ),
-                                                                Text(
-                                                                  formatCurrency(
-                                                                    thisGroup['exGroupIncome'],
-                                                                    context,
-                                                                  ),
-                                                                  style: theme
-                                                                      .textTheme
-                                                                      .titleSmall
-                                                                      ?.copyWith(
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                        color:
-                                                                            Colors.green,
-                                                                      ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            const SizedBox(
-                                                              height: 5,
-                                                            ),
-                                                            Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .min,
-                                                              children: [
-                                                                const Icon(
-                                                                  Icons
-                                                                      .arrow_downward,
-                                                                  color:
-                                                                      Colors
-                                                                          .red,
-                                                                  size: 20,
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 2,
-                                                                ),
-                                                                Text(
-                                                                  formatCurrency(
-                                                                    thisGroup['exGroupExpenses'],
-                                                                    context,
-                                                                  ),
-                                                                  style: theme
-                                                                      .textTheme
-                                                                      .titleSmall
-                                                                      ?.copyWith(
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                        color:
-                                                                            Colors.red,
-                                                                      ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                          return buildExpenseGroupCard(
+                                            thisGroup,
+                                            theme,
+                                            context,
                                           );
                                         },
                                       ),
@@ -844,285 +537,10 @@ class _DashboardPageState extends State<DashboardPage>
                                         itemBuilder: (context, index) {
                                           Map<String, dynamic> thisGroup =
                                               api.groupList[index];
-                                          return Hero(
-                                            tag:
-                                                'groupCard_${thisGroup['exGroupId']}',
-                                            child: Card(
-                                              elevation: 1,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: InkWell(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                splashColor: theme
-                                                    .colorScheme
-                                                    .primary
-                                                    .withOpacity(0.15),
-                                                highlightColor: theme
-                                                    .colorScheme
-                                                    .primary
-                                                    .withOpacity(0.08),
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder:
-                                                          (context) =>
-                                                              ExpenseGroupDetailsPage(
-                                                                groupMap:
-                                                                    thisGroup,
-                                                              ),
-                                                    ),
-                                                  );
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                    10.0,
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Expanded(
-                                                        child: Row(
-                                                          children: [
-                                                            Container(
-                                                              height: 75.0,
-                                                              width: 75.0,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                          12.0,
-                                                                        ),
-                                                                  ),
-                                                              child:
-                                                                  (thisGroup['exGroupImageURL'] !=
-                                                                              null &&
-                                                                          thisGroup['exGroupImageURL']
-                                                                              .toString()
-                                                                              .trim()
-                                                                              .isNotEmpty)
-                                                                      ? ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                              12.0,
-                                                                            ),
-                                                                        child: Image.network(
-                                                                          thisGroup['exGroupImageURL'],
-                                                                          fit:
-                                                                              BoxFit.cover,
-                                                                          loadingBuilder: (
-                                                                            context,
-                                                                            child,
-                                                                            loadingProgress,
-                                                                          ) {
-                                                                            if (loadingProgress ==
-                                                                                null) {
-                                                                              return child; // Image loaded
-                                                                            }
-                                                                            return const Center(
-                                                                              child:
-                                                                                  CupertinoActivityIndicator(),
-                                                                            );
-                                                                          },
-                                                                          errorBuilder:
-                                                                              (
-                                                                                context,
-                                                                                _,
-                                                                                __,
-                                                                              ) => Image.asset(
-                                                                                Theme.of(
-                                                                                          context,
-                                                                                        ).brightness ==
-                                                                                        Brightness.light
-                                                                                    ? 'assets/logos/logo_light.png'
-                                                                                    : 'assets/logos/logo_dark.png',
-                                                                                fit:
-                                                                                    BoxFit.contain,
-                                                                              ),
-                                                                        ),
-                                                                      )
-                                                                      : Image.asset(
-                                                                        Theme.of(
-                                                                                  context,
-                                                                                ).brightness ==
-                                                                                Brightness.light
-                                                                            ? 'assets/logos/logo_light.png'
-                                                                            : 'assets/logos/logo_dark.png',
-                                                                        fit:
-                                                                            BoxFit.contain,
-                                                                      ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 10.0,
-                                                            ),
-                                                            Expanded(
-                                                              child: Column(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    '${thisGroup['exGroupName']}',
-                                                                    style: theme
-                                                                        .textTheme
-                                                                        .titleMedium
-                                                                        ?.copyWith(
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                        ),
-                                                                    softWrap:
-                                                                        true,
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    maxLines: 1,
-                                                                  ),
-                                                                  Row(
-                                                                    children: [
-                                                                      Icon(
-                                                                        typeList
-                                                                            .elementAt(
-                                                                              int.parse(
-                                                                                thisGroup['exGroupType'],
-                                                                              ),
-                                                                            )
-                                                                            .icon,
-                                                                        size:
-                                                                            17.5,
-                                                                        color: theme
-                                                                            .colorScheme
-                                                                            .onSurface
-                                                                            .withOpacity(
-                                                                              0.7,
-                                                                            ),
-                                                                      ),
-                                                                      const SizedBox(
-                                                                        width:
-                                                                            2.5,
-                                                                      ),
-                                                                      Expanded(
-                                                                        child: Text(
-                                                                          typeList
-                                                                              .elementAt(
-                                                                                int.parse(
-                                                                                  thisGroup['exGroupType'],
-                                                                                ),
-                                                                              )
-                                                                              .name,
-                                                                          maxLines:
-                                                                              1,
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
-                                                                          style: theme.textTheme.labelSmall?.copyWith(
-                                                                            color: theme.colorScheme.onSurface.withOpacity(
-                                                                              0.7,
-                                                                            ),
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                            letterSpacing:
-                                                                                1.2,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              const Icon(
-                                                                Icons
-                                                                    .arrow_upward,
-                                                                color:
-                                                                    Colors
-                                                                        .green,
-                                                                size: 20,
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 2,
-                                                              ),
-                                                              Text(
-                                                                formatCurrency(
-                                                                  thisGroup['exGroupIncome'],
-                                                                  context,
-                                                                ),
-                                                                style: theme
-                                                                    .textTheme
-                                                                    .titleSmall
-                                                                    ?.copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                    ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 5,
-                                                          ),
-                                                          Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              const Icon(
-                                                                Icons
-                                                                    .arrow_downward,
-                                                                color:
-                                                                    Colors.red,
-                                                                size: 20,
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 2,
-                                                              ),
-                                                              Text(
-                                                                formatCurrency(
-                                                                  thisGroup['exGroupExpenses'],
-                                                                  context,
-                                                                ),
-                                                                style: theme
-                                                                    .textTheme
-                                                                    .titleSmall
-                                                                    ?.copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                    ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                          return buildExpenseGroupCard(
+                                            thisGroup,
+                                            theme,
+                                            context,
                                           );
                                         },
                                       ),
@@ -1186,7 +604,8 @@ class _DashboardPageState extends State<DashboardPage>
                                         ),
                                         label: Text(
                                           'View all',
-                                          style: TextStyle(letterSpacing: 1.5),
+                                          style: theme.textTheme.labelSmall!
+                                              .copyWith(letterSpacing: 1.5),
                                         ),
                                         icon: Icon(Icons.arrow_forward),
                                       ),
@@ -1210,6 +629,213 @@ class _DashboardPageState extends State<DashboardPage>
                   ),
         );
       },
+    );
+  }
+
+  Hero buildExpenseGroupCard(
+    Map<String, dynamic> thisGroup,
+    ThemeData theme,
+    BuildContext context,
+  ) {
+    return Hero(
+      tag: 'groupCard_${thisGroup['exGroupId']}',
+      child: SizedBox(
+        width: 300.0,
+        child: Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12.0),
+            splashColor: theme.colorScheme.primary.withOpacity(0.15),
+            highlightColor: theme.colorScheme.primary.withOpacity(0.08),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder:
+                      (context) => ExpenseGroupDetailsPage(groupMap: thisGroup),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 50.0,
+                          width: 50.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child:
+                              (thisGroup['exGroupImageURL'] != null &&
+                                      thisGroup['exGroupImageURL']
+                                          .toString()
+                                          .trim()
+                                          .isNotEmpty)
+                                  ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    child: Image.network(
+                                      thisGroup['exGroupImageURL'],
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (
+                                        context,
+                                        child,
+                                        loadingProgress,
+                                      ) {
+                                        if (loadingProgress == null) {
+                                          return child; // Image loaded
+                                        }
+                                        return SizedBox(
+                                          width: 50,
+                                          height: 50,
+                                          child: const Center(
+                                            child: CupertinoActivityIndicator(),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder:
+                                          (context, _, __) => Image.asset(
+                                            Theme.of(context).brightness ==
+                                                    Brightness.light
+                                                ? 'assets/logos/logo_light.png'
+                                                : 'assets/logos/logo_dark.png',
+                                            fit: BoxFit.contain,
+                                          ),
+                                    ),
+                                  )
+                                  : Image.asset(
+                                    Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? 'assets/logos/logo_light.png'
+                                        : 'assets/logos/logo_dark.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                        ),
+                        const SizedBox(width: 10.0),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${thisGroup['exGroupName']}',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    typeList
+                                        .elementAt(
+                                          int.parse(thisGroup['exGroupType']),
+                                        )
+                                        .icon,
+                                    size: 17.5,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7),
+                                  ),
+                                  const SizedBox(width: 2.5),
+                                  Expanded(
+                                    child: Text(
+                                      typeList
+                                          .elementAt(
+                                            int.parse(thisGroup['exGroupType']),
+                                          )
+                                          .name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.7),
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.2,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!thisGroup['exGroupShared'])
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.arrow_upward,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              formatCurrency(
+                                thisGroup['exGroupIncome'],
+                                context,
+                              ),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!thisGroup['exGroupShared'])
+                            Icon(
+                              Icons.arrow_downward,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                          const SizedBox(width: 2),
+                          Text(
+                            formatCurrency(
+                              thisGroup['exGroupExpenses'],
+                              context,
+                            ),
+                            style:
+                                thisGroup['exGroupShared']
+                                    ? theme.textTheme.labelLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                    )
+                                    : theme.textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1270,10 +896,10 @@ class _DashboardPageState extends State<DashboardPage>
                   end: Alignment.bottomRight,
                 ),
               ),
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1298,9 +924,10 @@ class _DashboardPageState extends State<DashboardPage>
                           children: [
                             Text(
                               title.isEmpty ? 'Untitled Reminder' : title,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                               maxLines: 1,
@@ -1334,8 +961,9 @@ class _DashboardPageState extends State<DashboardPage>
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: true,
-                                    style: TextStyle(
-                                      fontSize: 14,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color:
                                           Theme.of(context).brightness ==
@@ -1370,8 +998,9 @@ class _DashboardPageState extends State<DashboardPage>
                             const SizedBox(width: 4),
                             Text(
                               date,
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelSmall?.copyWith(
                                 color: Colors.grey.shade900,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1384,10 +1013,9 @@ class _DashboardPageState extends State<DashboardPage>
                   if (description.isNotEmpty)
                     Text(
                       description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.95),
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelSmall!.copyWith(color: Colors.white70),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1430,8 +1058,9 @@ class _DashboardPageState extends State<DashboardPage>
                             const SizedBox(width: 4),
                             Text(
                               isExpense ? 'Expense' : 'Income',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelSmall?.copyWith(
                                 color: Colors.grey.shade900,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1466,8 +1095,7 @@ class _DashboardPageState extends State<DashboardPage>
           const SizedBox(width: 4),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 11,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
@@ -1516,68 +1144,73 @@ class _DashboardPageState extends State<DashboardPage>
     final savings = (income - expenses).clamp(0, double.infinity);
     double savingsPct =
         (income == 0 ? 0 : savings / income).clamp(0.0, 1.0).toDouble();
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Monthly Overview',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    savingsPct = 1 - savingsPct;
+    return Padding(
+      padding: const EdgeInsets.only(right: 10.0),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Monthly Overview',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatTile(
-                    context,
-                    label: 'Income',
-                    value: formatCurrency(income, context),
-                    color: Colors.green,
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatTile(
+                      context,
+                      label: 'Income',
+                      value: formatCurrency(income, context),
+                      color: Colors.green,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildStatTile(
-                    context,
-                    label: 'Expenses',
-                    value: formatCurrency(expenses, context),
-                    color: Colors.red,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildStatTile(
+                      context,
+                      label: 'Expenses',
+                      value: formatCurrency(expenses, context),
+                      color: Colors.red,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildStatTile(
-                    context,
-                    label: 'Savings',
-                    value: formatCurrency(savings, context),
-                    color: primary,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildStatTile(
+                      context,
+                      label: 'Savings',
+                      value: formatCurrency(savings, context),
+                      color: primary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: savingsPct,
-                minHeight: 8,
-                color: primary,
-                backgroundColor: theme.colorScheme.onSurface.withOpacity(0.08),
+                ],
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '${(savingsPct * 100).toStringAsFixed(0)}% of income saved',
-              style: theme.textTheme.labelMedium,
-            ),
-          ],
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: savingsPct,
+                  minHeight: 8,
+                  color: savingsPct > 0.75 ? Colors.red : primary,
+                  backgroundColor: theme.colorScheme.onSurface.withOpacity(
+                    0.08,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${(savingsPct * 100).toStringAsFixed(0)}% spent',
+                style: theme.textTheme.labelSmall,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1614,7 +1247,7 @@ class _DashboardPageState extends State<DashboardPage>
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1651,7 +1284,7 @@ class _DashboardPageState extends State<DashboardPage>
           );
         },
         child: Card(
-          elevation: 1,
+          elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -1719,7 +1352,7 @@ class _DashboardPageState extends State<DashboardPage>
                             goal['savingsGoalName'].toString(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -1734,7 +1367,7 @@ class _DashboardPageState extends State<DashboardPage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
@@ -1752,8 +1385,8 @@ class _DashboardPageState extends State<DashboardPage>
                   children: [
                     Text(
                       'Saved: ${formatCurrency(saved, context)}',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
@@ -1938,7 +1571,7 @@ class _DashboardPageState extends State<DashboardPage>
     // showGenericDialog usually returns a Future; dispose controllers after dialog closes.
     DialogUtils.showGenericDialog(
       context: context,
-      title: DialogUtils.titleText('Top-up'),
+      title: DialogUtils.titleText('Top-up', context),
       message: StatefulBuilder(
         builder: (context, setState) {
           // capture the setState reference for use in onConfirm

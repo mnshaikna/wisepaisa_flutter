@@ -77,11 +77,10 @@ Material buildCreateDataBox(
         child: Center(
           child: Text(
             title,
-            style: TextStyle(
-              color: Colors.white,
+            style: Theme.of(context).textTheme.labelLarge!.copyWith(
               letterSpacing: 1.5,
-              fontSize: 15.0,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.normal,
+              color: Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
@@ -167,7 +166,9 @@ buildCreateExpense(BuildContext context) {
     () {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => CreateExpensePage(group: {}, expense: {}),
+          builder:
+              (context) =>
+                  CreateExpensePage(group: {}, expense: {}, showGroup: true),
         ),
       );
     },
@@ -242,6 +243,26 @@ Widget buildDashboardShimmer(BuildContext context) {
                   ),
             ),
           ),
+
+          titleShimmer(),
+          const SizedBox(height: 10),
+          // Horizontal Reminder List Placeholder
+          SizedBox(
+            height: 150,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder:
+                  (context, index) => Container(
+                    width: 280,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+            ),
+          ),
           const SizedBox(height: 20),
           titleShimmer(),
           const SizedBox(height: 10),
@@ -287,15 +308,29 @@ Widget buildDashboardShimmer(BuildContext context) {
   );
 }
 
-Container titleShimmer() {
-  return Container(
-    width: 200,
-    height: 20,
-    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(8),
-    ),
+Row titleShimmer() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Container(
+        width: 200,
+        height: 20,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      Container(
+        width: 100.0,
+        height: 30,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ],
   );
 }
 
@@ -350,10 +385,10 @@ List<Widget> buildGroupedExpenseWidgets(
   groups.forEach((header, items) {
     widgets.add(
       Padding(
-        padding: const EdgeInsets.fromLTRB(8, 12, 8, 6),
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
         child: Text(
           header,
-          style: theme.textTheme.titleMedium?.copyWith(
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -392,7 +427,7 @@ List<Widget> buildGroupedExpenseWidgets(
           confirmDismiss: (direction) async {
             final shouldDelete = await DialogUtils.showGenericDialog(
               context: context,
-              title: DialogUtils.titleText('Delete Expense?'),
+              title: DialogUtils.titleText('Delete Expense?', context),
               message: const Text(
                 'Are you sure you want to delete this expense?',
               ),
@@ -450,6 +485,7 @@ List<Widget> buildGroupedExpenseWidgets(
                                     (context) => CreateExpensePage(
                                       group: {},
                                       expense: e,
+                                      showGroup: true,
                                     ),
                               ),
                             );
@@ -485,9 +521,9 @@ List<Widget> buildGroupedExpenseWidgets(
                     children: [
                       Text(
                         DateTime.parse(e['expenseDate']).day.toString(),
-                        style: TextStyle(
-                          fontSize: 17.5,
+                        style: theme.textTheme.labelMedium!.copyWith(
                           fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
                         ),
                       ),
                       Text(
@@ -501,20 +537,27 @@ List<Widget> buildGroupedExpenseWidgets(
                                   1,
                             )
                             .toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.labelMedium!.copyWith(
                           letterSpacing: 1.5,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              title: Text(e['expenseTitle'], style: TextStyle(fontSize: 17.5)),
+              title: Text(
+                e['expenseTitle'],
+                style: theme.textTheme.labelLarge!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               subtitle: Text(
                 '${e['expenseCategory']} • ${e['expenseSubCategory']}',
-                style: TextStyle(fontSize: 12.5),
+                style: theme.textTheme.labelSmall!.copyWith(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               trailing: Card(
                 margin: EdgeInsets.zero,
@@ -539,7 +582,7 @@ List<Widget> buildGroupedExpenseWidgets(
                       SizedBox(width: 5.0),
                       Text(
                         formatCurrency(e['expenseAmount'], context),
-                        style: TextStyle(
+                        style: theme.textTheme.labelSmall!.copyWith(
                           fontWeight: FontWeight.bold,
                           color:
                               e['expenseSpendType'] == 'expense'
@@ -591,18 +634,24 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
                         children: [
                           Text(
                             expense['expenseCategory'],
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelMedium!.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
                             maxLines: 1,
                           ),
                           Text(
                             expense['expenseSubCategory'] ?? '',
-                            style: TextStyle(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall!.copyWith(
                               fontWeight: FontWeight.w500,
                               color: Colors.grey,
                               letterSpacing: 1.5,
-                              fontSize: 12.5,
                             ),
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
@@ -616,8 +665,7 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
               ),
               Text(
                 "${expense['expenseSpendType'] == 'income' ? '+' : '-'} ₹${expense['expenseAmount']}",
-                style: TextStyle(
-                  fontSize: 18,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                   color:
                       expense['expenseSpendType'] == 'income'
@@ -631,12 +679,16 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
           SizedBox(height: 8),
           Text(
             expense['expenseTitle'],
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4),
           Text(
             formatDateString(expense['expenseDate'], pattern: 'dd MMM yyyy'),
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium!.copyWith(color: Colors.grey[600]),
           ),
 
           Divider(height: 20),
@@ -650,7 +702,7 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
               children: [
                 Text(
                   "Paid By: ${expense['expensePaidBy']['userName']}",
-                  style: TextStyle(fontSize: 14),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
 
                 Icon(
@@ -671,8 +723,12 @@ Widget expenseCard(BuildContext context, Map<String, dynamic> expense) {
             spacing: 6,
             children:
                 expense['expensePaidTo'].map<Widget>((name) {
-                  debugPrint('name:::${name.toString()}');
-                  return Chip(label: Text(name['userName']));
+                  return Chip(
+                    label: Text(
+                      name['userName'],
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                  );
                 }).toList(),
           ),
 
@@ -762,7 +818,7 @@ Widget initialsRow(
       debugPrint(names.toString());
       DialogUtils.showGenericDialog(
         context: context,
-        title: DialogUtils.titleText('Group Members'),
+        title: DialogUtils.titleText('Group Members', context),
         message: SizedBox(
           height:
               names.length > 5
@@ -781,8 +837,16 @@ Widget initialsRow(
                         backgroundImage: NetworkImage(name['userImageUrl']),
                       ),
                     ),
-                    title: Text(name['userName']),
-                    subtitle: Text(name['userEmail']),
+                    title: Text(
+                      name['userName'],
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      name['userEmail'],
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   );
                 }).toList(),
           ),
@@ -839,9 +903,8 @@ Widget initialsRow(
                 backgroundColor: Colors.blue,
                 child: Text(
                   "+$extraCount",
-                  style: const TextStyle(
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
                     color: Colors.white,
-                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -935,10 +998,9 @@ showSnackBar(context, text, Icon icon) {
           Text(
             text,
             textAlign: TextAlign.start,
-            style: TextStyle(
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(
               letterSpacing: 1.5,
               fontWeight: FontWeight.w500,
-              fontSize: 13.5,
             ),
             overflow: TextOverflow.ellipsis,
             softWrap: true,
@@ -958,19 +1020,19 @@ showSnackBar(context, text, Icon icon) {
 String getPayStatus(Map<String, dynamic> expense, BuildContext context) {
   AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
   List<dynamic> paidTo = expense['expensePaidTo'];
-  debugPrint('paidTo:::${paidTo.toString()}');
 
-  if (expense['expensePaidBy']['userId'] == auth.user!.id &&
-      (paidTo.length == 1 && paidTo.first['userId'] == auth.user!.id)) {
+  if (expense['expensePaidBy']['userId'] == auth.thisUser!['userId'] &&
+      (paidTo.length == 1 &&
+          paidTo.first['userId'] == auth.thisUser!['userId'])) {
     return 'no balance';
   }
 
-  if (expense['expensePaidBy']['userId'] == auth.user!.id) {
+  if (expense['expensePaidBy']['userId'] == auth.thisUser!['userId']) {
     return 'you lent';
   }
 
   final payItem = paidTo.firstWhere(
-    (pay) => pay['userId'] == auth.user!.id,
+    (pay) => pay['userId'] == auth.thisUser!['userId'],
     orElse: () => null, // returns null if not found
   );
   debugPrint('payItem:::${payItem.toString()}');
@@ -1024,8 +1086,13 @@ Widget noDataWidget(String header, String subHead, BuildContext context) {
         textAlign: TextAlign.center,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor),
+        ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
       ),
     ],
   );
 }
+
+TextStyle labelStyle(BuildContext context) => Theme.of(context)
+    .textTheme
+    .labelLarge!
+    .copyWith(letterSpacing: 1.5, color: Colors.grey.shade500);

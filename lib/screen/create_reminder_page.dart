@@ -14,6 +14,7 @@ import 'package:wisepaise/utils/toast.dart';
 import 'package:wisepaise/utils/utils.dart';
 
 import '../utils/calculator_bottom_sheet.dart';
+import '../utils/constants.dart';
 import 'home_page.dart';
 
 class CreateReminderPage extends StatefulWidget {
@@ -214,7 +215,12 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
             return Scaffold(
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Create a reminder'),
+                title: Text(
+                  'Create a reminder',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
               body: Stack(
                 children: [
@@ -314,6 +320,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
                                     labelText: 'Reminder Name',
+                                    labelStyle: labelStyle(context),
                                     border: _outlineBorder(),
                                   ),
                                   maxLines: 1,
@@ -326,6 +333,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
                                     labelText: 'Description (Optional)',
+                                    labelStyle: labelStyle(context),
                                     border: _outlineBorder(),
                                   ),
                                   maxLines: 2,
@@ -349,6 +357,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                     ),
                                     hintText: set.currency,
                                     labelText: 'Amount',
+                                    labelStyle: labelStyle(context),
                                     border: _outlineBorder(),
                                   ),
                                   keyboardType: TextInputType.number,
@@ -366,6 +375,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
                                     labelText: 'Reminder Date',
+                                    labelStyle: labelStyle(context),
                                     suffixIcon: IconButton(
                                       icon: const Icon(Icons.calendar_today),
                                       onPressed:
@@ -386,13 +396,18 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   ),
                                   title: Text(
                                     'Recurring',
-                                    style: TextStyle(
-                                      fontSize: 17.5,
-                                      letterSpacing: 1.5,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontWeight: FontWeight.bold),
                                   ),
-                                  subtitle: Text('Repeat this reminder?'),
+                                  subtitle: Text(
+                                    'Repeat this reminder?',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall!
+                                        .copyWith(color: Colors.grey.shade500),
+                                  ),
                                   activeColor: Colors.blue,
                                   value: _isRecurring,
                                   onChanged: (bool value) {
@@ -408,43 +423,84 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                       Row(
                                         children: [
                                           Expanded(
-                                            child:
-                                                DropdownButtonFormField<String>(
-                                                  value: _recurrencePattern,
-                                                  decoration: InputDecoration(
-                                                    labelText:
-                                                        'Recurrence Pattern',
-                                                    border: _outlineBorder(),
+                                            child: DropdownButtonFormField<
+                                              String
+                                            >(
+                                              value: _recurrencePattern,
+                                              decoration: InputDecoration(
+                                                labelText: 'Recurrence Pattern',
+                                                labelStyle: labelStyle(context),
+                                                border: _outlineBorder(),
+                                              ),
+                                              items: [
+                                                DropdownMenuItem(
+                                                  value: 'NONE',
+                                                  child: Text(
+                                                    'None',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelLarge!
+                                                        .copyWith(
+                                                          letterSpacing: 1.5,
+                                                        ),
                                                   ),
-                                                  items: const [
-                                                    DropdownMenuItem(
-                                                      value: 'NONE',
-                                                      child: Text('None'),
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      value: 'DAILY',
-                                                      child: Text('Daily'),
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      value: 'WEEKLY',
-                                                      child: Text('Weekly'),
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      value: 'MONTHLY',
-                                                      child: Text('Monthly'),
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      value: 'YEARLY',
-                                                      child: Text('Yearly'),
-                                                    ),
-                                                  ],
-                                                  onChanged:
-                                                      (v) => setState(
-                                                        () =>
-                                                            _recurrencePattern =
-                                                                v ?? 'NONE',
-                                                      ),
                                                 ),
+                                                DropdownMenuItem(
+                                                  value: 'DAILY',
+                                                  child: Text(
+                                                    'Daily',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelLarge!
+                                                        .copyWith(
+                                                          letterSpacing: 1.5,
+                                                        ),
+                                                  ),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'WEEKLY',
+                                                  child: Text(
+                                                    'Weekly',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelLarge!
+                                                        .copyWith(
+                                                          letterSpacing: 1.5,
+                                                        ),
+                                                  ),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'MONTHLY',
+                                                  child: Text(
+                                                    'Monthly',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelLarge!
+                                                        .copyWith(
+                                                          letterSpacing: 1.5,
+                                                        ),
+                                                  ),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'YEARLY',
+                                                  child: Text(
+                                                    'Yearly',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelLarge!
+                                                        .copyWith(
+                                                          letterSpacing: 1.5,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ],
+                                              onChanged:
+                                                  (v) => setState(
+                                                    () =>
+                                                        _recurrencePattern =
+                                                            v ?? 'NONE',
+                                                  ),
+                                            ),
                                           ),
                                           SizedBox(width: 12),
                                           Expanded(
@@ -455,6 +511,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                                   TextInputType.number,
                                               decoration: InputDecoration(
                                                 labelText: 'Interval',
+                                                labelStyle: labelStyle(context),
                                                 border: _outlineBorder(),
                                               ),
                                             ),
@@ -473,6 +530,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                             ),
                                         decoration: InputDecoration(
                                           labelText: 'Recurrence End Date',
+                                          labelStyle: labelStyle(context),
                                           suffixIcon: IconButton(
                                             icon: const Icon(
                                               Icons.calendar_today,
@@ -490,25 +548,6 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                     ],
                                   ),
                                 ),
-                                /*SwitchListTile.adaptive(
-                                  contentPadding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  title: Text(
-                                    'Active',
-                                    style: TextStyle(
-                                      fontSize: 17.5,
-                                      letterSpacing: 1.5,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  subtitle: Text('Enable or disable reminder'),
-                                  activeColor: Colors.blue,
-                                  value: _isActive,
-                                  onChanged:
-                                      (v) => setState(() => _isActive = v),
-                                ),*/
                               ],
                             ),
                           ),
@@ -543,8 +582,9 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
-                              textStyle: TextStyle(
-                                fontSize: 15.0,
+                              textStyle: Theme.of(
+                                context,
+                              ).textTheme.titleMedium!.copyWith(
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.bold,
                               ),

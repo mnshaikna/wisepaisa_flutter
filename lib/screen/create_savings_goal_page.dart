@@ -13,6 +13,7 @@ import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../utils/constants.dart';
 import '../utils/toast.dart';
 import '../utils/utils.dart';
 import 'home_page.dart';
@@ -66,6 +67,9 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
           appBar: AppBar(
             title: Text(
               goal.isNotEmpty ? goal['savingsGoalName'] : 'Create Savings Goal',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
             ),
             centerTitle: true,
           ),
@@ -156,6 +160,7 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                                       TextCapitalization.sentences,
                                   decoration: InputDecoration(
                                     labelText: 'Goal name',
+                                    labelStyle: labelStyle(context),
                                     border: buildOutlineInputBorder(),
                                   ),
                                 ),
@@ -167,6 +172,7 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                             controller: targetAmountController,
                             decoration: InputDecoration(
                               labelText: 'Target amount',
+                              labelStyle: labelStyle(context),
                               border: buildOutlineInputBorder(),
                               hintText: set.currency,
                             ),
@@ -178,6 +184,7 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                             enabled: goal.isEmpty,
                             decoration: InputDecoration(
                               labelText: 'Saved so far (optional)',
+                              labelStyle: labelStyle(context),
                               border: buildOutlineInputBorder(),
                               hintText: set.currency,
                             ),
@@ -196,6 +203,7 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: 'Target Date',
+                              labelStyle: labelStyle(context),
                               suffixIcon: IconButton(
                                 icon: const Icon(Icons.calendar_today),
                                 onPressed:
@@ -250,11 +258,15 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                                   savingsGoalImageUrl: url,
                                   savingsGoalUser:
                                       UserModel(
-                                        userId: authProv.user!.id,
-                                        userName: authProv.user!.displayName!,
-                                        userEmail: authProv.user!.email,
-                                        userImageUrl: authProv.user!.photoUrl!,
-                                        userCreatedOn: '',
+                                        userId: authProv.thisUser!['userId'],
+                                        userName:
+                                            authProv.thisUser!['userName'],
+                                        userEmail:
+                                            authProv.thisUser!['userEmail'],
+                                        userImageUrl:
+                                            authProv.thisUser!['userImageUrl'],
+                                        userCreatedOn:
+                                            authProv.thisUser!['userCreatedOn'],
                                       ).toJson(),
                                   savingsGoalCreatedOn: formatDate(
                                     DateTime.now(),
@@ -348,8 +360,9 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
-                            textStyle: TextStyle(
-                              fontSize: 15.0,
+                            textStyle: Theme.of(
+                              context,
+                            ).textTheme.titleMedium!.copyWith(
                               letterSpacing: 1.5,
                               fontWeight: FontWeight.bold,
                             ),

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
@@ -9,16 +12,27 @@ import 'package:wisepaise/utils/utils.dart';
 
 class AuthProvider extends ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'https://www.googleapis.com/auth/userinfo.profile'],
+    scopes: [
+      'email',
+      /*'https://www.googleapis.com/auth/userinfo.profile',*/
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
   );
 
   GoogleSignInAccount? user;
+  Map<String, dynamic>? thisUser;
+
   bool _isLoading = false;
   String? _error;
 
   bool get isLoading => _isLoading;
 
   String? get error => _error;
+
+  setUser(Map<String, dynamic> user) {
+    thisUser = user;
+    notifyListeners();
+  }
 
   Future<GoogleSignInAccount?> getSignedInUser() async {
     user = _googleSignIn.currentUser;
@@ -63,7 +77,11 @@ class AuthProvider extends ChangeNotifier {
         userImageUrl: account.photoUrl ?? '',
         userCreatedOn: formatDate(DateTime.now(), pattern: 'yyyy-MM-dd'),
       );
-      await api.createUser(context, myUser.toJson());
+      await api.createUser(context, myUser.toJson()).then((Response resp) {
+        if (resp.statusCode == HttpStatus.ok) {
+          setUser(resp.data);
+        }
+      });
       notifyListeners();
 
       Toasts.show(

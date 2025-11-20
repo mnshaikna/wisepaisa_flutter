@@ -118,7 +118,7 @@ class _ExpenseChartCardState extends State<ExpenseChartCard> {
           children: [
             Text(
               "Expense Report - $chartTitle",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
             ),
             DropdownButton<String>(
               value: selectedRange,
@@ -126,6 +126,7 @@ class _ExpenseChartCardState extends State<ExpenseChartCard> {
                   ["Month", "Year"]
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold),
               onChanged: (val) => setState(() => selectedRange = val!),
             ),
           ],

@@ -2,18 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_actions/quick_actions.dart';
-import 'package:shimmer/main.dart';
+import 'package:wisepaise/models/user_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/connectivity_provider.dart';
-import 'package:wisepaise/providers/notification_provider.dart';
+import 'package:wisepaise/services/notification_service.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
 import 'package:wisepaise/screen/create_expense_group_page.dart';
 import 'package:wisepaise/screen/create_expense_page.dart';
 import 'package:wisepaise/screen/create_reminder_page.dart';
+import 'package:wisepaise/screen/create_savings_goal_page.dart';
 import 'package:wisepaise/screen/intro_screen.dart';
 import 'package:wisepaise/screen/login_page.dart';
 import 'package:wisepaise/screen/home_page.dart';
@@ -26,6 +26,7 @@ import 'models/reminder_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  NotificationService().init();
   await Hive.initFlutter();
   await Hive.openBox('settings');
   var box = await Hive.openBox('appBox');
@@ -38,7 +39,6 @@ void main() async {
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => ApiProvider()),
         ChangeNotifierProvider(create: (context) => SettingsProvider()),
-        ChangeNotifierProvider(create: (context) => NotificationProvider()),
         ChangeNotifierProvider(create: (context) => ConnectivityProvider()),
       ],
       child: MyApp(hasSeenIntro: hasSeenIntro),
@@ -90,7 +90,12 @@ class _MyAppState extends State<MyApp> {
           case 'add_expense':
             navigatorKey.currentState?.push(
               MaterialPageRoute(
-                builder: (context) => CreateExpensePage(expense: {}, group: {}),
+                builder:
+                    (context) => CreateExpensePage(
+                      expense: {},
+                      group: {},
+                      showGroup: true,
+                    ),
               ),
             );
             break;
@@ -110,25 +115,38 @@ class _MyAppState extends State<MyApp> {
               ),
             );
             break;
+          case 'create_goal':
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => CreateSavingsGoalPage(goal: {}),
+              ),
+            );
+            break;
         }
       });
     });
 
     quickActions.setShortcutItems(<ShortcutItem>[
       const ShortcutItem(
-        type: 'add_expense',
-        localizedTitle: 'Create an Expense Record',
-        icon: 'receipt',
+        type: 'create_group',
+        localizedTitle: 'Create a Group',
+        icon: 'people',
+      ),
+      const ShortcutItem(
+        type: 'create_goal',
+        localizedTitle: 'Set a Goal',
+        icon: 'goal',
       ),
       const ShortcutItem(
         type: 'add_reminder',
-        localizedTitle: 'Create an Expense Reminder',
+        localizedTitle: 'Set a Reminder',
         icon: 'alarm',
       ),
+
       const ShortcutItem(
-        type: 'create_group',
-        localizedTitle: 'Create an Expense Group',
-        icon: 'people',
+        type: 'add_expense',
+        localizedTitle: 'Add an Expense',
+        icon: 'receipt',
       ),
     ]);
   }
@@ -141,6 +159,15 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _initialUser = user;
         _checking = false;
+        auth.setUser(
+          UserModel(
+            userId: user!.id,
+            userName: user.displayName!,
+            userEmail: user.email,
+            userImageUrl: user.photoUrl!,
+            userCreatedOn: '',
+          ).toJson(),
+        );
       });
     } catch (e) {
       debugPrint("Silent sign-in error: $e");
@@ -185,9 +212,18 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           navigatorKey: navigatorKey,
           themeMode: settings.themeMode,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(1.0)),
+              child: child!,
+            );
+          },
           // 🌞 Light theme
           theme: ThemeData(
             scaffoldBackgroundColor: Colors.white,
+            appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             useMaterial3: true,
             fontFamily: GoogleFonts.karla().fontFamily,
             brightness: Brightness.light,
@@ -200,6 +236,7 @@ class _MyAppState extends State<MyApp> {
           // 🌙 Dark theme
           darkTheme: ThemeData(
             scaffoldBackgroundColor: Colors.black,
+            appBarTheme: AppBarTheme(backgroundColor: Colors.black),
             useMaterial3: true,
             fontFamily: GoogleFonts.karla().fontFamily,
             brightness: Brightness.dark,

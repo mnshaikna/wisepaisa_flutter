@@ -156,7 +156,9 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
@@ -187,10 +189,12 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
               suffixIcon: const Icon(Icons.clear),
               suffixMode: OverlayVisibilityMode.editing,
               placeholder: 'Search expenses...',
-              placeholderStyle: TextStyle(
-                fontSize: 15.0,
+              placeholderStyle: theme.textTheme.titleSmall!.copyWith(
                 letterSpacing: 1.5,
-                color: isDark ? Colors.white54 : Colors.black54,
+                color:
+                    Theme.of(context).brightness == Brightness.light
+                        ? Colors.black54
+                        : Colors.white54,
               ),
               prefixIcon: const Padding(
                 padding: EdgeInsets.only(left: 8.0, top: 5.0),
@@ -227,7 +231,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                   children: [
                     Text(
                       'Search Filters',
-                      style: TextStyle(
+                      style: theme.textTheme.titleSmall!.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
                       ),
@@ -255,7 +259,11 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                             SizedBox(width: 5.0),
                             Text(
                               'Reset filters',
-                              style: TextStyle(color: Colors.blue),
+                              style: theme.textTheme.labelMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                                color: Colors.blue,
+                              ),
                             ),
                           ],
                         ),
@@ -303,9 +311,8 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                         startDate != null
                                             ? '${formatDate(startDate!)} - ${formatDate(endDate!)}'
                                             : 'Date Range',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
+                                        style: theme.textTheme.labelMedium!
+                                            .copyWith(color: Colors.white),
                                       ),
                                     ],
                                   ),
@@ -327,7 +334,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                     ),
                                     child: Icon(
                                       Icons.clear,
-                                      size: 16,
+                                      size: 14,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -344,9 +351,12 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                             isExpanded: true,
                             decoration: _filterDecoration('Type', context),
                             items: [
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'all',
-                                child: Text('All'),
+                                child: Text(
+                                  'All',
+                                  style: theme.textTheme.labelMedium,
+                                ),
                               ),
                               ...catList.keys.map(
                                 (type) => DropdownMenuItem(
@@ -371,6 +381,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                           overflow: TextOverflow.ellipsis,
                                           softWrap: true,
                                           maxLines: 1,
+                                          style: theme.textTheme.labelMedium,
                                         ),
                                       ),
                                     ],
@@ -401,9 +412,12 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                             isExpanded: true,
                             decoration: _filterDecoration('Category', context),
                             items: [
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'all',
-                                child: Text('All'),
+                                child: Text(
+                                  'All',
+                                  style: theme.textTheme.labelMedium,
+                                ),
                               ),
                               ...currentCategories.map(
                                 (cat) => DropdownMenuItem(
@@ -419,6 +433,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                           overflow: TextOverflow.ellipsis,
                                           softWrap: true,
                                           maxLines: 1,
+                                          style: theme.textTheme.labelMedium,
                                         ),
                                       ),
                                     ],
@@ -456,9 +471,12 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                               context,
                             ),
                             items: [
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'all',
-                                child: Text('All'),
+                                child: Text(
+                                  'All',
+                                  style: theme.textTheme.labelMedium,
+                                ),
                               ),
                               ...currentSubCategories.map(
                                 (sub) => DropdownMenuItem(
@@ -468,6 +486,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                     softWrap: true,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
+                                    style: theme.textTheme.labelMedium,
                                   ),
                                 ),
                               ),
@@ -493,9 +512,12 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                               context,
                             ),
                             items: [
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'all',
-                                child: Text('All'),
+                                child: Text(
+                                  'All',
+                                  style: theme.textTheme.labelMedium,
+                                ),
                               ),
                               ...payMethodList.map(
                                 (pay) => DropdownMenuItem(
@@ -510,6 +532,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                           overflow: TextOverflow.ellipsis,
                                           softWrap: true,
                                           maxLines: 1,
+                                          style: theme.textTheme.labelMedium,
                                         ),
                                       ),
                                     ],
@@ -551,7 +574,10 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
         ),
         label: Text(
           'Export Report',
-          style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+            letterSpacing: 1.5,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Consumer<ApiProvider>(
@@ -572,7 +598,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                     children:
                         getResultList().map((expense) {
                           String payStatus = getPayStatus(expense, context);
-                          debugPrint('payStatus:::$payStatus');
+                          debugPrint('$payStatus');
                           return ListTile(
                             onTap: () {
                               DialogUtils.showGenericDialog(
@@ -586,6 +612,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                           (context) => CreateExpensePage(
                                             group: {},
                                             expense: expense,
+                                            showGroup: true,
                                           ),
                                     ),
                                   );
@@ -630,7 +657,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                         expense['expenseCategory'],
                                         expense['expenseSpendType'],
                                       ),
-                                      size: 15.0,
+                                      size: 13.0,
                                     ),
                                     Divider(
                                       endIndent: 10.0,
@@ -639,10 +666,10 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                     ),
                                     Text(
                                       '${DateTime.parse(expense['expenseDate']).day.toString()} ${month.elementAt(int.parse(DateTime.parse(expense['expenseDate']).month.toString()) - 1).toUpperCase()}',
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: theme.textTheme.labelSmall!
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -650,13 +677,17 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                             ),
                             title: Text(
                               expense['expenseTitle'],
-                              style: TextStyle(fontSize: 17.5),
+                              style: theme.textTheme.labelLarge!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: Text(
                               group.exGroupShared
-                                  ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
+                                  ? '${expense['expensePaidBy']['userId'] == auth.thisUser!['userId'] ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)}'
                                   : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
-                              style: TextStyle(fontSize: 12.5),
+                              style: theme.textTheme.labelSmall!.copyWith(
+                                color: Colors.grey,
+                              ),
                             ),
                             trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -665,16 +696,20 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                 group.exGroupShared
                                     ? Text(
                                       payStatus,
-                                      style: TextStyle(
-                                        letterSpacing: 1.5,
-                                        color:
-                                            payStatus == 'not involved' ||
-                                                    payStatus == 'no balance'
-                                                ? Colors.grey
-                                                : payStatus == 'you borrowed'
-                                                ? Colors.red
-                                                : Colors.green,
-                                      ),
+                                      style: theme.textTheme.labelMedium!
+                                          .copyWith(
+                                            letterSpacing: 1.5,
+                                            color:
+                                                payStatus == 'not involved' ||
+                                                        payStatus ==
+                                                            'no balance'
+                                                    ? Colors.grey
+                                                    : payStatus ==
+                                                        'You borrowed'
+                                                    ? Colors.red
+                                                    : Colors.green,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     )
                                     : SizedBox.shrink(),
                                 group.exGroupShared &&
@@ -686,16 +721,16 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
                                         expense['expenseAmount'],
                                         context,
                                       ),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.5,
-                                        fontSize: 13.5,
-                                        color:
-                                            expense['expenseSpendType'] ==
-                                                    'income'
-                                                ? Colors.green
-                                                : Colors.red,
-                                      ),
+                                      style: theme.textTheme.labelMedium!
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.5,
+                                            color:
+                                                expense['expenseSpendType'] ==
+                                                        'income'
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                          ),
                                     ),
                               ],
                             ),

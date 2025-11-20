@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,8 +9,9 @@ import 'package:wisepaise/models/group_model.dart';
 import 'package:wisepaise/models/user_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
-
+import 'package:wisepaise/screen/add_members_screen.dart';
 import '../models/type_model.dart';
+import '../utils/constants.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/toast.dart';
 import '../utils/utils.dart';
@@ -41,10 +40,8 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
   double verticalGap = 15.0;
   UserModel thisUser = UserModel.empty();
   List<dynamic> groupMembers = [];
-  TextEditingController memberController = TextEditingController(),
-      groupNameController = TextEditingController(),
+  TextEditingController groupNameController = TextEditingController(),
       groupDescController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -67,7 +64,12 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(group.isNotEmpty ? group['exGroupName'] : 'Create a group'),
+        title: Text(
+          group.isNotEmpty ? group['exGroupName'] : 'Create a group',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+        ),
       ),
       body: Consumer<ApiProvider>(
         builder: (_, api, __) {
@@ -168,6 +170,7 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                         TextCapitalization.sentences,
                                     decoration: InputDecoration(
                                       labelText: 'Group name',
+                                      labelStyle: labelStyle(context),
                                       border: buildOutlineInputBorder(),
                                     ),
                                   ),
@@ -184,15 +187,17 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                               textInputAction: TextInputAction.newline,
                               textCapitalization: TextCapitalization.sentences,
                               decoration: InputDecoration(
-                                hintText: 'Group Desc (Optional)',
+                                labelText: 'Group Desc (Optional)',
+                                labelStyle: labelStyle(context),
                                 border: buildOutlineInputBorder(),
                               ),
                             ),
                             Text(
                               'Group Type',
-                              style: TextStyle(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium!.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 17.5,
                                 letterSpacing: 1.5,
                               ),
                               textAlign: TextAlign.left,
@@ -243,7 +248,13 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                         child: Column(
                                           children: [
                                             Icon(thisType.icon),
-                                            Text(thisType.name),
+                                            Text(
+                                              thisType.name,
+                                              style:
+                                                  Theme.of(
+                                                    context,
+                                                  ).textTheme.labelSmall,
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -260,13 +271,22 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                               ),
                               title: Text(
                                 'Shared Group',
-                                style: TextStyle(
-                                  fontSize: 17.5,
-                                  letterSpacing: 1.5,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium!.copyWith(
                                   fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
                                 ),
                               ),
-                              subtitle: Text('Group involves other people?'),
+                              subtitle: Text(
+                                'Group involves other people?',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall!.copyWith(
+                                  letterSpacing: 1.5,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
                               activeColor: Colors.blue,
                               value: isGroup,
                               onChanged: (bool value) {
@@ -278,13 +298,14 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                     context: context,
                                     title: DialogUtils.titleText(
                                       'Remove Members?',
+                                      context,
                                     ),
                                     message: Text(
                                       'Remove all ${groupMembers.length} added Members?',
-                                      style: TextStyle(
-                                        letterSpacing: 1.5,
-                                        fontSize: 15.0,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(letterSpacing: 1.5),
                                     ),
                                     confirmColor: Colors.green,
                                     showCancel: true,
@@ -311,11 +332,15 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                   setState(() {
                                     groupMembers.add(
                                       UserModel(
-                                        userId: authProv.user!.id,
-                                        userName: authProv.user!.displayName!,
-                                        userEmail: authProv.user!.email,
-                                        userImageUrl: authProv.user!.photoUrl!,
-                                        userCreatedOn: "userCreatedOn",
+                                        userId: authProv.thisUser!['userId'],
+                                        userName:
+                                            authProv.thisUser!['userName'],
+                                        userEmail:
+                                            authProv.thisUser!['userEmail'],
+                                        userImageUrl:
+                                            authProv.thisUser!['userImageUrl'],
+                                        userCreatedOn:
+                                            authProv.thisUser!['userCreatedOn'],
                                       ).toJson(),
                                     );
                                   });
@@ -331,7 +356,14 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                         context,
                                         "Share Expenses with friends?\n\n➕ Add members to this group",
                                         () {
-                                          showAddMembersDialog(context);
+                                          //showAddMembersDialog(context);
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      AddMembersScreen(),
+                                            ),
+                                          );
                                         },
                                         LinearGradient(
                                           colors: [
@@ -348,9 +380,10 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                         children: [
                                           Text(
                                             'Group Members',
-                                            style: TextStyle(
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium!.copyWith(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 17.5,
                                               letterSpacing: 1.5,
                                             ),
                                             textAlign: TextAlign.left,
@@ -371,9 +404,16 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                                 ToastType.info,
                                                           );
                                                         } else {
+                                                          AuthProvider auth =
+                                                              Provider.of<
+                                                                AuthProvider
+                                                              >(
+                                                                context,
+                                                                listen: false,
+                                                              );
                                                           setState(() {
                                                             if (e['userId'] ==
-                                                                group['exGroupOwnerId']['userId']) {
+                                                                auth.thisUser!['userId']) {
                                                               Toasts.show(
                                                                 context,
                                                                 'Owner cannot be removed',
@@ -382,8 +422,17 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                                         .info,
                                                               );
                                                             } else {
+                                                              int
+                                                              ind = groupMembers
+                                                                  .indexWhere(
+                                                                    (ele) =>
+                                                                        ele['userId'] ==
+                                                                        e['userId'],
+                                                                  );
                                                               groupMembers
-                                                                  .remove(e);
+                                                                  .removeAt(
+                                                                    ind,
+                                                                  );
                                                               Toasts.show(
                                                                 context,
                                                                 'Member ${e['userName']} removed',
@@ -403,18 +452,20 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                               maxRadius: 30.0,
                                                               backgroundImage:
                                                                   NetworkImage(
-                                                                    e is Map
-                                                                        ? e['userImageUrl']
-                                                                        : e.userImageUrl,
+                                                                    e['userImageUrl'],
                                                                   ),
                                                             ),
                                                             SizedBox(
                                                               height: 5.0,
                                                             ),
                                                             Text(
-                                                              e is Map
-                                                                  ? e['userName']
-                                                                  : e.userName,
+                                                              e['userName'],
+                                                              style:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      )
+                                                                      .textTheme
+                                                                      .labelMedium,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
@@ -431,10 +482,55 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                   }).toList()
                                                   ..add(
                                                     GestureDetector(
-                                                      onTap: () {
-                                                        showAddMembersDialog(
-                                                          context,
-                                                        );
+                                                      onTap: () async {
+                                                        List<
+                                                          Map<String, dynamic>
+                                                        >
+                                                        selectedList =
+                                                            await Navigator.of(
+                                                              context,
+                                                            ).push(
+                                                              MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        AddMembersScreen(),
+                                                              ),
+                                                            ) ??
+                                                            [];
+
+                                                        if (selectedList
+                                                            .isNotEmpty) {
+                                                          setState(() {
+                                                            groupMembers.addAll(
+                                                              selectedList,
+                                                            );
+                                                          });
+                                                          groupMembers =
+                                                              groupMembers
+                                                                  .fold<
+                                                                    Map<
+                                                                      String,
+                                                                      Map<
+                                                                        String,
+                                                                        dynamic
+                                                                      >
+                                                                    >
+                                                                  >(
+                                                                    {},
+                                                                    (
+                                                                      map,
+                                                                      item,
+                                                                    ) =>
+                                                                        map
+                                                                          ..[item['userId']] =
+                                                                              item,
+                                                                  )
+                                                                  .values
+                                                                  .toList();
+                                                          debugPrint(
+                                                            'selectedList:::${selectedList.toString()}',
+                                                          );
+                                                        }
                                                       },
                                                       child: Column(
                                                         children: [
@@ -445,7 +541,15 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                                             ),
                                                           ),
                                                           SizedBox(height: 5.0),
-                                                          Text('Add Members'),
+                                                          Text(
+                                                            'Add Members',
+                                                            style:
+                                                                Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .textTheme
+                                                                    .labelMedium,
+                                                          ),
                                                         ],
                                                       ),
                                                     ),
@@ -490,11 +594,15 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                                   exGroupMembers: groupMembers,
                                   exGroupOwnerId:
                                       UserModel(
-                                        userId: authProv.user!.id,
-                                        userName: authProv.user!.displayName!,
-                                        userEmail: authProv.user!.email,
-                                        userImageUrl: authProv.user!.photoUrl!,
-                                        userCreatedOn: '',
+                                        userId: authProv.thisUser!['userId'],
+                                        userName:
+                                            authProv.thisUser!['userName'],
+                                        userEmail:
+                                            authProv.thisUser!['userEmail'],
+                                        userImageUrl:
+                                            authProv.thisUser!['userImageUrl'],
+                                        userCreatedOn:
+                                            authProv.thisUser!['userCreatedOn'],
                                       ).toJson(),
                                   exGroupCreatedOn: DateFormat(
                                     'yyyy-MM-dd HH:mm:ss',
@@ -578,8 +686,9 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
-                            textStyle: TextStyle(
-                              fontSize: 15.0,
+                            textStyle: Theme.of(
+                              context,
+                            ).textTheme.titleMedium!.copyWith(
                               letterSpacing: 1.5,
                               fontWeight: FontWeight.bold,
                             ),
@@ -603,97 +712,6 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8.0),
       borderSide: BorderSide(width: 0.25),
-    );
-  }
-
-  void showAddMembersDialog(BuildContext context) {
-    memberController.clear();
-    DialogUtils.showGenericDialog(
-      context: context,
-      title: Text(
-        'Add Members',
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 17.5,
-          letterSpacing: 1.5,
-        ),
-        textAlign: TextAlign.left,
-      ),
-      message: Form(
-        key: _formKey,
-        child: TextFormField(
-          validator: (String? str) {
-            AuthProvider auth = Provider.of<AuthProvider>(
-              context,
-              listen: false,
-            );
-            if (str!.trim().isEmpty) {
-              return 'Enter an email Id';
-            }
-            if ((str.trim().compareTo(auth.user!.email)) == 0) {
-              return 'Owner cannot be a member';
-            }
-            return null;
-          },
-          controller: memberController,
-          //autofocus: true,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          textCapitalization: TextCapitalization.none,
-          decoration: InputDecoration(
-            hintText: 'abc@gmail.com',
-            hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1.5),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(width: 0.1, color: Colors.blue),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(width: 0.1, color: Colors.blue),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(width: 0.1, color: Colors.blue),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(width: 0.1, color: Colors.red),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(width: 0.1, color: Colors.red),
-            ),
-          ),
-        ),
-      ),
-      cancelText: 'Cancel',
-      confirmText: 'Add',
-      onCancel: () {
-        memberController.clear();
-        unfocusKeyboard();
-        Navigator.of(context).pop();
-      },
-      onConfirm: () {
-        if (_formKey.currentState!.validate()) {
-          Navigator.of(context).pop();
-          ApiProvider api = Provider.of(context, listen: false);
-          api.getUserByEmail(context, memberController.text.trim()).then((
-            Response resp,
-          ) {
-            setState(() {
-              if (resp.statusCode == HttpStatus.ok) {
-                thisUser = UserModel.fromJson(resp.data);
-              } else {
-                thisUser = UserModel.empty();
-              }
-              unfocusKeyboard();
-              _showAddMemberBottomSheet(context);
-            });
-          });
-        }
-      },
-      showCancel: true,
-      confirmColor: Colors.lightBlue,
     );
   }
 
@@ -801,74 +819,6 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showAddMemberBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      showDragHandle: true,
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Add Member',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Divider(height: 1),
-              thisUser.userId.isEmpty
-                  ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: Text(
-                        'Email ${memberController.text.trim()} not found',
-                        style: TextStyle(letterSpacing: 1.5),
-                      ),
-                    ),
-                  )
-                  : ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(thisUser.userImageUrl),
-                    ),
-                    title: Text(thisUser.userName),
-                    subtitle: Text(thisUser.userEmail),
-                    trailing: IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          side: BorderSide(width: 0.25),
-                        ),
-                      ),
-                      icon: Icon(Icons.check),
-                      onPressed: () {
-                        setState(() {
-                          groupMembers.add(thisUser);
-                        });
-                        unfocusKeyboard();
-                        Navigator.of(context).pop();
-
-                        debugPrint('groupMembers:::${groupMembers.length}');
-                      },
-                    ),
-                  ),
-              const SizedBox(height: 6),
-            ],
           ),
         );
       },

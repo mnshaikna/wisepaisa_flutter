@@ -55,7 +55,6 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-
     Future<bool> onWillPop() {
       DateTime? currentBackPressTime = null;
       DateTime now = DateTime.now();
@@ -153,19 +152,15 @@ class _LoginPageState extends State<LoginPage>
                             Text(
                               'Welcome to WisePaisa!',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.5,
-                                fontSize: 25.0,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge!
+                                  .copyWith(fontWeight: FontWeight.bold),
                             ),
-                            const Text(
+                            const SizedBox(height: 5.0),
+                            Text(
                               "Sign in to continue\nYou're only one step away!",
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13.0,
-                                letterSpacing: 1.5,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall!
+                                  .copyWith(letterSpacing: 1.5),
                             ),
                             const SizedBox(height: 20),
                             Consumer<AuthProvider>(
@@ -173,12 +168,13 @@ class _LoginPageState extends State<LoginPage>
                                 return GoogleAuthButton(
                                   onPressed: _handleGoogleSignIn,
                                   isLoading: authProvider.isLoading,
-                                  style: const AuthButtonStyle(
+                                  style: AuthButtonStyle(
                                     iconBackground: Colors.transparent,
                                     buttonColor: Colors.white,
                                     progressIndicatorStrokeWidth: 2.0,
-                                    textStyle: TextStyle(
-                                      fontSize: 17.7,
+                                    textStyle: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium!.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
                                     ),
@@ -190,7 +186,7 @@ class _LoginPageState extends State<LoginPage>
                                 );
                               },
                             ),
-                            const SizedBox(height: 12),
+                            /*const SizedBox(height: 12),
                             if (Platform.isIOS)
                               AppleAuthButton(
                                 onPressed: () {},
@@ -202,15 +198,13 @@ class _LoginPageState extends State<LoginPage>
                                   padding: EdgeInsets.symmetric(vertical: 10.0),
                                   buttonType: AuthButtonType.secondary,
                                 ),
-                              ),
+                              ),*/
                             const SizedBox(height: 20.0),
-                            const Text(
+                            Text(
                               "By creating an account, you agree to our\nPrivacy Policy and Terms of Use",
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12.0,
-                                letterSpacing: 1.5,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall!
+                                  .copyWith(letterSpacing: 1.5),
                             ),
                           ],
                         ),

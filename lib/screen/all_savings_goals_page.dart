@@ -8,7 +8,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/models/savings_goal_transaction.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
-import 'package:wisepaise/utils/constants.dart';
 import 'package:wisepaise/utils/dialog_utils.dart';
 import '../providers/api_provider.dart';
 import '../utils/toast.dart';
@@ -37,18 +36,23 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
             ? buildLoadingContainer(context: context)
             : Scaffold(
               appBar: AppBar(
-                title: const Text('Saving Goals'),
+                title: Text(
+                  'Saving Goals',
+                  style: theme.textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 centerTitle: true,
               ),
               body:
                   (api.savingsGoalList.isEmpty)
                       ? Center(
-                    child: noDataWidget(
-                      'Goals not found',
-                      'Create a goal and be on target',
-                      context,
-                    ),
-                  )
+                        child: noDataWidget(
+                          'Goals not found',
+                          'Create a goal and be on target',
+                          context,
+                        ),
+                      )
                       : ListView.separated(
                         padding: const EdgeInsets.all(12),
                         itemCount: api.savingsGoalList.length,
@@ -166,7 +170,7 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
                                                     .titleMedium
                                                     ?.copyWith(
                                                       fontWeight:
-                                                          FontWeight.w700,
+                                                          FontWeight.bold,
                                                     ),
                                               ),
                                               Text(
@@ -216,9 +220,9 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
                                       children: [
                                         Text(
                                           'Saved: ${formatCurrency(goal['savingsGoalCurrentAmount'], context)}',
-                                          style: theme.textTheme.labelMedium
+                                          style: theme.textTheme.labelSmall
                                               ?.copyWith(
-                                                fontWeight: FontWeight.w700,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                         ),
                                         Text(
@@ -226,7 +230,8 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
                                             goal['savingsGoalTargetDate'],
                                             pattern: 'dd MMM yyyy',
                                           ),
-                                          style: theme.textTheme.labelSmall,
+                                          style: theme.textTheme.labelSmall!
+                                              .copyWith(color: Colors.grey),
                                         ),
                                       ],
                                     ),
@@ -241,14 +246,14 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
                 onPressed: () async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>  CreateSavingsGoalPage(goal: {},),
+                      builder: (_) => CreateSavingsGoalPage(goal: {}),
                     ),
                   );
                 },
                 icon: const Icon(FontAwesomeIcons.flagCheckered),
-                label: const Text(
+                label: Text(
                   'Create a goal',
-                  style: TextStyle(
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
                     letterSpacing: 1.5,
                     fontWeight: FontWeight.bold,
                   ),
@@ -276,7 +281,7 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
     // showGenericDialog usually returns a Future; dispose controllers after dialog closes.
     DialogUtils.showGenericDialog(
       context: context,
-      title: DialogUtils.titleText('Top-up'),
+      title: DialogUtils.titleText('Top-up',context),
       message: StatefulBuilder(
         builder: (context, setState) {
           // capture the setState reference for use in onConfirm

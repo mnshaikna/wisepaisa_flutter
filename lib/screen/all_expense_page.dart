@@ -15,10 +15,19 @@ class AllExpensePage extends StatefulWidget {
 class _AllExpensePageState extends State<AllExpensePage> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Consumer<ApiProvider>(
       builder: (_, api, __) {
         return Scaffold(
-          appBar: AppBar(centerTitle: true, title: Text('Expenses')),
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text(
+              'Expenses',
+              style: theme.textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           body:
               api.userExpenseList.isEmpty
                   ? Center(
@@ -44,7 +53,11 @@ class _AllExpensePageState extends State<AllExpensePage> {
                 () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder:
-                        (context) => CreateExpensePage(group: {}, expense: {}),
+                        (context) => CreateExpensePage(
+                          group: {},
+                          expense: {},
+                          showGroup: true,
+                        ),
                   ),
                 ),
             shape: RoundedRectangleBorder(
@@ -53,7 +66,10 @@ class _AllExpensePageState extends State<AllExpensePage> {
             extendedIconLabelSpacing: 15.0,
             label: Text(
               'Add Expenses',
-              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         );

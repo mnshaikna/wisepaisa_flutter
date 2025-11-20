@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "460722747757-jgs1gscne0ea2sbeqd37pbq5oib05g8t.apps.googleusercontent.com",
+          "client_id": "460722747757-e0aprsdltc1fe9p4dvtbthp96uo7jrle.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.appswella.wisepaise",
-            "certificate_hash": "3c82fdc6f4abe88898aa8fd524d4ac77e6fa59ff"
+            "certificate_hash": "479634e10f3b363ed425ecef11edcf8fffb2b099"
           }
         },
         {

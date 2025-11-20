@@ -60,7 +60,15 @@ class _AllReminderPageState extends State<AllReminderPage>
     return Consumer<ApiProvider>(
       builder: (_, api, __) {
         return Scaffold(
-          appBar: AppBar(centerTitle: true, title: Text('Expense Reminders')),
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text(
+              'Expense Reminders',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
           floatingActionButton: FloatingActionButton.extended(
             icon: Icon(Icons.alarm),
             onPressed:
@@ -78,7 +86,10 @@ class _AllReminderPageState extends State<AllReminderPage>
 
             label: Text(
               'Add Reminders',
-              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           body:
@@ -100,10 +111,11 @@ class _AllReminderPageState extends State<AllReminderPage>
                             ? SizedBox.shrink()
                             : Text(
                               'Active Reminders',
-                              style: TextStyle(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium!.copyWith(
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 17.5,
                               ),
                             ),
                         SizedBox(height: 10.0),
@@ -124,10 +136,11 @@ class _AllReminderPageState extends State<AllReminderPage>
                             ? SizedBox.shrink()
                             : Text(
                               'Inactive Reminders',
-                              style: TextStyle(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium!.copyWith(
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 17.5,
                               ),
                             ),
                         SizedBox(height: 10.0),
@@ -207,7 +220,7 @@ class _AllReminderPageState extends State<AllReminderPage>
         confirmDismiss: (direction) async {
           final shouldDelete = await DialogUtils.showGenericDialog(
             context: context,
-            title: DialogUtils.titleText('Delete Reminder?'),
+            title: DialogUtils.titleText('Delete Reminder?', context),
             message: const Text(
               'Are you sure you want to delete this reminder?',
             ),
@@ -285,7 +298,9 @@ class _AllReminderPageState extends State<AllReminderPage>
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          DialogUtils.titleText(title),
+                          Expanded(
+                            child: DialogUtils.titleText(title, context),
+                          ),
                           TextButton.icon(
                             onPressed: () {
                               Navigator.pop(context);
@@ -369,8 +384,9 @@ class _AllReminderPageState extends State<AllReminderPage>
                                             title.isEmpty
                                                 ? 'Untitled Reminder'
                                                 : title,
-                                            style: const TextStyle(
-                                              fontSize: 14,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelMedium!.copyWith(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
                                             ),
@@ -402,14 +418,17 @@ class _AllReminderPageState extends State<AllReminderPage>
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   softWrap: true,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                    color:
-                                                        isExpense
-                                                            ? Colors.red
-                                                            : Colors.green,
-                                                  ),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall!
+                                                      .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            isExpense
+                                                                ? Colors.red
+                                                                : Colors.green,
+                                                      ),
                                                 ),
                                               ),
                                             ],
@@ -439,8 +458,9 @@ class _AllReminderPageState extends State<AllReminderPage>
                                           const SizedBox(width: 4),
                                           Text(
                                             date,
-                                            style: TextStyle(
-                                              fontSize: 12,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall!.copyWith(
                                               color: Colors.grey.shade900,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -453,8 +473,9 @@ class _AllReminderPageState extends State<AllReminderPage>
                                 if (description.isNotEmpty)
                                   Text(
                                     description,
-                                    style: TextStyle(
-                                      fontSize: 11,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall!.copyWith(
                                       color: Colors.white.withOpacity(0.95),
                                     ),
                                     maxLines: 2,
@@ -495,10 +516,11 @@ class _AllReminderPageState extends State<AllReminderPage>
                                             isRecurring
                                                 ? 'Recurring'
                                                 : 'One-time',
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.white,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall!.copyWith(
                                               fontWeight: FontWeight.bold,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ],
@@ -534,9 +556,11 @@ class _AllReminderPageState extends State<AllReminderPage>
                                           const SizedBox(width: 4),
                                           Text(
                                             isActive ? 'Active' : 'Disabled',
-                                            style: const TextStyle(
-                                              fontSize: 11,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall!.copyWith(
                                               fontWeight: FontWeight.bold,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ],
@@ -573,9 +597,11 @@ class _AllReminderPageState extends State<AllReminderPage>
                                           const SizedBox(width: 4),
                                           Text(
                                             isExpense ? 'Expense' : 'Income',
-                                            style: TextStyle(
-                                              fontSize: 12,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall!.copyWith(
                                               fontWeight: FontWeight.bold,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ],
@@ -677,9 +703,8 @@ class _AllReminderPageState extends State<AllReminderPage>
                   ),
                   title: Text(
                     title.isEmpty ? 'Untitled Reminder' : title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -713,10 +738,8 @@ class _AllReminderPageState extends State<AllReminderPage>
                               const SizedBox(width: 4),
                               Text(
                                 date,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall!
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -751,10 +774,8 @@ class _AllReminderPageState extends State<AllReminderPage>
                               const SizedBox(width: 4),
                               Text(
                                 isRecurring ? 'Recurring' : 'One-time',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall!
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -773,9 +794,10 @@ class _AllReminderPageState extends State<AllReminderPage>
                       ),
                       Text(
                         formatCurrency(double.tryParse(amount) ?? 0, context),
-                        style: TextStyle(
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelMedium!.copyWith(
                           color: isExpense ? Colors.red : Colors.green,
-                          fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,

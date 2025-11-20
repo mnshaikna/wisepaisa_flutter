@@ -22,7 +22,15 @@ class _AllGroupPageState extends State<AllGroupPage> {
     return Consumer2<ApiProvider, AuthProvider>(
       builder: (_, api, auth, __) {
         return Scaffold(
-          appBar: AppBar(centerTitle: true, title: Text('Expenses Groups')),
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text(
+              'Expenses Groups',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               Navigator.of(context).push(
@@ -38,7 +46,10 @@ class _AllGroupPageState extends State<AllGroupPage> {
             ),
             label: Text(
               'Create Groups',
-              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           body:
@@ -133,8 +144,9 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                           children: [
                                             Text(
                                               group.exGroupName,
-                                              style: const TextStyle(
-                                                fontSize: 20,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.titleMedium!.copyWith(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -142,10 +154,13 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                             if (group.exGroupDesc.isNotEmpty)
                                               Text(
                                                 group.exGroupDesc,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey.shade700,
-                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium!
+                                                    .copyWith(
+                                                      color:
+                                                          Colors.grey.shade600,
+                                                    ),
                                               ),
                                             Row(
                                               mainAxisAlignment:
@@ -170,10 +185,15 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                                         ),
                                                       )
                                                       .name,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey.shade600,
-                                                  ),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall!
+                                                      .copyWith(
+                                                        color:
+                                                            Colors
+                                                                .grey
+                                                                .shade600,
+                                                      ),
                                                 ),
                                               ],
                                             ),
@@ -194,9 +214,10 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                           Icon(Icons.person, size: 20.0),
                                           SizedBox(width: 5.0),
                                           Text(
-                                            auth.user!.displayName!,
-                                            style: TextStyle(
-                                              fontSize: 13,
+                                            auth.thisUser!['userName'],
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelMedium!.copyWith(
                                               color: Colors.grey.shade600,
                                             ),
                                           ),
@@ -214,8 +235,9 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                             formatDateString(
                                               group.exGroupCreatedOn,
                                             ),
-                                            style: TextStyle(
-                                              fontSize: 13,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelMedium!.copyWith(
                                               color: Colors.grey.shade600,
                                             ),
                                           ),
@@ -265,11 +287,14 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                                         group.exGroupIncome,
                                                         context,
                                                       ),
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        letterSpacing: 1.5,
-                                                      ),
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleSmall!
+                                                          .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            letterSpacing: 1.5,
+                                                          ),
                                                     ),
                                                   ],
                                                 ),
@@ -287,11 +312,14 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                                         group.exGroupExpenses,
                                                         context,
                                                       ),
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        letterSpacing: 1.5,
-                                                      ),
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleSmall!
+                                                          .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            letterSpacing: 1.5,
+                                                          ),
                                                     ),
                                                   ],
                                                 ),
@@ -317,11 +345,14 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                                         group.exGroupIncome,
                                                         context,
                                                       ),
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        letterSpacing: 1.5,
-                                                      ),
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleSmall!
+                                                          .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            letterSpacing: 1.5,
+                                                          ),
                                                     ),
                                                   ],
                                                 ),
@@ -339,11 +370,14 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                                         group.exGroupExpenses,
                                                         context,
                                                       ),
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        letterSpacing: 1.5,
-                                                      ),
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleSmall!
+                                                          .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            letterSpacing: 1.5,
+                                                          ),
                                                     ),
                                                   ],
                                                 ),

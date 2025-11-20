@@ -109,7 +109,7 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                 onPressed: () {
                   DialogUtils.showGenericDialog(
                     context: context,
-                    title: DialogUtils.titleText('Delete Goal?'),
+                    title: DialogUtils.titleText('Delete Goal?', context),
                     message: Text(
                       "Are you sure you want to delete the Goal '${goal['savingsGoalName']}'",
                     ),
@@ -306,7 +306,7 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                         children: [
                           Text(
                             'What it takes to hit your goal',
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -408,7 +408,7 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  //const SizedBox(height: 8),
                   if (trxs.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -485,6 +485,7 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                                   context: context,
                                   title: DialogUtils.titleText(
                                     'Delete Transaction?',
+                                    context,
                                   ),
                                   message: const Text(
                                     'Are you sure you want to delete this transaction?',
@@ -644,7 +645,7 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
     // showGenericDialog usually returns a Future; dispose controllers after dialog closes.
     DialogUtils.showGenericDialog(
       context: context,
-      title: DialogUtils.titleText('Top-up'),
+      title: DialogUtils.titleText('Top-up', context),
       message: StatefulBuilder(
         builder: (context, setState) {
           // capture the setState reference for use in onConfirm

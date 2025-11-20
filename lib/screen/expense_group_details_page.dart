@@ -47,8 +47,6 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
   void initState() {
     super.initState();
     AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
-    debugPrint('groupOwner:::${groupMap['exGroupOwnerId']['userId']}');
-    debugPrint('loginId:::${auth.user!.id}');
     init();
     getMinMaxDates();
   }
@@ -73,6 +71,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
   @override
   Widget build(BuildContext context) {
     AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+    final theme = Theme.of(context);
     List expenseList = group.expenses;
     return Consumer<ApiProvider>(
       builder: (_, api, __) {
@@ -95,8 +94,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                       horizontal: 10.0,
                     ),
                     placeholder: 'Search expenses...',
-                    placeholderStyle: TextStyle(
-                      fontSize: 15.0,
+                    placeholderStyle: theme.textTheme.titleSmall!.copyWith(
                       letterSpacing: 1.5,
                       color:
                           Theme.of(context).brightness == Brightness.light
@@ -215,12 +213,16 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                             ],
                           ),
                         ),
-                      if (group.exGroupOwnerId['userId'] == auth.user!.id)
+                      if (group.exGroupOwnerId['userId'] ==
+                          auth.thisUser!['userId'])
                         PopupMenuItem(
                           onTap: () {
                             DialogUtils.showGenericDialog(
                               context: context,
-                              title: DialogUtils.titleText('Delete Group?'),
+                              title: DialogUtils.titleText(
+                                'Delete Group?',
+                                context,
+                              ),
                               message: Text(
                                 'Are you sure you want to delete this Expense Group?',
                               ),
@@ -376,19 +378,27 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                             children: [
                                               Text(
                                                 group.exGroupName,
-                                                style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                                style: theme
+                                                    .textTheme
+                                                    .titleMedium!
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                               ),
 
                                               if (group.exGroupDesc.isNotEmpty)
                                                 Text(
                                                   group.exGroupDesc,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey.shade700,
-                                                  ),
+                                                  style: theme
+                                                      .textTheme
+                                                      .labelMedium!
+                                                      .copyWith(
+                                                        color:
+                                                            Colors
+                                                                .grey
+                                                                .shade700,
+                                                      ),
                                                 ),
                                               Row(
                                                 mainAxisAlignment:
@@ -413,11 +423,15 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                           ),
                                                         )
                                                         .name,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      color:
-                                                          Colors.grey.shade600,
-                                                    ),
+                                                    style: theme
+                                                        .textTheme
+                                                        .labelMedium!
+                                                        .copyWith(
+                                                          color:
+                                                              Colors
+                                                                  .grey
+                                                                  .shade700,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -425,7 +439,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                           ),
                                         ),
                                         group.exGroupOwnerId['userId'] ==
-                                                auth.user!.id
+                                                auth.thisUser!['userId']
                                             ? IconButton(
                                               iconSize: 20.0,
                                               onPressed: () async {
@@ -485,7 +499,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                             : SizedBox.shrink(),
                                       ],
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 20.0),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -494,14 +508,16 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: [
-                                            Icon(Icons.person, size: 20.0),
+                                            Icon(Icons.person, size: 18.0),
                                             SizedBox(width: 5.0),
                                             Text(
                                               group.exGroupOwnerId['userName'],
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey.shade600,
-                                              ),
+                                              style: theme
+                                                  .textTheme
+                                                  .labelMedium!
+                                                  .copyWith(
+                                                    color: Colors.grey.shade700,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -511,16 +527,18 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            Icon(Icons.date_range, size: 20.0),
+                                            Icon(Icons.date_range, size: 18.0),
                                             SizedBox(width: 5.0),
                                             Text(
                                               formatDateString(
                                                 group.exGroupCreatedOn,
                                               ),
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey.shade600,
-                                              ),
+                                              style: theme
+                                                  .textTheme
+                                                  .labelMedium!
+                                                  .copyWith(
+                                                    color: Colors.grey.shade700,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -549,21 +567,44 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                               children: [
                                                 Row(
                                                   children: [
-                                                    Icon(
-                                                      Icons.arrow_downward,
-                                                      color: Colors.red,
-                                                    ),
+                                                    if (!group.exGroupShared)
+                                                      Icon(
+                                                        Icons.arrow_downward,
+                                                        color: Colors.red,
+                                                      ),
                                                     Text(
                                                       formatCurrency(
                                                         group.exGroupExpenses,
                                                         context,
                                                       ),
-                                                      style: TextStyle(
-                                                        color: Colors.red,
-                                                        letterSpacing: 1.5,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
+                                                      style:
+                                                          group.exGroupShared
+                                                              ? theme.textTheme.bodyLarge!.copyWith(
+                                                                color:
+                                                                    group.exGroupShared
+                                                                        ? Colors
+                                                                            .blue
+                                                                        : Colors
+                                                                            .red,
+                                                                letterSpacing:
+                                                                    1.5,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              )
+                                                              : theme
+                                                                  .textTheme
+                                                                  .labelLarge!
+                                                                  .copyWith(
+                                                                    color:
+                                                                        Colors
+                                                                            .red,
+                                                                    letterSpacing:
+                                                                        1.5,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
                                                     ),
                                                   ],
                                                 ),
@@ -607,6 +648,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                           }),
                         ),
                       ),
+                    SizedBox(height: 5.0),
                     Expanded(
                       child:
                           group.expenses.isEmpty
@@ -627,6 +669,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                               (context) => CreateExpensePage(
                                                 group: group.toJson(),
                                                 expense: {},
+                                                showGroup: true,
                                               ),
                                         ),
                                       );
@@ -650,7 +693,9 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                               group.exGroupId,
                                         );
                                         api.groupList.add(group.toJson());
-                                        setState(() {});
+                                        setState(() {
+                                          groupMap = updatedGroup;
+                                        });
                                       }
                                     },
                                     LinearGradient(
@@ -719,6 +764,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                 context: context,
                                                 title: DialogUtils.titleText(
                                                   'Delete Expense?',
+                                                  context,
                                                 ),
                                                 message: const Text(
                                                   'Are you sure you want to delete this expense?',
@@ -759,10 +805,8 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                 );
                                                 if (resp.statusCode ==
                                                     HttpStatus.ok) {
-                                                  Toasts.show(
-                                                    context,
-                                                    "Expense ${expense['expenseTitle']} Removed",
-                                                    type: ToastType.success,
+                                                  debugPrint(
+                                                    'resp.data:::${resp.data}',
                                                   );
 
                                                   var index = api.groupList
@@ -785,6 +829,14 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                     );
                                                     groupMap = resp.data;
                                                   });
+                                                  showSnackBar(
+                                                    context,
+                                                    "Expense Removed",
+                                                    Icon(
+                                                      Icons
+                                                          .remove_circle_outline,
+                                                    ),
+                                                  );
                                                 }
                                               });
                                         },
@@ -794,9 +846,6 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                           ),
                                           child: ListTile(
                                             onTap: () {
-                                              debugPrint(
-                                                'expenseId:::${expense['expenseId']}',
-                                              );
                                               DialogUtils.showGenericDialog(
                                                 context: context,
                                                 showCancel: true,
@@ -819,6 +868,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                                             group.toJson(),
                                                                         expense:
                                                                             expense,
+                                                                        showGroup: true,
                                                                       ),
                                                                 ),
                                                               );
@@ -904,32 +954,41 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                 decoration: BoxDecoration(
                                                   shape: BoxShape.circle,
                                                 ),
-                                                height: 65.0,
-                                                width: 65.0,
+                                                height: 75.0,
+                                                width: 60.0,
                                                 child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
-                                                    Icon(
-                                                      getCategoryIcon(
-                                                        expense['expenseCategory'],
-                                                        expense['expenseSpendType'],
+                                                    Expanded(
+                                                      child: Icon(
+                                                        getCategoryIcon(
+                                                          expense['expenseCategory'],
+                                                          expense['expenseSpendType'],
+                                                        ),
+                                                        size: 13.0,
                                                       ),
-                                                      size: 15.0,
                                                     ),
                                                     Divider(
                                                       endIndent: 10.0,
                                                       indent: 10.0,
                                                       thickness: 0.5,
                                                     ),
-                                                    Text(
-                                                      '${DateTime.parse(expense['expenseDate']).day.toString()} ${month.elementAt(int.parse(DateTime.parse(expense['expenseDate']).month.toString()) - 1).toUpperCase()}',
-                                                      style: TextStyle(
-                                                        fontSize: 12.5,
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                                                    Expanded(
+                                                      child: Text(
+                                                        '${DateTime.parse(expense['expenseDate']).day.toString()} ${month.elementAt(int.parse(DateTime.parse(expense['expenseDate']).month.toString()) - 1).toUpperCase()}',
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelSmall!
+                                                            .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                       ),
                                                     ),
                                                   ],
@@ -938,13 +997,17 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                             ),
                                             title: Text(
                                               expense['expenseTitle'],
-                                              style: TextStyle(fontSize: 17.5),
+                                              style: theme.textTheme.labelLarge!
+                                                  .copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                             ),
                                             subtitle: Text(
                                               groupMap['exGroupShared']
-                                                  ? '${expense['expensePaidBy']['userId'] == auth.user!.id ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)} ${payStatus == 'no balance' ? 'for yourself' : ''}'
+                                                  ? '${expense['expensePaidBy']['userId'] == auth.thisUser!['userId'] ? 'You' : expense['expensePaidBy']['userName']} paid ${formatCurrency(expense['expenseAmount'], context)} ${payStatus == 'no balance' ? 'for yourself' : ''}'
                                                   : '${expense['expenseCategory']} | ${expense['expenseSubCategory']}',
-                                              style: TextStyle(fontSize: 12.5),
+                                              style: theme.textTheme.labelSmall!
+                                                  .copyWith(color: Colors.grey),
                                             ),
                                             trailing: Column(
                                               mainAxisAlignment:
@@ -952,26 +1015,29 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.end,
                                               children: [
-                                                groupMap['exGroupShared']
-                                                    ? Text(
-                                                      payStatus,
-                                                      style: TextStyle(
-                                                        letterSpacing: 1.5,
-                                                        color:
-                                                            payStatus ==
-                                                                        'not involved' ||
-                                                                    payStatus ==
-                                                                        'no balance'
-                                                                ? Colors.grey
-                                                                : payStatus ==
-                                                                    'You borrowed'
-                                                                ? Colors.red
-                                                                : Colors.green,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    )
-                                                    : SizedBox.shrink(),
+                                                if (groupMap['exGroupShared'])
+                                                  Text(
+                                                    payStatus,
+                                                    style: theme
+                                                        .textTheme
+                                                        .labelMedium!
+                                                        .copyWith(
+                                                          letterSpacing: 1.5,
+                                                          color:
+                                                              payStatus ==
+                                                                          'not involved' ||
+                                                                      payStatus ==
+                                                                          'no balance'
+                                                                  ? Colors.grey
+                                                                  : payStatus ==
+                                                                      'You borrowed'
+                                                                  ? Colors.red
+                                                                  : Colors
+                                                                      .green,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                  ),
                                                 group.exGroupShared &&
                                                         (payStatus ==
                                                                 'not involved' ||
@@ -983,21 +1049,26 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                         double.parse(
                                                           getPaidAmount(
                                                             expense,
+                                                            group,
                                                           ),
                                                         ),
                                                         context,
                                                       ),
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        letterSpacing: 1.5,
-                                                        fontSize: 13.5,
-                                                        color:
-                                                            expense['expenseSpendType'] ==
-                                                                    'income'
-                                                                ? Colors.green
-                                                                : Colors.red,
-                                                      ),
+                                                      style: theme
+                                                          .textTheme
+                                                          .labelMedium!
+                                                          .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            letterSpacing: 1.5,
+                                                            color:
+                                                                expense['expenseSpendType'] ==
+                                                                        'income'
+                                                                    ? Colors
+                                                                        .green
+                                                                    : Colors
+                                                                        .red,
+                                                          ),
                                                     ),
                                               ],
                                             ),
@@ -1029,7 +1100,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                 MaterialPageRoute(
                   builder:
                       (context) =>
-                          CreateExpensePage(group: group.toJson(), expense: {}),
+                          CreateExpensePage(group: group.toJson(), expense: {},  showGroup: true,),
                 ),
               );
 
@@ -1055,7 +1126,10 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
             extendedIconLabelSpacing: 15.0,
             label: Text(
               'Add Expense',
-              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         );
@@ -1063,20 +1137,26 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
     );
   }
 
-  getPaidAmount(Map<String, dynamic> expense) {
+  getPaidAmount(Map<String, dynamic> expense, GroupModel group) {
     AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
     List<dynamic> paidFor = expense['expensePaidTo'];
-
-    debugPrint('paidFor:::${paidFor.toString()}');
+    debugPrint('expense[expenseAmount]:::${expense['expenseAmount']}');
+    debugPrint('paidFor.length:::${paidFor.length}');
     var itsme = paidFor.firstWhere(
-      (ele) => ele['userId'] == auth.user!.id,
+      (ele) => ele['userId'] == auth.thisUser!['userId'],
       orElse: () => {},
     );
 
-    if (itsme.isEmpty) {
-      return expense['expenseAmount'].toStringAsFixed(2);
+    if (group.exGroupShared) {
+      if (itsme.isEmpty) {
+        return expense['expenseAmount'].toStringAsFixed(2);
+      } else {
+        return (expense['expenseAmount'] -
+                (expense['expenseAmount'] / paidFor.length))
+            .toStringAsFixed(2);
+      }
     } else {
-      return (expense['expenseAmount'] / paidFor.length).toStringAsFixed(2);
+      return expense['expenseAmount'].toStringAsFixed(2);
     }
   }
 
@@ -1089,28 +1169,26 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
 
     final double income = group.exGroupIncome;
     final double expenses = group.exGroupExpenses;
-    final double savings = (income - expenses).clamp(0.0, double.infinity);
+    //final double savings = (income - expenses).clamp(0.0, double.infinity);
+    final double savings = (income - expenses);
     double savingsPct =
         (income == 0 ? 0 : savings / income).clamp(0.0, 1.0).toDouble();
-
-    debugPrint('savingsPct:::$savingsPct');
-
     savingsPct = 1 - savingsPct;
-    debugPrint('savingsPct1:::$savingsPct');
+
     return Container(
       margin: EdgeInsets.only(top: 10.0, left: 15.0, right: 15.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            elevation: 0,
+            elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: SizedBox(
-              height: 155,
+              height: 150,
               child: Padding(
-                padding: const EdgeInsets.all(14.0),
+                padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1125,13 +1203,16 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                         ),
                         Text(
                           '${formatDateString(startDate.toString(), pattern: "dd MMM")} - ${formatDateString(endDate.toString(), pattern: 'dd MMM')}',
-                          style: theme.textTheme.labelLarge,
+                          style: theme.textTheme.labelMedium!.copyWith(
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     Expanded(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -1163,16 +1244,25 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 10.0),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(6),
                             child: LinearProgressIndicator(
                               value: savingsPct,
-                              minHeight: 8,
-                              color: primary,
+                              minHeight: 7.5,
+                              color: savingsPct > 0.75 ? Colors.red : primary,
                               backgroundColor: theme.colorScheme.onSurface
                                   .withOpacity(0.08),
                             ),
+                          ),
+                          const SizedBox(height: 5.0),
+                          Text(
+                            '${(savingsPct * 100).toStringAsFixed(0)}% spent',
+                            style: theme.textTheme.labelSmall!.copyWith(
+                              color: savingsPct > 0.75 ? Colors.red : primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
                         ],
                       ),
@@ -1218,7 +1308,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),

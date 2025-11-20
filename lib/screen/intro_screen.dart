@@ -21,35 +21,35 @@ class IntroScreen extends StatelessWidget {
           body:
               "Organize your expenses into shared or personal groups for better tracking and collaboration.",
           image: _buildLottie('assets/lottie/group.json'),
-          decoration: _getPageDecoration(theme),
+          decoration: _getPageDecoration(theme, context),
         ),
         PageViewModel(
           title: "Expense Reminder",
           body:
               "Never miss a bill or payment again. Set reminders and manage your expenses smartly.",
           image: _buildLottie('assets/lottie/reminder.json'),
-          decoration: _getPageDecoration(theme),
+          decoration: _getPageDecoration(theme, context),
         ),
         PageViewModel(
           title: "Savings Goal",
           body:
               "Plan your savings, set achievable targets, and visualize your progress easily.",
           image: _buildLottie('assets/lottie/goals.json'),
-          decoration: _getPageDecoration(theme),
+          decoration: _getPageDecoration(theme, context),
         ),
         PageViewModel(
           title: "Charts & Reports Export",
           body:
               "Analyze your spending habits using rich charts and export detailed financial reports.",
           image: _buildLottie('assets/lottie/chart.json'),
-          decoration: _getPageDecoration(theme),
+          decoration: _getPageDecoration(theme, context),
         ),
         PageViewModel(
           title: "Light & Dark Theme",
           body:
               "Enjoy your experience in light or dark mode — perfectly tuned for comfort and clarity.",
           image: _buildLottie('assets/lottie/theme.json'),
-          decoration: _getPageDecoration(theme),
+          decoration: _getPageDecoration(theme, context),
           footer: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: ElevatedButton.icon(
@@ -64,25 +64,29 @@ class IntroScreen extends StatelessWidget {
                 ),
               ),
               icon: Icon(FontAwesomeIcons.check),
-              label: const Text(
+              label: Text(
                 "GET STARTED",
-                style: TextStyle(
-                  fontSize: 16,
+                style: theme.textTheme.titleMedium!.copyWith(
+                  letterSpacing: 2.5,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
                 ),
               ),
             ),
           ),
         ),
       ],
-      onDone: () => _onIntroEnd(context),
       showSkipButton: true,
+      showNextButton: false,
+      showFirstBackButton: false,
+      showBackButton: false,
+      showDoneButton: false,
+      showBottomPart: true,
       skip: const Text("Skip"),
+      back: const Icon(Icons.arrow_back),
       next: const Icon(Icons.arrow_forward),
-      done: const Text("Done", style: TextStyle(fontWeight: FontWeight.bold)),
+
       dotsDecorator: DotsDecorator(
-        size: const Size(10, 10),
+        size: const Size(8, 8),
         color: Colors.grey.shade400,
         activeSize: const Size(22, 10),
         activeColor: theme.colorScheme.primary,
@@ -90,8 +94,9 @@ class IntroScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      curve: Curves.bounceInOut,
-      animationDuration: 500,
+      curve: Curves.ease,
+
+      animationDuration: 1000,
     );
   }
 
@@ -102,14 +107,16 @@ class IntroScreen extends StatelessWidget {
     );
   }
 
-  static PageDecoration _getPageDecoration(ThemeData theme) {
+  static PageDecoration _getPageDecoration(
+    ThemeData theme,
+    BuildContext context,
+  ) {
     return PageDecoration(
-      titleTextStyle: TextStyle(
-        fontSize: 30,
+      titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
         fontWeight: FontWeight.bold,
         letterSpacing: 1.5,
       ),
-      bodyTextStyle: TextStyle(fontSize: 17.5),
+      bodyTextStyle: Theme.of(context).textTheme.labelLarge!,
       imagePadding: const EdgeInsets.only(top: 40),
     );
   }

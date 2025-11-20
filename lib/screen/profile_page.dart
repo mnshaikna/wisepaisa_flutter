@@ -1,12 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:wisepaise/providers/api_provider.dart';
+import 'package:wisepaise/screen/profile_edit_page.dart';
 import 'package:wisepaise/utils/expense_chart.dart';
+import 'package:in_app_review/in_app_review.dart';
 import '../providers/auth_provider.dart';
+import '../services/notification_service.dart';
 import '../providers/settings_provider.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/toast.dart';
 import 'login_page.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
@@ -18,6 +24,20 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  String _version = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _initPackageInfo();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() => _version = info.version);
+    debugPrint('_version:::$_version');
+  }
+
   void _showThemeSheet(BuildContext context, SettingsProvider settings) {
     showModalBottomSheet(
       context: context,
@@ -39,13 +59,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Choose Theme',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -111,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -123,28 +145,23 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(width: 10.0),
                       Text(
                         'Permanently Delete Account?',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
-              const Divider(height: 1),
+              const SizedBox(height: 15.0),
+              const Divider(height: 1.0),
               SizedBox(height: 15.0),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'You are about to delete your account and all associated data.\n'
-                  'This action is permanent and cannot be reversed.',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 1.5,
-                    fontSize: 15.0,
-                  ),
+                  'You are about to delete your account and all associated data. This action is permanent and cannot be reversed.',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w500),
                 ),
               ),
               Padding(
@@ -229,13 +246,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Choose Currency',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -317,18 +336,67 @@ class _ProfilePageState extends State<ProfilePage> {
       final hh = picked.hour.toString().padLeft(2, '0');
       final mm = picked.minute.toString().padLeft(2, '0');
       settings.setReminderTime('$hh:$mm');
+
+      DateTime now = DateTime.now();
+      DateTime dateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        picked.hour,
+        picked.minute,
+      );
+
+      // If the selected time is already in the past, move to next day
+      if (dateTime.isBefore(now)) {
+        dateTime = dateTime.add(const Duration(days: 1));
+      }
+
+      await NotificationService().scheduleNotification(dateTime: dateTime).then(
+        (value) {
+          debugPrint('Notification scheduled at ${picked.toString()}');
+          Toasts.show(
+            context,
+            "Notification scheduled at ${picked.toString()}",
+            type: ToastType.info,
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> _shareApp() async {
+    final box = context.findRenderObject() as RenderBox?;
+    const String appUrl =
+        'https://play.google.com/store/apps/details?id=com.wisepaise.app';
+    const String message =
+        'Check out WisePaise, a great app for managing your expenses! Download it here: $appUrl';
+
+    await Share.share(
+      message,
+      subject: 'WisePaise Expense Tracker',
+      sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+    );
+  }
+
+  Future<void> _rateApp() async {
+    final InAppReview inAppReview = InAppReview.instance;
+    if (await inAppReview.isAvailable()) {
+      inAppReview.requestReview();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Profile',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: theme.textTheme.titleLarge!.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Consumer3<AuthProvider, SettingsProvider, ApiProvider>(
@@ -341,73 +409,105 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border:
-                                  authProvider.user?.photoUrl == null
-                                      ? Border.all(
-                                        width: 0.15,
-                                        color:
-                                            Theme.of(context).brightness ==
-                                                    Brightness.light
-                                                ? Colors.black54
-                                                : Colors.white54,
-                                      )
-                                      : null,
-                              borderRadius: BorderRadius.circular(12.0),
-                              image: DecorationImage(
-                                image:
-                                    authProvider.user?.photoUrl != null
-                                        ? NetworkImage(
-                                          authProvider.user!.photoUrl!,
-                                        )
-                                        : AssetImage(
-                                          Theme.of(context).brightness ==
-                                                  Brightness.light
-                                              ? 'assets/logos/logo_light.png'
-                                              : 'assets/logos/logo_dark.png',
-                                        ),
+                    authProvider.thisUser != null
+                        ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  // shape: BoxShape.circle,
+                                  border:
+                                      authProvider.thisUser!['userImageUrl'] ==
+                                              null
+                                          ? Border.all(
+                                            width: 0.15,
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                        Brightness.light
+                                                    ? Colors.black54
+                                                    : Colors.white54,
+                                          )
+                                          : null,
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image:
+                                        authProvider.thisUser!['userImageUrl'] !=
+                                                null
+                                            ? NetworkImage(
+                                              authProvider
+                                                  .thisUser!['userImageUrl'],
+                                            )
+                                            : AssetImage(
+                                              Theme.of(context).brightness ==
+                                                      Brightness.light
+                                                  ? 'assets/logos/logo_light.png'
+                                                  : 'assets/logos/logo_dark.png',
+                                            ),
+                                  ),
+                                ),
+                                height: 75.0,
+                                width: 75.0,
                               ),
-                            ),
-                            height: 75.0,
-                            width: 75.0,
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  authProvider.user?.displayName ?? 'User',
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  softWrap: true,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      authProvider.thisUser!['userName'] ??
+                                          'User',
+                                      style: theme.textTheme.titleLarge!
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      softWrap: true,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+
+                                    Text(
+                                      authProvider.thisUser!['userEmail'] ??
+                                          'n/a',
+                                      style: theme.textTheme.labelLarge!
+                                          .copyWith(color: Colors.grey[600]),
+                                      softWrap: true,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  authProvider.user?.email ?? 'N/a',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                  softWrap: true,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              ),
+                              IconButton(
+                                onPressed: () async {
+                                  var updatedUser = await Navigator.of(
+                                    context,
+                                  ).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ProfileEditPage(),
+                                    ),
+                                  );
+                                  if (updatedUser != null) {
+                                    authProvider.setUser(updatedUser);
+                                  }
+                                },
+                                icon: Icon(Icons.edit),
+                                style: IconButton.styleFrom(
+                                  backgroundColor:
+                                      theme.brightness == Brightness.dark
+                                          ? theme
+                                              .colorScheme
+                                              .surfaceContainerLowest
+                                          : theme
+                                              .colorScheme
+                                              .surfaceContainerHighest,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        )
+                        : Center(child: CupertinoActivityIndicator()),
                     SizedBox(height: 15.0),
                     // Report Section
                     Card(
@@ -444,7 +544,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           ListTile(
                             leading: const Icon(Icons.color_lens),
-                            title: const Text("Theme"),
+                            title: Text(
+                              "Theme",
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
                             trailing: GestureDetector(
                               onTap: () => _showThemeSheet(context, settings),
                               child: Container(
@@ -479,7 +585,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           const Divider(height: 1),
                           ListTile(
                             leading: const Icon(Icons.currency_exchange),
-                            title: const Text("Currency"),
+                            title: Text(
+                              "Currency",
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
                             trailing: GestureDetector(
                               onTap:
                                   () => _showCurrencySheet(context, settings),
@@ -515,7 +627,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           const Divider(height: 1),
                           ListTile(
                             leading: const Icon(Icons.notifications_active),
-                            title: const Text("Reminder Time"),
+                            title: Text(
+                              "Reminder Time",
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
                             trailing: GestureDetector(
                               onTap:
                                   () =>
@@ -555,22 +673,73 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ],
                 ),
-                Column(
-                  children: [SizedBox(height: 20.0),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: ElevatedButton.icon(
-                          onPressed:
-                              () => DialogUtils.showGenericDialog(
-                            title: DialogUtils.titleText('Sign Out?'),
-                            message: const Text(
+
+                const SizedBox(height: 20),
+
+                // ⚙️ App Section
+                Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.share),
+                        title: Text(
+                          "Share App",
+                          style: theme.textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        trailing: Icon(Icons.navigate_next),
+                        onTap: () => _shareApp(),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.rate_review_outlined),
+                        title: Text(
+                          "Rate App",
+                          style: theme.textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        trailing: Icon(Icons.navigate_next),
+                        onTap: () => _rateApp(),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Fluttered with ❤️ Version $_version",
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20.0),
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          () => DialogUtils.showGenericDialog(
+                            title: DialogUtils.titleText('Sign Out?', context),
+                            message: Text(
                               'Do you want to Signout?',
-                              style: TextStyle(
-                                fontSize: 15.0,
-                                letterSpacing: 1.5,
-                              ),
+                              style: Theme.of(context).textTheme.labelMedium!
+                                  .copyWith(letterSpacing: 1.5),
                               textAlign: TextAlign.left,
                             ),
                             confirmText: 'Sign out',
@@ -603,79 +772,82 @@ class _ProfilePageState extends State<ProfilePage> {
                             onCancel: () => Navigator.of(context).pop(),
                             context: context,
                           ),
-                          icon: const Icon(Icons.logout),
-                          label: const Text('Sign Out'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 24,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 15.0,
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      icon: const Icon(Icons.logout),
+                      label: Text(
+                        'Sign Out',
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 24,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
                       ),
                     ),
+                  ),
+                ),
 
-                    SizedBox(height: 5.0),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: ElevatedButton.icon(
-                          onPressed:
-                              () => DialogUtils.showGenericDialog(
-                            title: DialogUtils.titleText('Delete Account'),
-                            message: const Text(
+                SizedBox(height: 5.0),
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          () => DialogUtils.showGenericDialog(
+                            title: DialogUtils.titleText(
+                              'Delete Account',
+                              context,
+                            ),
+                            message: Text(
                               'User data will be deleted!!!\nDo you want to Delete your account?',
-                              style: TextStyle(
-                                fontSize: 15.0,
-                                letterSpacing: 1.5,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium,
                               textAlign: TextAlign.left,
                             ),
-                            confirmText: 'Cancel',
-                            cancelText: 'Delete',
+                            confirmText: 'Delete',
+                            cancelText: 'Cancel',
                             confirmColor: Colors.red,
                             showCancel: true,
-                            onCancel: () {
+                            onConfirm: () {
                               Navigator.of(context).pop();
                               _showDeleteConfirmation(context);
                             },
-                            onConfirm: () => Navigator.of(context).pop(),
+                            onCancel: () => Navigator.of(context).pop(),
                             context: context,
                           ),
-                          icon: const Icon(FontAwesomeIcons.trashCan),
-                          label: const Text('Delete Account'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 24,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 15.0,
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      icon: const Icon(FontAwesomeIcons.trashCan),
+                      label: Text(
+                        'Delete Account',
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 24,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),],
-                )
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           );

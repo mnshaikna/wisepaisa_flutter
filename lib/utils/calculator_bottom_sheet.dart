@@ -68,11 +68,13 @@ class _CalculatorBottomSheetState extends State<CalculatorBottomSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_expression, style: const TextStyle(fontSize: 22)),
+            Text(_expression, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 6),
             Text(
               _result,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             GridView.builder(
@@ -101,7 +103,7 @@ class _CalculatorBottomSheetState extends State<CalculatorBottomSheet> {
                       _append(key);
                     }
                   },
-                  child: Text(key, style: const TextStyle(fontSize: 20)),
+                  child: Text(key, style: Theme.of(context).textTheme.titleLarge),
                 );
               },
             ),
@@ -128,7 +130,7 @@ class _CalculatorBottomSheetState extends State<CalculatorBottomSheet> {
                     if (_result.isNotEmpty && _result != 'Error') {
                       Navigator.pop(context, double.tryParse(_result));
                     } else {
-                     // Navigator.pop(context);
+                      // Navigator.pop(context);
                     }
                   },
                   child: const Text('Use Result'),
