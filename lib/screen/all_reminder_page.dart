@@ -19,6 +19,7 @@ class AllReminderPage extends StatefulWidget {
 
 class _AllReminderPageState extends State<AllReminderPage>
     with SingleTickerProviderStateMixin {
+
   List<Map<String, dynamic>> getActiveReminders(ApiProvider api) {
     return api.expenseReminderList.where((rem) {
       return rem['reminderIsActive'] == true;

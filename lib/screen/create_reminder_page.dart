@@ -32,11 +32,9 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _recurrenceEndDateController =
       TextEditingController();
-  final TextEditingController _recurrenceIntervalController =
-      TextEditingController(text: '1');
   final TextEditingController _amountController = TextEditingController();
   bool _isExpense = true;
-  String _recurrencePattern = 'NONE';
+  String _recurrencePattern = 'DAILY';
   bool _isRecurring = false;
   bool _isActive = true;
 
@@ -57,6 +55,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         widget.reminder.reminderDescription.isNotEmpty
             ? widget.reminder.reminderDescription
             : '';
+
     _amountController.text =
         widget.reminder.reminderAmount.isNotEmpty
             ? widget.reminder.reminderAmount
@@ -66,6 +65,14 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         widget.reminder.reminderDate.isNotEmpty
             ? widget.reminder.reminderDate
             : '';
+    _recurrenceEndDateController.text =
+        widget.reminder.reminderRecurrenceEndDate.isNotEmpty
+            ? widget.reminder.reminderRecurrenceEndDate
+            : '';
+    _recurrencePattern =
+        widget.reminder.reminderRecurrencePattern.isNotEmpty
+            ? widget.reminder.reminderRecurrencePattern
+            : 'DAILY';
     _isRecurring = widget.reminder.reminderIsRecurring;
     _isActive = widget.reminder.reminderIsActive;
   }
@@ -76,7 +83,6 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
     _descController.dispose();
     _dateController.dispose();
     _recurrenceEndDateController.dispose();
-    _recurrenceIntervalController.dispose();
     _amountController.dispose();
     super.dispose();
   }
@@ -122,7 +128,6 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         _dateController.text.trim(),
         _recurrencePattern,
         _recurrenceEndDateController.text.trim(),
-        _recurrenceIntervalController.text.trim(),
         now,
         _amountController.text.trim(),
         _isExpense ? 'expense' : 'income',
@@ -145,11 +150,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
               'Reminder created successfully',
               type: ToastType.success,
             );
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => MyDashboardPage()),
-              (Route<dynamic> route) => false,
-            );
+            Navigator.pop(context);
           }
         });
       } catch (e) {
@@ -169,7 +170,6 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         _dateController.text.trim(),
         _recurrencePattern,
         _recurrenceEndDateController.text.trim(),
-        _recurrenceIntervalController.text.trim(),
         widget.reminder.reminderCreatedDate,
         _amountController.text.trim(),
         _isExpense ? 'expense' : 'income',
@@ -376,15 +376,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                   decoration: InputDecoration(
                                     labelText: 'Reminder Date',
                                     labelStyle: labelStyle(context),
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(Icons.calendar_today),
-                                      onPressed:
-                                          () => _pickDate(
-                                            context,
-                                            _dateController,
-                                            isFirstDateToday: true,
-                                          ),
-                                    ),
+                                    suffixIcon: Icon(Icons.calendar_today),
                                     border: _outlineBorder(),
                                   ),
                                 ),
@@ -426,25 +418,16 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                             child: DropdownButtonFormField<
                                               String
                                             >(
-                                              value: _recurrencePattern,
+                                              initialValue: _recurrencePattern,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+
                                               decoration: InputDecoration(
                                                 labelText: 'Recurrence Pattern',
                                                 labelStyle: labelStyle(context),
                                                 border: _outlineBorder(),
                                               ),
                                               items: [
-                                                DropdownMenuItem(
-                                                  value: 'NONE',
-                                                  child: Text(
-                                                    'None',
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .labelLarge!
-                                                        .copyWith(
-                                                          letterSpacing: 1.5,
-                                                        ),
-                                                  ),
-                                                ),
                                                 DropdownMenuItem(
                                                   value: 'DAILY',
                                                   child: Text(
@@ -481,69 +464,51 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                                                         ),
                                                   ),
                                                 ),
-                                                DropdownMenuItem(
-                                                  value: 'YEARLY',
-                                                  child: Text(
-                                                    'Yearly',
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .labelLarge!
-                                                        .copyWith(
-                                                          letterSpacing: 1.5,
-                                                        ),
-                                                  ),
-                                                ),
                                               ],
                                               onChanged:
                                                   (v) => setState(
                                                     () =>
                                                         _recurrencePattern =
-                                                            v ?? 'NONE',
+                                                            v ?? 'DAILY',
                                                   ),
                                             ),
                                           ),
                                           SizedBox(width: 12),
                                           Expanded(
                                             child: TextField(
+                                              enabled:
+                                                  _dateController
+                                                      .text
+                                                      .isNotEmpty,
                                               controller:
-                                                  _recurrenceIntervalController,
-                                              keyboardType:
-                                                  TextInputType.number,
+                                                  _recurrenceEndDateController,
+                                              readOnly: true,
+                                              onTap:
+                                                  () => _pickDate(
+                                                    context,
+                                                    _recurrenceEndDateController,
+                                                  ),
                                               decoration: InputDecoration(
-                                                labelText: 'Interval',
+                                                labelText:
+                                                    'Recurrence End Date',
                                                 labelStyle: labelStyle(context),
+                                                suffixIcon: IconButton(
+                                                  icon: const Icon(
+                                                    Icons.calendar_today,
+                                                  ),
+                                                  onPressed:
+                                                      () => _pickDate(
+                                                        context,
+                                                        _recurrenceEndDateController,
+                                                      ),
+                                                ),
                                                 border: _outlineBorder(),
                                               ),
                                             ),
                                           ),
                                         ],
                                       ),
-                                      SizedBox(height: verticalGap),
-                                      TextField(
-                                        controller:
-                                            _recurrenceEndDateController,
-                                        readOnly: true,
-                                        onTap:
-                                            () => _pickDate(
-                                              context,
-                                              _recurrenceEndDateController,
-                                            ),
-                                        decoration: InputDecoration(
-                                          labelText: 'Recurrence End Date',
-                                          labelStyle: labelStyle(context),
-                                          suffixIcon: IconButton(
-                                            icon: const Icon(
-                                              Icons.calendar_today,
-                                            ),
-                                            onPressed:
-                                                () => _pickDate(
-                                                  context,
-                                                  _recurrenceEndDateController,
-                                                ),
-                                          ),
-                                          border: _outlineBorder(),
-                                        ),
-                                      ),
+
                                       SizedBox(height: verticalGap),
                                     ],
                                   ),
@@ -618,12 +583,42 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         return SizedBox(
           height: 400,
           child: CalendarDatePicker(
-            initialDate: DateTime.now(),
-            firstDate: isFirstDateToday ? DateTime.now() : DateTime(2000),
+            initialDate:
+                _dateController.text.isNotEmpty
+                    ? DateTime.parse(_dateController.text).add(
+                      Duration(
+                        days:
+                            _recurrencePattern == 'DAILY'
+                                ? 2
+                                : _recurrencePattern == 'WEEKLY'
+                                ? 8
+                                : 32,
+                      ),
+                    )
+                    : isFirstDateToday
+                    ? DateTime.now()
+                    : DateTime(2000),
+            firstDate:
+                _dateController.text.isNotEmpty
+                    ? DateTime.parse(_dateController.text).add(
+                      Duration(
+                        days:
+                            _recurrencePattern == 'DAILY'
+                                ? 2
+                                : _recurrencePattern == 'WEEKLY'
+                                ? 8
+                                : 32,
+                      ),
+                    )
+                    : isFirstDateToday
+                    ? DateTime.now()
+                    : DateTime(2000),
             lastDate: DateTime(2100),
             onDateChanged: (date) {
               Navigator.of(context).pop();
-              controller.text = DateFormat('yyyy-MM-dd').format(date);
+              setState(() {
+                controller.text = DateFormat('yyyy-MM-dd').format(date);
+              });
             },
           ),
         );

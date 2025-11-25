@@ -1274,20 +1274,19 @@ class _DashboardPageState extends State<DashboardPage>
 
     return SizedBox(
       width: 250,
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12.0),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => SavingsGoalDetailsPage(goal: goal),
+              ),
+            );
+          },
 
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => SavingsGoalDetailsPage(goal: goal),
-            ),
-          );
-        },
-        child: Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(

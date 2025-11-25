@@ -7,7 +7,6 @@ class ReminderModel {
   String reminderDate;
   String reminderRecurrencePattern;
   String reminderRecurrenceEndDate;
-  String reminderRecurrenceInterval;
   String reminderCreatedDate;
   String reminderAmount;
   String reminderAmountType;
@@ -22,7 +21,6 @@ class ReminderModel {
     this.reminderDate,
     this.reminderRecurrencePattern,
     this.reminderRecurrenceEndDate,
-    this.reminderRecurrenceInterval,
     this.reminderCreatedDate,
     this.reminderAmount,
     this.reminderAmountType,
@@ -33,7 +31,6 @@ class ReminderModel {
 
   factory ReminderModel.empty() {
     return ReminderModel(
-      '',
       '',
       '',
       '',
@@ -57,7 +54,6 @@ class ReminderModel {
       (json['reminderDate'] ?? '').toString(),
       (json['reminderRecurrencePattern'] ?? '').toString(),
       (json['reminderRecurrenceEndDate'] ?? '').toString(),
-      (json['reminderRecurrenceInterval'] ?? '').toString(),
       (json['reminderCreatedDate'] ?? '').toString(),
       (json['reminderAmount'] ?? '').toString(),
       (json['reminderAmountType'] ?? '').toString(),
@@ -75,7 +71,6 @@ class ReminderModel {
       'reminderDate': reminderDate,
       'reminderRecurrencePattern': reminderRecurrencePattern,
       'reminderRecurrenceEndDate': reminderRecurrenceEndDate,
-      'reminderRecurrenceInterval': reminderRecurrenceInterval,
       'reminderCreatedDate': reminderCreatedDate,
       'reminderAmount': reminderAmount,
       'reminderAmountType': reminderAmountType,

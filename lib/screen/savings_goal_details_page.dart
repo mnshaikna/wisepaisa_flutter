@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:wisepaise/models/savings_goal_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
@@ -60,38 +61,32 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
         today;
 
     final int daysLeft = targetDate.difference(today).inDays;
+    debugPrint('daysLeft:::$daysLeft');
     final double pct = target == 0 ? 0 : (saved / target).clamp(0, 1);
 
     // Suggested and observed cadence
-    final double requiredPerDay =
-        daysLeft > 0 ? remaining / daysLeft : remaining;
+    final double requiredPerMonth =
+        daysLeft > 0 ? remaining / (daysLeft / 30) : remaining;
     final List<dynamic> trxs = goal['savingsGoalTransactions'] ?? <dynamic>[];
     final double totalTrxSaved = trxs.fold<double>(
       0.0,
       (s, t) => s + ((t['savingsGoalTrxAmount'] as num? ?? 0).toDouble()),
     );
-    final DateTime createdOn =
-        DateTime.tryParse(goal['savingsGoalCreatedOn']?.toString() ?? '') ??
-        today;
-    final DateTime startDate =
-        trxs.isEmpty
-            ? createdOn
-            : trxs
-                .map<DateTime>(
-                  (t) =>
-                      DateTime.tryParse(
-                        t['savingsGoalTrxCreatedOn']?.toString() ?? '',
-                      ) ??
-                      today,
-                )
-                .fold<DateTime>(
-                  createdOn,
-                  (prev, d) => d.isBefore(prev) ? d : prev,
-                );
-    final int daysSoFar = (today.difference(startDate).inDays).clamp(
+
+    debugPrint('goal[savingsGoalCreatedOn]:::${goal['savingsGoalCreatedOn']}');
+
+    final createdOn = DateFormat(
+      "MMM dd, yyyy",
+    ).parse(goal['savingsGoalCreatedOn']);
+
+    debugPrint('createdOn:::$createdOn');
+    final int daysSoFar = (today.difference(createdOn).inDays).clamp(
       1,
       1000000,
     );
+
+    debugPrint('daysSoFar:::$daysSoFar');
+
     final double pacePerDay = totalTrxSaved / daysSoFar;
     final DateTime? etaDate =
         pacePerDay > 0
@@ -338,12 +333,12 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                                 ),
                                 _metricCard(
                                   context,
-                                  title: 'Required/day',
+                                  title: 'Required/month',
                                   value: formatCurrency(
-                                    requiredPerDay,
+                                    requiredPerMonth,
                                     context,
                                   ),
-                                  hint: 'Daily to stay on track',
+                                  hint: 'Monthly to stay on track',
                                   color: Colors.blue,
                                   icon: Icons.trending_up,
                                 ),
@@ -515,12 +510,6 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
 
                             api.updateGoal(context, goal).then((Response resp) {
                               if (resp.statusCode == HttpStatus.ok) {
-                                Toasts.show(
-                                  context,
-                                  'Transaction deleted',
-                                  type: ToastType.success,
-                                );
-
                                 var index = api.savingsGoalList.indexWhere(
                                   (element) =>
                                       element['savingsGoalId'] ==
@@ -528,10 +517,15 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                                 );
 
                                 api.savingsGoalList[index] = resp.data;
-
+                                debugPrint('resp.data:::${resp.data}');
                                 setState(() {
                                   goal = resp.data;
                                 });
+                                Toasts.show(
+                                  context,
+                                  'Transaction deleted',
+                                  type: ToastType.success,
+                                );
                               }
                             });
                           },
@@ -659,6 +653,7 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                 controller: nameController,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -717,14 +712,15 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
           ApiProvider api = Provider.of<ApiProvider>(context, listen: false);
           await api.updateGoal(context, goal).then((Response resp) {
             if (resp.statusCode == HttpStatus.ok) {
+              setState(() {
+                debugPrint('resp.add:::${resp.data}');
+                this.goal = resp.data;
+              });
               Toasts.show(
                 context,
                 'Savings added to the Goal',
                 type: ToastType.success,
               );
-              setState(() {
-                goal = resp.data;
-              });
             }
           });
         }

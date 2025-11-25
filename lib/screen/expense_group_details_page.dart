@@ -669,7 +669,7 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                               (context) => CreateExpensePage(
                                                 group: group.toJson(),
                                                 expense: {},
-                                                showGroup: true,
+                                                showGroup: false,
                                               ),
                                         ),
                                       );
@@ -855,23 +855,24 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                                                             expense['expenseId']
                                                                 .isNotEmpty
                                                         ? () async {
-                                                          final updatedGroup =
-                                                              await Navigator.of(
-                                                                context,
-                                                              ).push(
-                                                                MaterialPageRoute(
-                                                                  builder:
-                                                                      (
-                                                                        context,
-                                                                      ) => CreateExpensePage(
-                                                                        group:
-                                                                            group.toJson(),
-                                                                        expense:
-                                                                            expense,
-                                                                        showGroup: true,
-                                                                      ),
-                                                                ),
-                                                              );
+                                                          final updatedGroup = await Navigator.of(
+                                                            context,
+                                                          ).push(
+                                                            MaterialPageRoute(
+                                                              builder:
+                                                                  (
+                                                                    context,
+                                                                  ) => CreateExpensePage(
+                                                                    group:
+                                                                        group
+                                                                            .toJson(),
+                                                                    expense:
+                                                                        expense,
+                                                                    showGroup:
+                                                                        true,
+                                                                  ),
+                                                            ),
+                                                          );
                                                           debugPrint(
                                                             'updatedGroup:::${updatedGroup.toString()}',
                                                           );
@@ -1099,8 +1100,11 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
               final updatedGroup = await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder:
-                      (context) =>
-                          CreateExpensePage(group: group.toJson(), expense: {},  showGroup: true,),
+                      (context) => CreateExpensePage(
+                        group: group.toJson(),
+                        expense: {},
+                        showGroup: false,
+                      ),
                 ),
               );
 

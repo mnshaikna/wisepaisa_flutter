@@ -55,8 +55,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
   TextEditingController dateController = TextEditingController(),
       descController = TextEditingController(),
       amountController = TextEditingController(),
-      expenseNote = TextEditingController(),
-      groupController = TextEditingController();
+      expenseNote = TextEditingController();
   dynamic paidBy;
   CategoryModel? selectedCategory;
   PaymentMethodModel? payMethod;
@@ -69,7 +68,6 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
   void initState() {
     super.initState();
     if (group.isNotEmpty) {
-      groupController.text = group['exGroupName'];
       dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       members = (group['exGroupMembers'] ?? []).toList();
     }
@@ -227,29 +225,6 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     ),
                                   ),
                                 const SizedBox(height: 16),
-
-                                if (showGroup)
-                                  TextField(
-                                    readOnly: true,
-                                    controller: groupController,
-                                    onTap:
-                                        group.isEmpty
-                                            ? () => _showGroupSheet(context)
-                                            : null,
-                                    textCapitalization:
-                                        TextCapitalization.sentences,
-                                    keyboardType: TextInputType.text,
-                                    textInputAction: TextInputAction.next,
-                                    decoration: InputDecoration(
-                                      labelText: 'Expense Group',
-                                      labelStyle: labelStyle(context),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    maxLines: 1,
-                                  ),
-                                const SizedBox(height: 16),
                                 TextField(
                                   controller: descController,
                                   textCapitalization:
@@ -322,6 +297,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         child: DropdownButtonFormField<
                                           CategoryModel
                                         >(
+                                          borderRadius: BorderRadius.circular(8.0),
                                           decoration: InputDecoration(
                                             labelText: "Category",
                                             labelStyle: labelStyle(context),
@@ -430,6 +406,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     // SubCategory Dropdown (depends on selectedCategory)
                                     Expanded(
                                       child: DropdownButtonFormField<String>(
+                                        borderRadius: BorderRadius.circular(8.0),
                                         decoration: InputDecoration(
                                           labelText: "Sub-Category",
                                           labelStyle: labelStyle(context),
@@ -478,6 +455,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                   child: DropdownButtonFormField<
                                     PaymentMethodModel
                                   >(
+                                    borderRadius: BorderRadius.circular(8.0),
                                     decoration: InputDecoration(
                                       labelText: "Payment Method",
                                       labelStyle: labelStyle(context),
@@ -820,286 +798,383 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                           ),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 10.0,
-                        ),
-                        width: double.infinity,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: ElevatedButton.icon(
-                            onPressed: () async {
-                              String url = "";
-                              if (validateForm()) {
-                                if (group.isNotEmpty) {
-                                  if (members.length == 1) {
-                                    AuthProvider auth =
-                                        Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false,
-                                        );
-                                    paidBy = getUser();
-                                    paidTo.add(getUser());
-                                  }
-                                  if (imageBytes != null) {
-                                    url = await uploadImage(
-                                      imageBytes!,
-                                      '${Random().nextInt(1000000)}',
-                                      context,
-                                    );
-                                  }
-                                  ExpenseModel expense = ExpenseModel(
-                                    expenseId:
-                                        this.expense['expenseId'] != null &&
-                                                this
-                                                    .expense['expenseId']
-                                                    .isNotEmpty
-                                            ? this.expense['expenseId']
-                                            : Random()
-                                                .nextInt(9999999)
-                                                .toString(),
-                                    expenseTitle: descController.text.trim(),
-                                    expenseNote: expenseNote.text.trim(),
-                                    expenseAmount: double.parse(
-                                      amountController.text.trim(),
-                                    ),
-                                    expenseSpendType:
-                                        isExpense ? 'expense' : 'income',
-                                    expenseDate: dateController.text.trim(),
-                                    expensePaidTo:
-                                        paidTo.toList().isEmpty
-                                            ? [getUser().toJson()]
-                                            : paidTo.toList(),
-                                    expenseCategory:
-                                        selectedCategory!.cat.toString(),
-                                    expenseSubCategory:
-                                        subCategoryValue.toString(),
-                                    expensePaymentMethod:
-                                        payMethod!.payMethod.toString(),
-                                    expensePaidBy: paidBy ?? getUser().toJson(),
-                                    expenseReceiptURL:
-                                        url.isNotEmpty ? url : '',
-                                    expenseUserId: UserModel.empty(),
-                                  );
-                                  List<dynamic> expenses =
-                                      group['expenses'] ?? [];
-
-                                  if (this.expense.isNotEmpty) {
-                                    expenses.removeWhere(
-                                      (exp) =>
-                                          exp['expenseId'] ==
-                                          this.expense['expenseId'],
-                                    );
-                                  }
-                                  expenses.add(expense.toJson());
-                                  debugPrint(
-                                    'Expense Data:::${expense.toJson().toString()}',
-                                  );
-                                  group['expenses'] = expenses;
-
-                                  await api.updateGroup(context, group).then((
-                                    Response resp,
-                                  ) {
-                                    debugPrint(resp.statusCode.toString());
-                                    if (resp.statusCode == 200) {
-                                      Toasts.show(
-                                        context,
-                                        this.expense.isNotEmpty
-                                            ? 'Expense successfully updated'
-                                            : 'Expense successfully added',
-                                        type: ToastType.success,
-                                      );
-                                      api.groupList.removeWhere(
-                                        (element) =>
-                                            element['exGroupId'] ==
-                                            group['exGroupId'],
-                                      );
-                                      api.groupList.add(resp.data);
-                                      Navigator.pop(context, resp.data);
-                                    }
-                                  });
-                                } else {
-                                  if (expense.isNotEmpty) {
-                                    debugPrint('Edit User Expense');
-                                    AuthProvider auth =
-                                        Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false,
-                                        );
-                                    paidBy = getUser();
-                                    paidTo.add(getUser());
-
-                                    if (imageBytes != null) {
-                                      url = await uploadImage(
-                                        imageBytes!,
-                                        '${Random().nextInt(1000000)}',
-                                        context,
-                                      );
-                                    }
-
-                                    ExpenseModel expense = ExpenseModel(
-                                      expenseId: this.expense['expenseId'],
-                                      expenseTitle: descController.text.trim(),
-                                      expenseNote: expenseNote.text.trim(),
-                                      expenseAmount: double.parse(
-                                        amountController.text.trim(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed:
+                                    group.isEmpty || showGroup
+                                        ? () => _showGroupSheet(context)
+                                        : null,
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  textStyle: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall!.copyWith(
+                                    letterSpacing: 1.25,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 5.0,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 25.0,
+                                        width: 25.0,
+                                        child:
+                                            selectedGroup['exGroupImageURL'] !=
+                                                        null ||
+                                                    group['exGroupImageURL'] !=
+                                                        null
+                                                ? ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        12.0,
+                                                      ),
+                                                  child: Image.network(
+                                                    (group['exGroupImageURL'] !=
+                                                            null)
+                                                        ? group['exGroupImageURL']
+                                                        : selectedGroup['exGroupImageURL'],
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (
+                                                      context,
+                                                      child,
+                                                      loadingProgress,
+                                                    ) {
+                                                      if (loadingProgress ==
+                                                          null) {
+                                                        return child; // Image loaded
+                                                      }
+                                                      return SizedBox(
+                                                        width: 50,
+                                                        height: 50,
+                                                        child: Center(
+                                                          child:
+                                                              CupertinoActivityIndicator(),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                                : Image.asset(
+                                                  Theme.of(
+                                                            context,
+                                                          ).brightness ==
+                                                          Brightness.light
+                                                      ? 'assets/logos/logo_light.png'
+                                                      : 'assets/logos/logo_dark.png',
+                                                  fit: BoxFit.contain,
+                                                ),
                                       ),
-                                      expenseSpendType:
-                                          isExpense ? 'expense' : 'income',
-                                      expenseDate: dateController.text.trim(),
-                                      expensePaidTo:
-                                          paidTo.toList().isEmpty
-                                              ? [getUser().toJson()]
-                                              : paidTo.toList(),
-                                      expenseCategory:
-                                          selectedCategory!.cat.toString(),
-                                      expenseSubCategory:
-                                          subCategoryValue.toString(),
-                                      expensePaymentMethod:
-                                          payMethod!.payMethod.toString(),
-                                      expensePaidBy:
-                                          paidBy ?? getUser().toJson(),
-                                      expenseReceiptURL:
-                                          url.isNotEmpty ? url : '',
-                                      expenseUserId: getUser(),
-                                    );
-
-                                    debugPrint(
-                                      'Edit User Expense Data:::${expense.toJson().toString()}',
-                                    );
-
-                                    await api
-                                        .updateExpense(
-                                          context,
-                                          expense.toJson(),
-                                        )
-                                        .then((Response resp) {
-                                          debugPrint(
-                                            resp.statusCode.toString(),
-                                          );
-                                          if (resp.statusCode == 200) {
-                                            Toasts.show(
-                                              context,
-                                              'Expense successfully Updated',
-                                              type: ToastType.success,
-                                            );
-
-                                            Navigator.pushAndRemoveUntil(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        MyDashboardPage(),
-                                              ),
-                                              (Route<dynamic> route) => false,
-                                            );
-                                          }
-                                        });
-                                  } else {
-                                    debugPrint('Add Expense');
-                                    AuthProvider auth =
-                                        Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false,
-                                        );
-                                    paidBy = getUser();
-                                    paidTo.add(getUser());
-                                    if (imageBytes != null) {
-                                      url = await uploadImage(
-                                        imageBytes!,
-                                        '${Random().nextInt(1000000)}',
-                                        context,
-                                      );
-                                    }
-                                    ExpenseModel expense = ExpenseModel(
-                                      expenseId: '',
-                                      expenseTitle: descController.text.trim(),
-                                      expenseNote: expenseNote.text.trim(),
-                                      expenseAmount: double.parse(
-                                        amountController.text.trim(),
+                                      SizedBox(width: 5.0),
+                                      Expanded(
+                                        child: Text(
+                                          group.isNotEmpty
+                                              ? group['exGroupName']
+                                              : selectedGroup['exGroupName'] ??
+                                                  'non-grouped expenses',
+                                          overflow: TextOverflow.ellipsis,
+                                          softWrap: true,
+                                          maxLines: 1,
+                                        ),
                                       ),
-                                      expenseSpendType:
-                                          isExpense ? 'expense' : 'income',
-                                      expenseDate: dateController.text.trim(),
-                                      expensePaidTo: paidTo.toList(),
-                                      expenseCategory:
-                                          selectedCategory!.cat.toString(),
-                                      expenseSubCategory:
-                                          subCategoryValue.toString(),
-                                      expensePaymentMethod:
-                                          payMethod!.payMethod.toString(),
-                                      expensePaidBy: paidBy!,
-                                      expenseReceiptURL:
-                                          url.isNotEmpty ? url : '',
-                                      expenseUserId: getUser(),
-                                    );
-
-                                    debugPrint(
-                                      'Expense Data:::${expense.toJson().toString()}',
-                                    );
-
-                                    await api
-                                        .createExpense(
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5.0),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  String url = "";
+                                  if (validateForm()) {
+                                    if (group.isNotEmpty) {
+                                      if (members.length == 1) {
+                                        AuthProvider auth =
+                                            Provider.of<AuthProvider>(
+                                              context,
+                                              listen: false,
+                                            );
+                                        paidBy = getUser();
+                                        paidTo.add(getUser());
+                                      }
+                                      if (imageBytes != null) {
+                                        url = await uploadImage(
+                                          imageBytes!,
+                                          '${Random().nextInt(1000000)}',
                                           context,
-                                          expense.toJson(),
-                                        )
-                                        .then((Response resp) {
-                                          debugPrint(
-                                            resp.statusCode.toString(),
-                                          );
-                                          if (resp.statusCode == 200) {
-                                            Toasts.show(
-                                              context,
-                                              'Expense successfully Created',
-                                              type: ToastType.success,
-                                            );
+                                        );
+                                      }
+                                      ExpenseModel expense = ExpenseModel(
+                                        expenseId:
+                                            this.expense['expenseId'] != null &&
+                                                    this
+                                                        .expense['expenseId']
+                                                        .isNotEmpty
+                                                ? this.expense['expenseId']
+                                                : Random()
+                                                    .nextInt(9999999)
+                                                    .toString(),
+                                        expenseTitle:
+                                            descController.text.trim(),
+                                        expenseNote: expenseNote.text.trim(),
+                                        expenseAmount: double.parse(
+                                          amountController.text.trim(),
+                                        ),
+                                        expenseSpendType:
+                                            isExpense ? 'expense' : 'income',
+                                        expenseDate: dateController.text.trim(),
+                                        expensePaidTo:
+                                            paidTo.toList().isEmpty
+                                                ? [getUser().toJson()]
+                                                : paidTo.toList(),
+                                        expenseCategory:
+                                            selectedCategory!.cat.toString(),
+                                        expenseSubCategory:
+                                            subCategoryValue.toString(),
+                                        expensePaymentMethod:
+                                            payMethod!.payMethod.toString(),
+                                        expensePaidBy:
+                                            paidBy ?? getUser().toJson(),
+                                        expenseReceiptURL:
+                                            url.isNotEmpty ? url : '',
+                                        expenseUserId: UserModel.empty(),
+                                      );
+                                      List<dynamic> expenses =
+                                          group['expenses'] ?? [];
 
-                                            Navigator.pushAndRemoveUntil(
+                                      if (this.expense.isNotEmpty) {
+                                        expenses.removeWhere(
+                                          (exp) =>
+                                              exp['expenseId'] ==
+                                              this.expense['expenseId'],
+                                        );
+                                      }
+                                      expenses.add(expense.toJson());
+                                      debugPrint(
+                                        'Expense Data:::${expense.toJson().toString()}',
+                                      );
+                                      group['expenses'] = expenses;
+
+                                      await api.updateGroup(context, group).then((
+                                        Response resp,
+                                      ) {
+                                        debugPrint(resp.statusCode.toString());
+                                        if (resp.statusCode == 200) {
+                                          Toasts.show(
+                                            context,
+                                            this.expense.isNotEmpty
+                                                ? 'Expense successfully updated'
+                                                : 'Expense successfully added',
+                                            type: ToastType.success,
+                                          );
+                                          api.groupList.removeWhere(
+                                            (element) =>
+                                                element['exGroupId'] ==
+                                                group['exGroupId'],
+                                          );
+                                          api.groupList.add(resp.data);
+                                          Navigator.pop(context, resp.data);
+                                        }
+                                      });
+                                    } else {
+                                      if (expense.isNotEmpty) {
+                                        debugPrint('Edit User Expense');
+                                        AuthProvider auth =
+                                            Provider.of<AuthProvider>(
                                               context,
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        MyDashboardPage(),
-                                              ),
-                                              (Route<dynamic> route) => false,
+                                              listen: false,
                                             );
-                                          }
-                                        });
+                                        paidBy = getUser();
+                                        paidTo.add(getUser());
+
+                                        if (imageBytes != null) {
+                                          url = await uploadImage(
+                                            imageBytes!,
+                                            '${Random().nextInt(1000000)}',
+                                            context,
+                                          );
+                                        }
+
+                                        ExpenseModel expense = ExpenseModel(
+                                          expenseId: this.expense['expenseId'],
+                                          expenseTitle:
+                                              descController.text.trim(),
+                                          expenseNote: expenseNote.text.trim(),
+                                          expenseAmount: double.parse(
+                                            amountController.text.trim(),
+                                          ),
+                                          expenseSpendType:
+                                              isExpense ? 'expense' : 'income',
+                                          expenseDate:
+                                              dateController.text.trim(),
+                                          expensePaidTo:
+                                              paidTo.toList().isEmpty
+                                                  ? [getUser().toJson()]
+                                                  : paidTo.toList(),
+                                          expenseCategory:
+                                              selectedCategory!.cat.toString(),
+                                          expenseSubCategory:
+                                              subCategoryValue.toString(),
+                                          expensePaymentMethod:
+                                              payMethod!.payMethod.toString(),
+                                          expensePaidBy:
+                                              paidBy ?? getUser().toJson(),
+                                          expenseReceiptURL:
+                                              url.isNotEmpty ? url : '',
+                                          expenseUserId: getUser(),
+                                        );
+
+                                        debugPrint(
+                                          'Edit User Expense Data:::${expense.toJson().toString()}',
+                                        );
+
+                                        await api
+                                            .updateExpense(
+                                              context,
+                                              expense.toJson(),
+                                            )
+                                            .then((Response resp) {
+                                              debugPrint(
+                                                resp.statusCode.toString(),
+                                              );
+                                              if (resp.statusCode == 200) {
+                                                Toasts.show(
+                                                  context,
+                                                  'Expense successfully Updated',
+                                                  type: ToastType.success,
+                                                );
+
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            MyDashboardPage(),
+                                                  ),
+                                                  (Route<dynamic> route) =>
+                                                      false,
+                                                );
+                                              }
+                                            });
+                                      } else {
+                                        debugPrint('Add Expense');
+                                        AuthProvider auth =
+                                            Provider.of<AuthProvider>(
+                                              context,
+                                              listen: false,
+                                            );
+                                        paidBy = getUser();
+                                        paidTo.add(getUser());
+                                        if (imageBytes != null) {
+                                          url = await uploadImage(
+                                            imageBytes!,
+                                            '${Random().nextInt(1000000)}',
+                                            context,
+                                          );
+                                        }
+                                        ExpenseModel expense = ExpenseModel(
+                                          expenseId: '',
+                                          expenseTitle:
+                                              descController.text.trim(),
+                                          expenseNote: expenseNote.text.trim(),
+                                          expenseAmount: double.parse(
+                                            amountController.text.trim(),
+                                          ),
+                                          expenseSpendType:
+                                              isExpense ? 'expense' : 'income',
+                                          expenseDate:
+                                              dateController.text.trim(),
+                                          expensePaidTo: paidTo.toList(),
+                                          expenseCategory:
+                                              selectedCategory!.cat.toString(),
+                                          expenseSubCategory:
+                                              subCategoryValue.toString(),
+                                          expensePaymentMethod:
+                                              payMethod!.payMethod.toString(),
+                                          expensePaidBy: paidBy!,
+                                          expenseReceiptURL:
+                                              url.isNotEmpty ? url : '',
+                                          expenseUserId: getUser(),
+                                        );
+
+                                        debugPrint(
+                                          'Expense Data:::${expense.toJson().toString()}',
+                                        );
+
+                                        await api
+                                            .createExpense(
+                                              context,
+                                              expense.toJson(),
+                                            )
+                                            .then((Response resp) {
+                                              debugPrint(
+                                                resp.statusCode.toString(),
+                                              );
+                                              if (resp.statusCode == 200) {
+                                                Toasts.show(
+                                                  context,
+                                                  'Expense successfully Created',
+                                                  type: ToastType.success,
+                                                );
+
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            MyDashboardPage(),
+                                                  ),
+                                                  (Route<dynamic> route) =>
+                                                      false,
+                                                );
+                                              }
+                                            });
+                                      }
+                                    }
                                   }
-                                }
-                              }
-                            },
-                            icon: Icon(
-                              expense.isNotEmpty ? Icons.edit : Icons.check,
-                            ),
-                            label: Text(
-                              expense.isNotEmpty
-                                  ? isExpense
-                                      ? 'Edit Expense'
-                                      : "Edit Income"
-                                  : isExpense
-                                  ? 'Add Expense'
-                                  : 'Add Income',
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 24,
+                                },
+                                icon: Icon(
+                                  expense.isNotEmpty ? Icons.edit : Icons.check,
+                                ),
+                                label: Text(
+                                  expense.isNotEmpty
+                                      ? isExpense
+                                          ? 'Edit Expense'
+                                          : "Edit Income"
+                                      : isExpense
+                                      ? 'Add Expense'
+                                      : 'Add Income',
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 24,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  textStyle: Theme.of(
+                                    context,
+                                  ).textTheme.titleSmall!.copyWith(
+                                    letterSpacing: 1.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              textStyle: Theme.of(
-                                context,
-                              ).textTheme.titleMedium!.copyWith(
-                                letterSpacing: 1.5,
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ],
@@ -1301,75 +1376,119 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
               const Divider(height: 1),
               const SizedBox(height: 6),
               Column(
-                children:
-                    api.groupList.map((grp) {
-                      return ListTile(
-                        title: Text(
-                          grp['exGroupName'],
-                          style: Theme.of(context).textTheme.titleMedium!
-                              .copyWith(fontWeight: FontWeight.bold),
+                children: [
+                  ListTile(
+                    title: Text(
+                      'non-grouped expense',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'This expense is not part of any groups',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    leading: Container(
+                      height: 50.0,
+                      width: 50.0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Image.asset(
+                        Theme.of(context).brightness == Brightness.light
+                            ? 'assets/logos/logo_light.png'
+                            : 'assets/logos/logo_dark.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        selectedGroup = {};
+                        group = selectedGroup;
+                        dateController.text = DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(DateTime.now());
+                        members = (group['exGroupMembers'] ?? []).toList();
+                      });
+                    },
+                  ),
+                  ...api.groupList.map((grp) {
+                    return ListTile(
+                      title: Text(
+                        grp['exGroupName'],
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        grp['exGroupDesc'],
+                        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                          color: Colors.grey.shade500,
                         ),
-                        subtitle: Text(
-                          grp['exGroupDesc'],
-                          style: Theme.of(context).textTheme.titleSmall!
-                              .copyWith(color: Colors.grey.shade500),
+                      ),
+                      leading: Container(
+                        height: 50.0,
+                        width: 50.0,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
                         ),
-                        leading: Container(
-                          height: 50.0,
-                          width: 50.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child:
-                              (grp['exGroupImageURL'] != null)
-                                  ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(12.0),
-                                    child: Image.network(
-                                      grp['exGroupImageURL'],
-                                      fit: BoxFit.cover,
-                                      loadingBuilder: (
-                                        context,
-                                        child,
-                                        loadingProgress,
-                                      ) {
-                                        if (loadingProgress == null) {
-                                          return child; // Image loaded
-                                        }
-                                        return SizedBox(
-                                          width: 50,
-                                          height: 50,
-                                          child: Center(
-                                            child: CupertinoActivityIndicator(),
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder:
-                                          (context, _, __) => Image.asset(
-                                            Theme.of(context).brightness ==
-                                                    Brightness.light
-                                                ? 'assets/logos/logo_light.png'
-                                                : 'assets/logos/logo_dark.png',
-                                            fit: BoxFit.contain,
-                                          ),
-                                    ),
-                                  )
-                                  : Image.asset(
-                                    Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? 'assets/logos/logo_light.png'
-                                        : 'assets/logos/logo_dark.png',
-                                    fit: BoxFit.contain,
+                        child:
+                            (grp['exGroupImageURL'] != null)
+                                ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Image.network(
+                                    grp['exGroupImageURL'],
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (
+                                      context,
+                                      child,
+                                      loadingProgress,
+                                    ) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      }
+                                      return SizedBox(
+                                        width: 50,
+                                        height: 50,
+                                        child: Center(
+                                          child: CupertinoActivityIndicator(),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder:
+                                        (context, _, __) => Image.asset(
+                                          Theme.of(context).brightness ==
+                                                  Brightness.light
+                                              ? 'assets/logos/logo_light.png'
+                                              : 'assets/logos/logo_dark.png',
+                                          fit: BoxFit.contain,
+                                        ),
                                   ),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          setState(() {
-                            groupController.text = grp['exGroupName'];
-                            selectedGroup = grp;
-                          });
-                        },
-                      );
-                    }).toList(),
+                                )
+                                : Image.asset(
+                                  Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? 'assets/logos/logo_light.png'
+                                      : 'assets/logos/logo_dark.png',
+                                  fit: BoxFit.contain,
+                                ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          selectedGroup = grp;
+                          group = selectedGroup;
+                          dateController.text = DateFormat(
+                            'yyyy-MM-dd',
+                          ).format(DateTime.now());
+                          members = (group['exGroupMembers'] ?? []).toList();
+                        });
+                      },
+                    );
+                  }),
+                ],
               ),
             ],
           ),
