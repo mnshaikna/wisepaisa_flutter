@@ -1096,3 +1096,9 @@ TextStyle labelStyle(BuildContext context) => Theme.of(context)
     .textTheme
     .labelLarge!
     .copyWith(letterSpacing: 1.5, color: Colors.grey.shade500);
+
+int notificationIdFromObjectId(String objectId) {
+  int returnValue = objectId.hashCode;
+  debugPrint('returnValue:::$returnValue');
+  return returnValue;
+}

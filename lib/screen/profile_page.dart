@@ -11,10 +11,11 @@ import 'package:in_app_review/in_app_review.dart';
 import '../providers/auth_provider.dart';
 import '../services/notification_service.dart';
 import '../providers/settings_provider.dart';
+import '../utils/constants.dart';
 import '../utils/dialog_utils.dart';
-import '../utils/toast.dart';
 import 'login_page.dart';
 import 'package:slide_to_act/slide_to_act.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -335,6 +336,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (picked != null) {
       final hh = picked.hour.toString().padLeft(2, '0');
       final mm = picked.minute.toString().padLeft(2, '0');
+
       settings.setReminderTime('$hh:$mm');
 
       DateTime now = DateTime.now();
@@ -345,21 +347,15 @@ class _ProfilePageState extends State<ProfilePage> {
         picked.hour,
         picked.minute,
       );
-
-      // If the selected time is already in the past, move to next day
       if (dateTime.isBefore(now)) {
         dateTime = dateTime.add(const Duration(days: 1));
       }
 
-      await NotificationService().scheduleNotification(dateTime: dateTime).then(
-        (value) {
-          debugPrint('Notification scheduled at ${picked.toString()}');
-          Toasts.show(
-            context,
-            "Notification scheduled at ${picked.toString()}",
-            type: ToastType.info,
-          );
-        },
+      final tzDate = tz.TZDateTime.from(dateTime, tz.local);
+      await NotificationService().scheduleDailyReminder(
+        dateTime: tzDate,
+        id: dailyNotificationId,
+        repeatType: RepeatType.daily,
       );
     }
   }

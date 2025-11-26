@@ -6,6 +6,7 @@
 final String baseUrl = 'http://72.60.209.187:8083/expense';
 final username = "admin";
 final password = "password";
+final int dailyNotificationId = 180991;
 
 List<String> month = [
   'Jan',

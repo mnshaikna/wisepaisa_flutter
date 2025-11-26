@@ -21,12 +21,21 @@ import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wisepaise/screen/splash_page.dart';
 
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:wisepaise/utils/constants.dart';
+import 'package:wisepaise/utils/toast.dart';
+
 import 'models/reminder_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.local);
+  await NotificationService().init();
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  NotificationService().init();
+
   await Hive.initFlutter();
   await Hive.openBox('settings');
   var box = await Hive.openBox('appBox');
@@ -67,6 +76,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    initNotification();
     _initGoogleSignIn();
     quickActions.initialize((String? shortcutType) {
       setState(() {
@@ -173,6 +183,31 @@ class _MyAppState extends State<MyApp> {
       debugPrint("Silent sign-in error: $e");
       setState(() => _checking = false);
     }
+  }
+
+  initNotification() async {
+    SettingsProvider settings = Provider.of<SettingsProvider>(
+      context,
+      listen: false,
+    );
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledTime = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      int.parse(settings.reminderTime.split(':')[0]),
+      int.parse(settings.reminderTime.split(':')[1]),
+    );
+    await NotificationService()
+        .scheduleDailyReminder(
+          dateTime: scheduledTime,
+          id: dailyNotificationId,
+          repeatType: RepeatType.daily,
+        )
+        .then((_) {
+          debugPrint('Reminder Set at scheduledTime $scheduledTime');
+        });
   }
 
   @override

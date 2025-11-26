@@ -1,136 +1,89 @@
-import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz1;
+import 'package:timezone/timezone.dart' as tz;
+
+enum RepeatType { none, daily, weekly, monthly }
 
 class NotificationService {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  static final NotificationService _instance = NotificationService._();
+
+  factory NotificationService() => _instance;
+
+  NotificationService._();
+
+  final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    await _requestPermissions();
-    const AndroidInitializationSettings androidInit =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
-    const iOSInit = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
+    const iosSettings = DarwinInitializationSettings(
       requestSoundPermission: true,
+      requestBadgePermission: true,
+      requestAlertPermission: true,
+      // onDidReceiveLocalNotification is optional for older iOS versions
     );
 
-    const InitializationSettings initSettings = InitializationSettings(
-      android: androidInit,
-      iOS: iOSInit,
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
     );
-
-    await flutterLocalNotificationsPlugin.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (response) {
-        debugPrint('Notification tapped: ${response.payload}');
-      },
-    );
-
-    tz.initializeTimeZones();
+    await _plugin.initialize(initSettings);
   }
 
-  Future<void> showSimpleNotification() async {
-    const NotificationDetails details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'general_channel',
-        'General Notifications',
-        channelDescription: 'Used for general notifications.',
-        importance: Importance.max,
-        priority: Priority.max,
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
+  Future<void> cancelAll() => _plugin.cancelAll();
 
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'Hello 👋',
-      'This is your local notification!',
-      details,
-      payload: 'Custom_Data',
-    );
-  }
+  Future<void> scheduleDailyReminder({
+    required tz.TZDateTime dateTime,
+    required int id,
+    required RepeatType repeatType,
+  }) async {
+    final androidPlugin =
+        _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
 
-  Future<void> scheduleNotification({required DateTime dateTime}) async {
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'scheduled_channel',
-      'Scheduled Notifications',
-      description: 'Used for scheduled notifications.',
-      importance: Importance.max,
-    );
+    if (androidPlugin != null) {
+      final allowed = await androidPlugin.areNotificationsEnabled();
+      if (!allowed!) await androidPlugin.requestExactAlarmsPermission();
 
-    const NotificationDetails details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'scheduled_channel',
-        'Scheduled Notifications',
-        channelDescription: 'Used for scheduled notifications.',
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
-
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(channel);
-
-    final timeZone = await FlutterTimezone.getLocalTimezone();
-    final String timeZoneName = timeZone.identifier;
-    tz1.setLocalLocation(tz1.getLocation(timeZoneName));
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      1,
-      'Scheduled ⏰',
-      'This notification was scheduled for ${dateTime.toString()}',
-      tz1.TZDateTime.from(dateTime, tz1.local),
-      details,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'Hello-World',
-    );
-  }
-
-  Future<void> cancelAllNotifications() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
-
-  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-    return await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-  }
-
-  Future<void> _requestPermissions() async {
-    if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          flutterLocalNotificationsPlugin
-              .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin
-              >();
-
-      await androidImplementation?.requestNotificationsPermission();
-      await androidImplementation?.requestExactAlarmsPermission();
-    } else {
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >()
-          ?.requestPermissions(alert: true, badge: true, sound: true);
+      await androidPlugin.requestNotificationsPermission();
     }
+    cancelAll();
+
+    await _plugin.zonedSchedule(
+      id,
+      'Log Your Spending',
+      'Track it today, manage it tomorrow! Log your expenses.',
+      dateTime,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'reminders_channel',
+          'Reminders',
+          channelDescription: 'Channel for daily reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          subtitle: 'Track it today, manage it tomorrow! Log your expenses.',
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents:
+          repeatType == RepeatType.none
+              ? null
+              : repeatType == RepeatType.daily
+              ? DateTimeComponents.time
+              : repeatType == RepeatType.weekly
+              ? DateTimeComponents.dayOfWeekAndTime
+              : repeatType == RepeatType.monthly
+              ? DateTimeComponents.dayOfMonthAndTime
+              : null,
+    );
   }
 }

@@ -2,6 +2,12 @@
   "configVersion": 2,
   "packages": [
     {
+      "name": "android_intent_plus",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/android_intent_plus-5.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "ansicolor",
       "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/ansicolor-2.0.3",
       "packageUri": "lib/",
@@ -21,7 +27,7 @@
     },
     {
       "name": "async",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/async-2.12.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/async-2.13.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -57,9 +63,9 @@
     },
     {
       "name": "checked_yaml",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/checked_yaml-2.0.3",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/checked_yaml-2.0.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.8"
     },
     {
       "name": "cli_util",
@@ -93,13 +99,13 @@
     },
     {
       "name": "cross_file",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/cross_file-0.3.4+2",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/cross_file-0.3.5+1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "crypto",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/crypto-3.0.6",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -159,33 +165,33 @@
     },
     {
       "name": "file",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file-6.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "file_selector_linux",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.3+2",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "file_selector_macos",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.4+4",
-      "packageUri": "lib/",
-      "languageVersion": "3.7"
-    },
-    {
-      "name": "file_selector_platform_interface",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_platform_interface-2.6.2",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file-7.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
-      "name": "file_selector_windows",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+4",
+      "name": "file_selector_linux",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.4",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "file_selector_macos",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "file_selector_platform_interface",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_platform_interface-2.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "file_selector_windows",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+5",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
     },
     {
       "name": "fixnum",
@@ -285,33 +291,39 @@
     },
     {
       "name": "flutter_local_notifications",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications-19.2.1",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.4"
     },
     {
       "name": "flutter_local_notifications_linux",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.4"
     },
     {
       "name": "flutter_local_notifications_platform_interface",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications_platform_interface-7.2.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications_platform_interface-9.1.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "flutter_local_notifications_windows",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_local_notifications_windows-1.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "flutter_native_splash",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_native_splash-2.4.6",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_native_splash-2.4.7",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "flutter_plugin_android_lifecycle",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.30",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "flutter_speed_dial",
@@ -321,9 +333,9 @@
     },
     {
       "name": "flutter_svg",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_svg-2.2.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/flutter_svg-2.2.3",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_test",
@@ -351,9 +363,9 @@
     },
     {
       "name": "font_awesome_flutter",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/font_awesome_flutter-10.9.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/font_awesome_flutter-10.12.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.9"
     },
     {
       "name": "google_fonts",
@@ -417,7 +429,7 @@
     },
     {
       "name": "http",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/http-1.5.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -435,27 +447,27 @@
     },
     {
       "name": "image_picker",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker-1.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.6"
-    },
-    {
-      "name": "image_picker_android",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker-1.2.1",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
     {
-      "name": "image_picker_for_web",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.0",
+      "name": "image_picker_android",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+10",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "image_picker_for_web",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
     },
     {
       "name": "image_picker_ios",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13+2",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "image_picker_linux",
@@ -465,15 +477,15 @@
     },
     {
       "name": "image_picker_macos",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2+1",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "image_picker_platform_interface",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_platform_interface-2.11.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/image_picker_platform_interface-2.11.1",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.7"
     },
     {
       "name": "image_picker_windows",
@@ -537,9 +549,9 @@
     },
     {
       "name": "lottie",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/lottie-3.3.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/lottie-3.3.2",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "matcher",
@@ -555,7 +567,7 @@
     },
     {
       "name": "math_expressions",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/math_expressions-2.7.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/math_expressions-2.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -615,15 +627,15 @@
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/path_provider_android-2.2.18",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "path_provider_foundation",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.2",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "path_provider_linux",
@@ -657,9 +669,9 @@
     },
     {
       "name": "petitparser",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/petitparser-6.1.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/petitparser-7.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.8"
     },
     {
       "name": "platform",
@@ -686,12 +698,6 @@
       "languageVersion": "3.3"
     },
     {
-      "name": "process",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/process-4.2.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.14"
-    },
-    {
       "name": "provider",
       "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/provider-6.1.5+1",
       "packageUri": "lib/",
@@ -711,15 +717,15 @@
     },
     {
       "name": "quick_actions_android",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/quick_actions_android-1.0.23",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/quick_actions_android-1.0.27",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "quick_actions_ios",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/quick_actions_ios-1.2.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/quick_actions_ios-1.2.3",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "quick_actions_platform_interface",
@@ -795,7 +801,7 @@
     },
     {
       "name": "timezone",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/timezone-0.9.4",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/timezone-0.10.1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -807,9 +813,9 @@
     },
     {
       "name": "universal_io",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/universal_io-2.2.2",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/universal_io-2.3.1",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.6"
     },
     {
       "name": "url_launcher",
@@ -819,25 +825,25 @@
     },
     {
       "name": "url_launcher_android",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.24",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
     {
       "name": "url_launcher_ios",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.5",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.6",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
     {
       "name": "url_launcher_linux",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "url_launcher_macos",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.4",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.5",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
@@ -855,9 +861,9 @@
     },
     {
       "name": "url_launcher_windows",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.4",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.8"
     },
     {
       "name": "uuid",
@@ -891,9 +897,9 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/vm_service-14.3.1",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/vm_service-15.0.2",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.5"
     },
     {
       "name": "web",
@@ -909,15 +915,15 @@
     },
     {
       "name": "xdg_directories",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/xdg_directories-0.2.0+3",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/xdg_directories-1.1.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.3"
     },
     {
       "name": "xml",
-      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/xml-6.5.0",
+      "rootUri": "file:///Users/mosh/.pub-cache/hosted/pub.dev/xml-6.6.1",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "yaml",

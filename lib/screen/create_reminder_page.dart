@@ -10,12 +10,14 @@ import 'package:wisepaise/models/user_model.dart';
 import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
+import 'package:wisepaise/screen/expense_search_page.dart';
 import 'package:wisepaise/utils/toast.dart';
 import 'package:wisepaise/utils/utils.dart';
 
+import '../services/notification_service.dart';
 import '../utils/calculator_bottom_sheet.dart';
-import '../utils/constants.dart';
-import 'home_page.dart';
+
+import 'package:timezone/timezone.dart' as tz;
 
 class CreateReminderPage extends StatefulWidget {
   ReminderModel reminder;
@@ -143,13 +145,18 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
       );
 
       try {
-        await api.createReminder(context, model.toJson()).then((Response resp) {
+        await api.createReminder(context, model.toJson()).then((
+          Response resp,
+        ) async {
           if (mounted && resp.statusCode == HttpStatus.ok) {
             Toasts.show(
               context,
               'Reminder created successfully',
               type: ToastType.success,
             );
+
+            setExpenseReminderNotification(model, resp.data);
+
             Navigator.pop(context);
           }
         });
@@ -191,6 +198,7 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
             );
 
             api.expenseReminderList.add(resp.data);
+            setExpenseReminderNotification(model, resp.data);
             Navigator.pop(context);
           }
         });
@@ -643,5 +651,60 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
         _amountController.text = result.toStringAsFixed(2);
       });
     }
+  }
+
+  setExpenseReminderNotification(
+    ReminderModel model,
+    Map<String, dynamic> data,
+  ) async {
+    SettingsProvider setting = Provider.of<SettingsProvider>(
+      context,
+      listen: false,
+    );
+
+    DateTime reminderDate = DateTime.parse(model.reminderDate);
+
+    DateTime now = DateTime.now();
+    DateTime dateTime = DateTime(
+      reminderDate.year,
+      reminderDate.month,
+      reminderDate.day,
+      int.parse(setting.reminderTime.split(':')[0]),
+      int.parse(setting.reminderTime.split(':')[1]),
+    );
+    if (dateTime.isBefore(now)) {
+      dateTime = dateTime.add(const Duration(days: 1));
+    }
+
+    final tzDate = tz.TZDateTime.from(dateTime, tz.local);
+    await NotificationService()
+        .scheduleDailyReminder(
+          dateTime: tzDate,
+          id: notificationIdFromObjectId(data['reminderId']),
+          repeatType:
+              !model.reminderIsRecurring
+                  ? RepeatType.none
+                  : model.reminderRecurrencePattern == 'DAILY'
+                  ? RepeatType.daily
+                  : model.reminderRecurrencePattern == 'WEEKLY'
+                  ? RepeatType.weekly
+                  : model.reminderRecurrencePattern == 'MONTHLY'
+                  ? RepeatType.monthly
+                  : RepeatType.none,
+        )
+        .then((_) {
+          debugPrint(
+            !model.reminderIsRecurring
+                ? 'Reminder set successfully at ${model.reminderDate}'
+                : '${model.reminderRecurrencePattern} Reminder set successfully at ${model.reminderDate}',
+          );
+          Toasts.show(
+            context,
+            !model.reminderIsRecurring
+                ? 'Reminder set successfully at ${model.reminderDate}'
+                : '${model.reminderRecurrencePattern} Reminder set successfully at ${model.reminderDate}',
+            type: ToastType.info,
+          );
+        });
   }
 }
