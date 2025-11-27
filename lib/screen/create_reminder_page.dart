@@ -220,19 +220,19 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
       builder: (_, api, __) {
         return Consumer<SettingsProvider>(
           builder: (_, set, __) {
-            return Scaffold(
-              appBar: AppBar(
-                centerTitle: true,
-                title: Text(
-                  'Create a reminder',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              body: Stack(
-                children: [
-                  Column(
+            return Stack(
+              children: [
+                Scaffold(
+                  appBar: AppBar(
+                    centerTitle: true,
+                    title: Text(
+                      'Create a reminder',
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  body: Column(
                     children: [
                       Expanded(
                         child: Padding(
@@ -567,9 +567,9 @@ class _CreateReminderPageState extends State<CreateReminderPage> {
                       ),
                     ],
                   ),
-                  if (api.isAPILoading) buildLoadingContainer(context: context),
-                ],
-              ),
+                ),
+                if (api.isAPILoading) buildLoadingContainer(context: context),
+              ],
             );
           },
         );

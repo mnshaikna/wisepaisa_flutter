@@ -11,6 +11,7 @@ import 'package:wisepaise/providers/api_provider.dart';
 import 'package:wisepaise/providers/auth_provider.dart';
 import 'package:wisepaise/providers/settings_provider.dart';
 import 'package:wisepaise/utils/calculator_bottom_sheet.dart';
+import 'package:wisepaise/utils/constants.dart';
 import 'package:wisepaise/utils/utils.dart';
 
 import '../models/type_model.dart';
@@ -112,23 +113,23 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
       builder: (_, api, __) {
         return Consumer<SettingsProvider>(
           builder: (_, set, __) {
-            return Scaffold(
-              appBar: AppBar(
-                centerTitle: true,
-                title: Text(
-                  group.isNotEmpty
-                      ? group['exGroupName']
-                      : expense.isNotEmpty
-                      ? "Edit Expense"
-                      : 'Add Expense',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              body: Stack(
-                children: [
-                  Column(
+            return Stack(
+              children: [
+                Scaffold(
+                  appBar: AppBar(
+                    centerTitle: true,
+                    title: Text(
+                      group.isNotEmpty
+                          ? group['exGroupName']
+                          : expense.isNotEmpty
+                          ? "Edit Expense"
+                          : 'Add Expense',
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  body: Column(
                     children: [
                       Expanded(
                         child: Padding(
@@ -145,7 +146,7 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                   SizedBox(height: 10.0),
                                 if (group.isEmpty || !group['exGroupShared'])
                                   Card(
-                                    elevation: 2.0,
+                                    elevation: 0.0,
                                     child: Container(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(12),
@@ -169,19 +170,38 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                 decoration: BoxDecoration(
                                                   color:
                                                       isExpense
-                                                          ? Colors.green
+                                                          ? Colors.red
                                                           : Colors.transparent,
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                 ),
-                                                child: Center(
-                                                  child: Text(
-                                                    "Expense",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.arrow_downward,
+                                                      color:
+                                                          !isExpense
+                                                              ? Colors
+                                                                  .grey
+                                                                  .shade700
+                                                              : Colors.black,
                                                     ),
-                                                  ),
+                                                    Text(
+                                                      "Expense",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            !isExpense
+                                                                ? Colors
+                                                                    .grey
+                                                                    .shade700
+                                                                : Colors.black,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -208,14 +228,33 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                 ),
-                                                child: Center(
-                                                  child: Text(
-                                                    "Income",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.arrow_upward,
+                                                      color:
+                                                          isExpense
+                                                              ? Colors
+                                                                  .grey
+                                                                  .shade700
+                                                              : Colors.black,
                                                     ),
-                                                  ),
+                                                    Text(
+                                                      "Income",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            isExpense
+                                                                ? Colors
+                                                                    .grey
+                                                                    .shade700
+                                                                : Colors.black,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -224,22 +263,6 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                       ),
                                     ),
                                   ),
-                                const SizedBox(height: 16),
-                                TextField(
-                                  controller: descController,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  keyboardType: TextInputType.text,
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(
-                                    labelText: "Enter a Desc",
-                                    labelStyle: labelStyle(context),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  maxLines: 1,
-                                ),
                                 const SizedBox(height: 16),
                                 // Amount field
                                 TextField(
@@ -267,6 +290,23 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                 ),
                                 const SizedBox(height: 16),
                                 TextField(
+                                  controller: descController,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  keyboardType: TextInputType.text,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: InputDecoration(
+                                    labelText: "Enter a Desc",
+                                    labelStyle: labelStyle(context),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  maxLines: 1,
+                                ),
+
+                                const SizedBox(height: 16),
+                                TextField(
                                   controller: dateController,
                                   readOnly: true,
                                   onTap:
@@ -285,6 +325,60 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     ),
                                   ),
                                 ),
+                                SizedBox(height: 2.5),
+                                SizedBox(
+                                  height: 40.0,
+                                  child: ListView(
+                                    physics: BouncingScrollPhysics(),
+                                    scrollDirection: Axis.horizontal,
+                                    children: [
+                                      buildPresetChip(
+                                        'Today',
+                                        Icon(Icons.today, size: 17.5),
+                                        () =>
+                                            dateController.text = formatDate(
+                                              DateTime.now(),
+                                              pattern: 'yyyy-MM-dd',
+                                            ),
+                                      ),
+                                      buildPresetChip(
+                                        'Yesterday',
+                                        Icon(
+                                          Icons.calendar_today_sharp,
+                                          size: 17.5,
+                                        ),
+                                        () =>
+                                            dateController.text = formatDate(
+                                              DateTime.now().subtract(
+                                                Duration(days: 1),
+                                              ),
+                                              pattern: 'yyyy-MM-dd',
+                                            ),
+                                      ),
+                                      buildPresetChip(
+                                        'This week Monday',
+                                        Icon(
+                                          Icons.calendar_view_week,
+                                          size: 17.5,
+                                        ),
+                                        () =>
+                                            dateController.text = formatDate(
+                                              getMondayOfCurrentWeek(),
+                                              pattern: 'yyyy-MM-dd',
+                                            ),
+                                      ),
+                                      buildPresetChip(
+                                        '1st ${month[DateTime.now().month - 1]}',
+                                        Icon(Icons.calendar_month, size: 17.5),
+                                        () =>
+                                            dateController.text = formatDate(
+                                              getFirstDayOfCurrentMonth(),
+                                              pattern: 'yyyy-MM-dd',
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 16),
                                 Row(
                                   children: [
@@ -297,7 +391,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                         child: DropdownButtonFormField<
                                           CategoryModel
                                         >(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius: BorderRadius.circular(
+                                            8.0,
+                                          ),
                                           decoration: InputDecoration(
                                             labelText: "Category",
                                             labelStyle: labelStyle(context),
@@ -406,7 +502,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                     // SubCategory Dropdown (depends on selectedCategory)
                                     Expanded(
                                       child: DropdownButtonFormField<String>(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius: BorderRadius.circular(
+                                          8.0,
+                                        ),
                                         decoration: InputDecoration(
                                           labelText: "Sub-Category",
                                           labelStyle: labelStyle(context),
@@ -547,8 +645,9 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                                             expense['expenseReceiptURL']
                                                 .isEmpty)
                                     ? buildCreateDataBox(
+                                      shrinkHeight: true,
                                       context,
-                                      "Got a Receipt to add?\n\n➕ Tap to add attachment",
+                                      "➕ Tap to add attachment",
                                       () {
                                         _showAttachmentOptions(context);
                                       },
@@ -1179,13 +1278,31 @@ class _CreateExpensePageState extends State<CreateExpensePage> {
                       ),
                     ],
                   ),
-                  if (api.isAPILoading) buildLoadingContainer(context: context),
-                ],
-              ),
+                ),
+                if (api.isAPILoading) buildLoadingContainer(context: context),
+              ],
             );
           },
         );
       },
+    );
+  }
+
+  Widget buildPresetChip(String label, Icon icon, var onTap) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8.0),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [icon, SizedBox(width: 5.0), Text(label)],
+          ),
+        ),
+      ),
     );
   }
 

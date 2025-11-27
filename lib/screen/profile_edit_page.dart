@@ -45,22 +45,22 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Edit Profile',
-          style: theme.textTheme.titleLarge!.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: Consumer2<ApiProvider, AuthProvider>(
-        builder: (_, api, authProvider, __) {
-          return Stack(
-            children: [
-              SingleChildScrollView(
+    return Consumer2<ApiProvider, AuthProvider>(
+      builder: (_, api, authProvider, __) {
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                centerTitle: true,
+                title: Text(
+                  'Edit Profile',
+                  style: theme.textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              body: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
@@ -216,11 +216,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   ),
                 ),
               ),
-              if (api.isAPILoading) buildLoadingContainer(context: context),
-            ],
-          );
-        },
-      ),
+            ),
+            if (api.isAPILoading) buildLoadingContainer(context: context),
+          ],
+        );
+      },
     );
   }
 

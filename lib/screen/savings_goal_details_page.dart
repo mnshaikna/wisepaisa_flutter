@@ -95,49 +95,49 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
 
     return Consumer<ApiProvider>(
       builder: (_, api, __) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(goal['savingsGoalName']),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                onPressed: () {
-                  DialogUtils.showGenericDialog(
-                    context: context,
-                    title: DialogUtils.titleText('Delete Goal?', context),
-                    message: Text(
-                      "Are you sure you want to delete the Goal '${goal['savingsGoalName']}'",
-                    ),
-                    onCancel: () async {
-                      Navigator.of(context).pop();
-                      await api.deleteGoal(context, goal['savingsGoalId']).then(
-                        (Response resp) {
-                          if (resp.statusCode == HttpStatus.ok) {
-                            Toasts.show(
-                              context,
-                              'Goal Deleted',
-                              type: ToastType.success,
-                            );
-                            Navigator.of(context).pop();
-                          }
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                title: Text(goal['savingsGoalName']),
+                centerTitle: true,
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      DialogUtils.showGenericDialog(
+                        context: context,
+                        title: DialogUtils.titleText('Delete Goal?', context),
+                        message: Text(
+                          "Are you sure you want to delete the Goal '${goal['savingsGoalName']}'",
+                        ),
+                        onCancel: () async {
+                          Navigator.of(context).pop();
+                          await api
+                              .deleteGoal(context, goal['savingsGoalId'])
+                              .then((Response resp) {
+                                if (resp.statusCode == HttpStatus.ok) {
+                                  Toasts.show(
+                                    context,
+                                    'Goal Deleted',
+                                    type: ToastType.success,
+                                  );
+                                  Navigator.of(context).pop();
+                                }
+                              });
                         },
+                        cancelText: 'Delete',
+                        confirmColor: Colors.red,
+                        confirmText: 'Cancel',
+                        showCancel: true,
+                        onConfirm: () => Navigator.pop(context),
                       );
                     },
-                    cancelText: 'Delete',
-                    confirmColor: Colors.red,
-                    confirmText: 'Cancel',
-                    showCancel: true,
-                    onConfirm: () => Navigator.pop(context),
-                  );
-                },
-                icon: Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
+                  ),
+                ],
+                actionsPadding: EdgeInsets.symmetric(horizontal: 5.0),
               ),
-            ],
-            actionsPadding: EdgeInsets.symmetric(horizontal: 5.0),
-          ),
-          body: Stack(
-            children: [
-              ListView(
+              body: ListView(
                 padding: const EdgeInsets.all(15),
                 children: [
                   Card(
@@ -424,30 +424,6 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                         final t = trxs[index];
                         return Dismissible(
                           key: UniqueKey(),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                            ),
-                            leading: CircleAvatar(
-                              radius: 20,
-                              backgroundColor:
-                                  theme.colorScheme.surfaceContainerHigh,
-                              child: const Icon(Icons.add, size: 18),
-                            ),
-                            title: Text(t['savingsGoalTrxName'] ?? '-'),
-                            subtitle: Text(t['savingsGoalTrxCreatedOn']),
-                            trailing: Text(
-                              formatCurrency(
-                                (t['savingsGoalTrxAmount'] as num? ?? 0)
-                                    .toDouble(),
-                                context,
-                              ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
                           direction: DismissDirection.endToStart,
                           background: Container(
                             alignment: Alignment.centerRight,
@@ -529,30 +505,62 @@ class _SavingsGoalDetailsPageState extends State<SavingsGoalDetailsPage> {
                               }
                             });
                           },
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                            ),
+                            leading: CircleAvatar(
+                              radius: 20,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainerHigh,
+                              child: const Icon(Icons.add, size: 18),
+                            ),
+                            title: Text(t['savingsGoalTrxName'] ?? '-'),
+                            subtitle: Text(
+                              t['savingsGoalTrxCreatedOn'],
+                              style: theme.textTheme.labelMedium!.copyWith(
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            trailing: Text(
+                              formatCurrency(
+                                (t['savingsGoalTrxAmount'] as num? ?? 0)
+                                    .toDouble(),
+                                context,
+                              ),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
                         );
                       },
                     ),
                   const SizedBox(height: 80),
                 ],
               ),
-              if (api.isAPILoading) buildLoadingContainer(context: context),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () async {
-              unfocusKeyboard();
-              _showTopUpDialog(context, goal);
-            },
-            icon: Icon(FontAwesomeIcons.moneyBillTransfer),
-            extendedIconLabelSpacing: 15.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () async {
+                  unfocusKeyboard();
+                  _showTopUpDialog(context, goal);
+                },
+                icon: Icon(FontAwesomeIcons.moneyBills, size: 22.5),
+                extendedIconLabelSpacing: 15.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                label: Text(
+                  'Add Transaction',
+                  style: TextStyle(
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
-            label: Text(
-              'Add Transaction',
-              style: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
-            ),
-          ),
+            if (api.isAPILoading) buildLoadingContainer(context: context),
+          ],
         );
       },
     );

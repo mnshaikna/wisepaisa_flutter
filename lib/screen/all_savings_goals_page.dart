@@ -250,7 +250,7 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
                     ),
                   );
                 },
-                icon: const Icon(FontAwesomeIcons.flagCheckered),
+                icon: const Icon(FontAwesomeIcons.solidFlag, size: 22.5),
                 label: Text(
                   'Create a goal',
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
@@ -281,7 +281,7 @@ class _AllSavingsGoalsPageState extends State<AllSavingsGoalsPage> {
     // showGenericDialog usually returns a Future; dispose controllers after dialog closes.
     DialogUtils.showGenericDialog(
       context: context,
-      title: DialogUtils.titleText('Top-up',context),
+      title: DialogUtils.titleText('Top-up', context),
       message: StatefulBuilder(
         builder: (context, setState) {
           // capture the setState reference for use in onConfirm

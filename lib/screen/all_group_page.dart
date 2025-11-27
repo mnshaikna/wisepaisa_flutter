@@ -61,133 +61,108 @@ class _AllGroupPageState extends State<AllGroupPage> {
                       context,
                     ),
                   )
-                  : ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemCount: api.groupList.length,
-                    itemBuilder: (context, index) {
-                      GroupModel group = GroupModel.fromJson(
-                        api.groupList.elementAt(index),
-                      );
-                      return Hero(
-                        tag: 'groupCard_${group.exGroupId}',
-                        flightShuttleBuilder: (
-                          flightContext,
-                          animation,
-                          direction,
-                          fromContext,
-                          toContext,
-                        ) {
-                          return Material(
-                            child:
-                                (direction == HeroFlightDirection.push
-                                    ? fromContext.widget
-                                    : toContext.widget),
-                          );
-                        },
-                        child: GestureDetector(
-                          onTap:
-                              () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => ExpenseGroupDetailsPage(
-                                        groupMap: group.toJson(),
-                                      ),
+                  : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemCount: api.groupList.length,
+                      itemBuilder: (context, index) {
+                        GroupModel group = GroupModel.fromJson(
+                          api.groupList.elementAt(index),
+                        );
+                        return Hero(
+                          tag: 'groupCard_${group.exGroupId}',
+                          flightShuttleBuilder: (
+                            flightContext,
+                            animation,
+                            direction,
+                            fromContext,
+                            toContext,
+                          ) {
+                            return Material(
+                              child:
+                                  (direction == HeroFlightDirection.push
+                                      ? fromContext.widget
+                                      : toContext.widget),
+                            );
+                          },
+                          child: GestureDetector(
+                            onTap:
+                                () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => ExpenseGroupDetailsPage(
+                                          groupMap: group.toJson(),
+                                        ),
+                                  ),
                                 ),
+                            child: Card(
+                              elevation: 1,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 5.0,
+                                vertical: 7.5,
                               ),
-                          child: Card(
-                            elevation: 1,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 5.0,
-                              vertical: 7.5,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Group image or fallback
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child:
-                                            group.exGroupImageURL.isNotEmpty
-                                                ? Image.network(
-                                                  group.exGroupImageURL,
-                                                  width: 60,
-                                                  height: 60,
-                                                  fit: BoxFit.cover,
-                                                )
-                                                : Container(
-                                                  width: 60,
-                                                  height: 60,
-                                                  color: Colors.grey.shade300,
-                                                  child: Icon(
-                                                    Icons.group,
-                                                    size: 32,
-                                                    color: Colors.grey,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Group image or fallback
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child:
+                                              group.exGroupImageURL.isNotEmpty
+                                                  ? Image.network(
+                                                    group.exGroupImageURL,
+                                                    width: 60,
+                                                    height: 60,
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                  : Container(
+                                                    width: 60,
+                                                    height: 60,
+                                                    color: Colors.grey.shade300,
+                                                    child: Icon(
+                                                      Icons.group,
+                                                      size: 32,
+                                                      color: Colors.grey,
+                                                    ),
                                                   ),
-                                                ),
-                                      ),
-                                      const SizedBox(width: 12),
+                                        ),
+                                        const SizedBox(width: 12),
 
-                                      // Group name & type
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              group.exGroupName,
-                                              style: Theme.of(
-                                                context,
-                                              ).textTheme.titleMedium!.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-
-                                            if (group.exGroupDesc.isNotEmpty)
+                                        // Group name & type
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
                                               Text(
-                                                group.exGroupDesc,
+                                                group.exGroupName,
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .labelMedium!
+                                                    .titleMedium!
                                                     .copyWith(
-                                                      color:
-                                                          Colors.grey.shade600,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                               ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Icon(
-                                                  typeList
-                                                      .elementAt(
-                                                        int.parse(
-                                                          group.exGroupType,
-                                                        ),
-                                                      )
-                                                      .icon,
-                                                  size: 20.0,
-                                                ),
-                                                SizedBox(width: 5.0),
+
+                                              if (group.exGroupDesc.isNotEmpty)
                                                 Text(
-                                                  typeList
-                                                      .elementAt(
-                                                        int.parse(
-                                                          group.exGroupType,
-                                                        ),
-                                                      )
-                                                      .name,
+                                                  group.exGroupDesc,
                                                   style: Theme.of(context)
                                                       .textTheme
-                                                      .labelSmall!
+                                                      .labelMedium!
                                                       .copyWith(
                                                         color:
                                                             Colors
@@ -195,205 +170,202 @@ class _AllGroupPageState extends State<AllGroupPage> {
                                                                 .shade600,
                                                       ),
                                                 ),
-                                              ],
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Icon(
+                                                    typeList
+                                                        .elementAt(
+                                                          int.parse(
+                                                            group.exGroupType,
+                                                          ),
+                                                        )
+                                                        .icon,
+                                                    size: 20.0,
+                                                  ),
+                                                  SizedBox(width: 5.0),
+                                                  Text(
+                                                    typeList
+                                                        .elementAt(
+                                                          int.parse(
+                                                            group.exGroupType,
+                                                          ),
+                                                        )
+                                                        .name,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .labelSmall!
+                                                        .copyWith(
+                                                          color:
+                                                              Colors
+                                                                  .grey
+                                                                  .shade600,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Icon(Icons.person, size: 20.0),
+                                            SizedBox(width: 5.0),
+                                            Text(
+                                              auth.thisUser!['userName'],
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.labelMedium!.copyWith(
+                                                color: Colors.grey.shade600,
+                                              ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Icon(Icons.person, size: 20.0),
-                                          SizedBox(width: 5.0),
-                                          Text(
-                                            auth.thisUser!['userName'],
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.labelMedium!.copyWith(
-                                              color: Colors.grey.shade600,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.date_range, size: 20.0),
+                                            SizedBox(width: 5.0),
+                                            Text(
+                                              formatDateString(
+                                                group.exGroupCreatedOn,
+                                              ),
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.labelMedium!.copyWith(
+                                                color: Colors.grey.shade600,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.date_range, size: 20.0),
-                                          SizedBox(width: 5.0),
-                                          Text(
-                                            formatDateString(
-                                              group.exGroupCreatedOn,
-                                            ),
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.labelMedium!.copyWith(
-                                              color: Colors.grey.shade600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      SizedBox(height: 15.0),
-                                      Row(
-                                        mainAxisAlignment:
-                                            group.exGroupShared &&
-                                                    group
-                                                        .exGroupMembers
-                                                        .isNotEmpty
-                                                ? MainAxisAlignment.spaceBetween
-                                                : MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          if (group.exGroupShared &&
-                                              group.exGroupMembers.isNotEmpty)
-                                            initialsRow(
-                                              group.exGroupMembers,
-                                              context,
-                                              showImage: true,
-                                            ),
-                                          if (group.exGroupShared &&
-                                              group.exGroupMembers.isNotEmpty)
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.arrow_upward,
-                                                      color: Colors.green,
-                                                    ),
-                                                    Text(
-                                                      formatCurrency(
-                                                        group.exGroupIncome,
-                                                        context,
-                                                      ),
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .titleSmall!
-                                                          .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            letterSpacing: 1.5,
-                                                          ),
-                                                    ),
-                                                  ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        SizedBox(height: 15.0),
+                                        Row(
+                                          mainAxisAlignment:
+                                              group.exGroupShared &&
+                                                      group
+                                                          .exGroupMembers
+                                                          .isNotEmpty
+                                                  ? MainAxisAlignment
+                                                      .spaceBetween
+                                                  : MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            if (group.exGroupShared &&
+                                                group.exGroupMembers.isNotEmpty)
+                                              initialsRow(
+                                                group.exGroupMembers,
+                                                context,
+                                                showImage: true,
+                                              ),
+                                            if (group.exGroupShared &&
+                                                group.exGroupMembers.isNotEmpty)
+                                              Text(
+                                                formatCurrency(
+                                                  group.exGroupExpenses,
+                                                  context,
                                                 ),
-                                                SizedBox(width: 5.0),
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.arrow_downward,
-                                                      color: Colors.red,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium!
+                                                    .copyWith(
+                                                      color: Colors.blue,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      letterSpacing: 1.5,
                                                     ),
-                                                    Text(
-                                                      formatCurrency(
-                                                        group.exGroupExpenses,
-                                                        context,
+                                              )
+                                            else
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.arrow_upward,
+                                                        color: Colors.green,
                                                       ),
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .titleSmall!
-                                                          .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            letterSpacing: 1.5,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            )
-                                          else
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.arrow_upward,
-                                                      color: Colors.green,
-                                                    ),
-                                                    Text(
-                                                      formatCurrency(
-                                                        group.exGroupIncome,
-                                                        context,
+                                                      Text(
+                                                        formatCurrency(
+                                                          group.exGroupIncome,
+                                                          context,
+                                                        ),
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleSmall!
+                                                            .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              letterSpacing:
+                                                                  1.5,
+                                                            ),
                                                       ),
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .titleSmall!
-                                                          .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            letterSpacing: 1.5,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(width: 5.0),
-                                                Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.arrow_downward,
-                                                      color: Colors.red,
-                                                    ),
-                                                    Text(
-                                                      formatCurrency(
-                                                        group.exGroupExpenses,
-                                                        context,
+                                                    ],
+                                                  ),
+                                                  SizedBox(width: 5.0),
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.arrow_downward,
+                                                        color: Colors.red,
                                                       ),
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .titleSmall!
-                                                          .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            letterSpacing: 1.5,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                                      Text(
+                                                        formatCurrency(
+                                                          group.exGroupExpenses,
+                                                          context,
+                                                        ),
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleSmall!
+                                                            .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              letterSpacing:
+                                                                  1.5,
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
         );
       },

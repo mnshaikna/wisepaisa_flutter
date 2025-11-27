@@ -193,7 +193,7 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
               color: navBarColor,
               elevation: 8,
               shadowColor: navBarShadowColor,
-              height: 65.0,
+              height: 50.0,
               child: Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Row(
@@ -233,7 +233,7 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
             : Colors.grey;
 
     final color = isSelected ? selectedColor : unselectedColor;
-    final double iconSize = isSelected ? 30.0 : 25.0;
+    final double iconSize = isSelected ? 22.5 : 20.0;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
@@ -242,12 +242,11 @@ class _MyDashboardPageState extends State<MyDashboardPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: color, size: iconSize),
-          //const SizedBox(height: 4),
           Visibility(
             visible: isSelected,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 color: color,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),

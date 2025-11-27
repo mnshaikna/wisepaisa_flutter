@@ -59,8 +59,9 @@ Material buildCreateDataBox(
   BuildContext context,
   String title,
   var onTapFunction,
-  Gradient gradients,
-) {
+  Gradient gradients, {
+  bool shrinkHeight = false,
+}) {
   return Material(
     color: Colors.grey.shade100,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -68,7 +69,7 @@ Material buildCreateDataBox(
       borderRadius: BorderRadius.circular(8.0),
       onTap: onTapFunction,
       child: Ink(
-        height: 125,
+        height: shrinkHeight ? 50 : 125,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
           gradient: gradients,
@@ -1101,4 +1102,26 @@ int notificationIdFromObjectId(String objectId) {
   int returnValue = objectId.hashCode;
   debugPrint('returnValue:::$returnValue');
   return returnValue;
+}
+
+DateTime getFirstDayOfCurrentMonth() {
+  return DateTime(DateTime.now().year, DateTime.now().month, 1);
+}
+
+DateTime getMondayOfCurrentWeek() {
+  final now = DateTime.now();
+
+  final currentDayOfWeek = now.weekday;
+
+  final differenceToMonday = currentDayOfWeek - DateTime.monday;
+
+  final mondayOfThisWeek = now.subtract(Duration(days: differenceToMonday));
+
+  final mondayAtMidnight = DateTime(
+    mondayOfThisWeek.year,
+    mondayOfThisWeek.month,
+    mondayOfThisWeek.day,
+  );
+
+  return mondayAtMidnight;
 }

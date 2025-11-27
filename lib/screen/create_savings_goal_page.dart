@@ -63,19 +63,21 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
   Widget build(BuildContext context) {
     return Consumer2<SettingsProvider, ApiProvider>(
       builder: (_, set, api, __) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              goal.isNotEmpty ? goal['savingsGoalName'] : 'Create Savings Goal',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-          ),
-          body: Stack(
-            children: [
-              Padding(
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  goal.isNotEmpty
+                      ? goal['savingsGoalName']
+                      : 'Create Savings Goal',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                ),
+                centerTitle: true,
+              ),
+              body: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 8.0,
                   horizontal: 15.0,
@@ -374,9 +376,9 @@ class _CreateSavingsGoalPageState extends State<CreateSavingsGoalPage> {
                   ],
                 ),
               ),
-              if (api.isAPILoading) buildLoadingContainer(context: context),
-            ],
-          ),
+            ),
+            if (api.isAPILoading) buildLoadingContainer(context: context),
+          ],
         );
       },
     );

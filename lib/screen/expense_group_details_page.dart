@@ -75,212 +75,217 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
     List expenseList = group.expenses;
     return Consumer<ApiProvider>(
       builder: (_, api, __) {
-        return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Hero(
-              tag: 'searchHero',
-              child: GestureDetector(
-                onTap:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ExpenseSearchPage(group: group),
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                title: Hero(
+                  tag: 'searchHero',
+                  child: GestureDetector(
+                    onTap:
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ExpenseSearchPage(group: group),
+                          ),
+                        ),
+                    child: AbsorbPointer(
+                      child: CupertinoSearchTextField(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal: 10.0,
+                        ),
+                        placeholder: 'Search expenses...',
+                        placeholderStyle: theme.textTheme.titleSmall!.copyWith(
+                          letterSpacing: 1.5,
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.black54
+                                  : Colors.white54,
+                        ),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.only(left: 8.0, top: 5.0),
+                          child: Icon(Icons.search),
+                        ),
                       ),
-                    ),
-                child: AbsorbPointer(
-                  child: CupertinoSearchTextField(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                      horizontal: 10.0,
-                    ),
-                    placeholder: 'Search expenses...',
-                    placeholderStyle: theme.textTheme.titleSmall!.copyWith(
-                      letterSpacing: 1.5,
-                      color:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.black54
-                              : Colors.white54,
-                    ),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(left: 8.0, top: 5.0),
-                      child: Icon(Icons.search),
                     ),
                   ),
                 ),
-              ),
-            ),
-            actions: [
-              PopupMenuButton(
-                itemBuilder:
-                    (BuildContext context) => <PopupMenuEntry<String>>[
-                      PopupMenuItem(
-                        onTap: () async {
-                          Uint8List pdfBytes =
-                              await generateProfessionalGroupPdf(
-                                group,
-                                context,
-                                expenses: [],
-                              );
+                actions: [
+                  PopupMenuButton(
+                    itemBuilder:
+                        (BuildContext context) => <PopupMenuEntry<String>>[
+                          PopupMenuItem(
+                            onTap: () async {
+                              Uint8List pdfBytes =
+                                  await generateProfessionalGroupPdf(
+                                    group,
+                                    context,
+                                    expenses: [],
+                                  );
 
-                          await Printing.sharePdf(
-                            bytes: pdfBytes,
-                            filename: '${group.exGroupName}_report.pdf',
-                          );
-                        },
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 6,
-                        ),
-                        value: 'OptionA',
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Icon(FontAwesomeIcons.share, size: 20),
+                              await Printing.sharePdf(
+                                bytes: pdfBytes,
+                                filename: '${group.exGroupName}_report.pdf',
+                              );
+                            },
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 6,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(child: Text('Export/Share')),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        onTap:
-                            () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => ExpenseChartScreen(
-                                      expenses: group.expenses,
+                            value: 'OptionA',
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Icon(FontAwesomeIcons.share, size: 20),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(child: Text('Export/Share')),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            onTap:
+                                () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => ExpenseChartScreen(
+                                          expenses: group.expenses,
+                                        ),
+                                  ),
+                                ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 6,
+                            ),
+                            value: 'OptionB',
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Icon(
+                                    FontAwesomeIcons.chartPie,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(child: Text('Chart')),
+                              ],
+                            ),
+                          ),
+                          if (group.exGroupShared)
+                            PopupMenuItem(
+                              onTap:
+                                  () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => GroupBalanceScreen(
+                                            group: groupMap,
+                                          ),
                                     ),
+                                  ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                              value: 'OptionC',
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Icon(
+                                      FontAwesomeIcons.scaleUnbalancedFlip,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: Text('Member Balances')),
+                                ],
                               ),
                             ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 6,
-                        ),
-                        value: 'OptionB',
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Icon(FontAwesomeIcons.chartPie, size: 20),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(child: Text('Chart')),
-                          ],
-                        ),
-                      ),
-                      if (group.exGroupShared)
-                        PopupMenuItem(
-                          onTap:
-                              () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          GroupBalanceScreen(group: groupMap),
-                                ),
-                              ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 6,
-                          ),
-                          value: 'OptionC',
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                child: Icon(
-                                  FontAwesomeIcons.scaleUnbalancedFlip,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(child: Text('Member Balances')),
-                            ],
-                          ),
-                        ),
-                      if (group.exGroupOwnerId['userId'] ==
-                          auth.thisUser!['userId'])
-                        PopupMenuItem(
-                          onTap: () {
-                            DialogUtils.showGenericDialog(
-                              context: context,
-                              title: DialogUtils.titleText(
-                                'Delete Group?',
-                                context,
-                              ),
-                              message: Text(
-                                'Are you sure you want to delete this Expense Group?',
-                              ),
-                              confirmText: 'Delete',
-                              confirmColor: Colors.red,
-                              onConfirm: () async {
-                                Navigator.pop(context);
-                                await api
-                                    .deleteGroups(group.exGroupId, context)
-                                    .then((Response res) {
-                                      api.groupList.removeWhere(
-                                        (element) =>
-                                            element['exGroupId'] ==
-                                            group.exGroupId,
-                                      );
-                                      Navigator.pop(context);
-                                      Toasts.show(
-                                        context,
-                                        'Expense Group Deleted',
-                                        type: ToastType.success,
-                                      );
-                                    });
+                          if (group.exGroupOwnerId['userId'] ==
+                              auth.thisUser!['userId'])
+                            PopupMenuItem(
+                              onTap: () {
+                                DialogUtils.showGenericDialog(
+                                  context: context,
+                                  title: DialogUtils.titleText(
+                                    'Delete Group?',
+                                    context,
+                                  ),
+                                  message: Text(
+                                    'Are you sure you want to delete this Expense Group?',
+                                  ),
+                                  confirmText: 'Delete',
+                                  confirmColor: Colors.red,
+                                  onConfirm: () async {
+                                    Navigator.pop(context);
+                                    await api
+                                        .deleteGroups(group.exGroupId, context)
+                                        .then((Response res) {
+                                          api.groupList.removeWhere(
+                                            (element) =>
+                                                element['exGroupId'] ==
+                                                group.exGroupId,
+                                          );
+                                          Navigator.pop(context);
+                                          Toasts.show(
+                                            context,
+                                            'Expense Group Deleted',
+                                            type: ToastType.success,
+                                          );
+                                        });
+                                  },
+                                  showCancel: true,
+                                  cancelText: 'Cancel',
+                                  onCancel: () => Navigator.pop(context),
+                                );
                               },
-                              showCancel: true,
-                              cancelText: 'Cancel',
-                              onCancel: () => Navigator.pop(context),
-                            );
-                          },
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 6,
-                          ),
-                          value: 'OptionD',
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                child: Icon(Icons.delete, size: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
                               ),
-                              SizedBox(width: 12),
-                              Expanded(child: Text('Delete group')),
-                            ],
-                          ),
-                        ),
-                    ],
+                              value: 'OptionD',
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Icon(Icons.delete, size: 20),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(child: Text('Delete group')),
+                                ],
+                              ),
+                            ),
+                        ],
+                  ),
+                ],
+                actionsPadding: EdgeInsets.only(right: 10.0),
               ),
-            ],
-            actionsPadding: EdgeInsets.only(right: 10.0),
-          ),
-          body: SafeArea(
-            child: Stack(
-              children: [
-                Column(
+              body: SafeArea(
+                child: Column(
                   children: [
                     SizedBox(
                       height: group.exGroupShared ? 220.0 : 180.0,
@@ -1090,52 +1095,52 @@ class _ExpenseGroupDetailsPageState extends State<ExpenseGroupDetailsPage> {
                     ),
                   ],
                 ),
-                if (api.isAPILoading) buildLoadingContainer(context: context),
-              ],
-            ),
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            icon: Icon(Icons.receipt_outlined),
-            onPressed: () async {
-              final updatedGroup = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder:
-                      (context) => CreateExpensePage(
-                        group: group.toJson(),
-                        expense: {},
-                        showGroup: false,
-                      ),
-                ),
-              );
+              ),
+              floatingActionButton: FloatingActionButton.extended(
+                icon: Icon(Icons.receipt_outlined),
+                onPressed: () async {
+                  final updatedGroup = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => CreateExpensePage(
+                            group: group.toJson(),
+                            expense: {},
+                            showGroup: false,
+                          ),
+                    ),
+                  );
 
-              if (updatedGroup != null) {
-                group = GroupModel.fromJson(updatedGroup);
-                group.expenses.sort((a, b) {
-                  final dateA = DateTime.parse(a['expenseDate']);
-                  final dateB = DateTime.parse(b['expenseDate']);
-                  return dateB.compareTo(dateA);
-                });
-                api.groupList.removeWhere(
-                  (thisGrp) => thisGrp['exGroupId'] == group.exGroupId,
-                );
-                api.groupList.add(group.toJson());
-                setState(() {
-                  groupMap = updatedGroup;
-                });
-              }
-            },
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            extendedIconLabelSpacing: 15.0,
-            label: Text(
-              'Add Expense',
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                letterSpacing: 1.5,
-                fontWeight: FontWeight.bold,
+                  if (updatedGroup != null) {
+                    group = GroupModel.fromJson(updatedGroup);
+                    group.expenses.sort((a, b) {
+                      final dateA = DateTime.parse(a['expenseDate']);
+                      final dateB = DateTime.parse(b['expenseDate']);
+                      return dateB.compareTo(dateA);
+                    });
+                    api.groupList.removeWhere(
+                      (thisGrp) => thisGrp['exGroupId'] == group.exGroupId,
+                    );
+                    api.groupList.add(group.toJson());
+                    setState(() {
+                      groupMap = updatedGroup;
+                    });
+                  }
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                extendedIconLabelSpacing: 15.0,
+                label: Text(
+                  'Add Expense',
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ),
+            if (api.isAPILoading) buildLoadingContainer(context: context),
+          ],
         );
       },
     );

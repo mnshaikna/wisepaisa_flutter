@@ -60,22 +60,22 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          group.isNotEmpty ? group['exGroupName'] : 'Create a group',
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Consumer<ApiProvider>(
-        builder: (_, api, __) {
-          return Stack(
-            children: [
-              Padding(
+    return Consumer<ApiProvider>(
+      builder: (_, api, __) {
+        return Stack(
+          children: [
+            Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                centerTitle: true,
+                title: Text(
+                  group.isNotEmpty ? group['exGroupName'] : 'Create a group',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              body: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 8.0,
                   horizontal: 15.0,
@@ -700,11 +700,11 @@ class _CreateExpenseGroupPageState extends State<CreateExpenseGroupPage> {
                   ],
                 ),
               ),
-              if (api.isAPILoading) buildLoadingContainer(context: context),
-            ],
-          );
-        },
-      ),
+            ),
+            if (api.isAPILoading) buildLoadingContainer(context: context),
+          ],
+        );
+      },
     );
   }
 
